@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+
+@plugin "daisyui" {
+	/* biome-ignore lint/correctness/noUnknownProperty: daisyui */
+	themes: business --default;
+}
+
+@plugin "daisyui/theme" {
+	/* biome-ignore lint/correctness/noUnknownProperty: daisyui */
+	name: 'business';
+	/* biome-ignore lint/correctness/noUnknownProperty: daisyui */
+	default: true;
+	--radius-selector: 0.5rem;
+	--radius-field: 0.5rem;
+	--radius-box: 0.5rem;
+	--depth: 1;
+}
+
+body {
+	height: 100vh;
+	width: 100vw;
+	overflow-y: hidden;
+	user-select: none;
+	-webkit-user-select: none;
+}

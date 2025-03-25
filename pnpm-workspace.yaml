@@ -1,0 +1,6 @@
+packages:
+  - 'apps/*'
+
+catalog:
+  'vite': '6.2.2'
+  'vitest': '3.0.9'
