@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@tauri-apps/plugin-os':
-        specifier: ~2
-        version: 2.2.1
     devDependencies:
       '@eslint/js':
         specifier: ^9.23.0
@@ -47,6 +43,13 @@ importers:
         version: 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.6.3)
 
   apps/desktop:
+    dependencies:
+      '@tabler/icons-svelte':
+        specifier: 3.31.0
+        version: 3.31.0(svelte@5.25.2)
+      svelte-french-toast:
+        specifier: ^1.2.0
+        version: 1.2.0(svelte@5.25.2)
     devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^3.0.6
@@ -57,9 +60,6 @@ importers:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.0.0
         version: 5.0.3(svelte@5.25.2)(vite@6.2.2(@types/node@20.17.24)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
-      '@tabler/icons-svelte':
-        specifier: 3.31.0
-        version: 3.31.0(svelte@5.25.2)
       '@tailwindcss/vite':
         specifier: 4.0.15
         version: 4.0.15(vite@6.2.2(@types/node@20.17.24)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
@@ -69,12 +69,18 @@ importers:
       '@tauri-apps/cli':
         specifier: ^2
         version: 2.3.1
+      '@tauri-apps/plugin-dialog':
+        specifier: ^2.2.2
+        version: 2.2.2
       '@tauri-apps/plugin-opener':
         specifier: ^2
         version: 2.2.6
       '@tauri-apps/plugin-os':
         specifier: ^2.2.1
         version: 2.2.1
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
       daisyui:
         specifier: ^5.0.9
         version: 5.0.9
@@ -627,6 +633,9 @@ packages:
     engines: {node: '>= 10'}
     hasBin: true
 
+  '@tauri-apps/plugin-dialog@2.2.2':
+    resolution: {integrity: sha512-Pm9qnXQq8ZVhAMFSEPwxvh+nWb2mk7LASVlNEHYaksHvcz8P6+ElR5U5dNL9Ofrm+uwhh1/gYKWswK8JJJAh6A==}
+
   '@tauri-apps/plugin-opener@2.2.6':
     resolution: {integrity: sha512-bSdkuP71ZQRepPOn8BOEdBKYJQvl6+jb160QtJX/i2H9BF6ZySY/kYljh76N2Ne5fJMQRge7rlKoStYQY5Jq1w==}
 
@@ -747,6 +756,9 @@ packages:
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
     engines: {node: '>= 14.16.0'}
+
+  class-transformer@0.5.1:
+    resolution: {integrity: sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==}
 
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
@@ -1311,6 +1323,16 @@ packages:
       svelte:
         optional: true
 
+  svelte-french-toast@1.2.0:
+    resolution: {integrity: sha512-5PW+6RFX3xQPbR44CngYAP1Sd9oCq9P2FOox4FZffzJuZI2mHOB7q5gJBVnOiLF5y3moVGZ7u2bYt7+yPAgcEQ==}
+    peerDependencies:
+      svelte: ^3.57.0 || ^4.0.0
+
+  svelte-writable-derived@3.1.1:
+    resolution: {integrity: sha512-w4LR6/bYZEuCs7SGr+M54oipk/UQKtiMadyOhW0PTwAtJ/Ai12QS77sLngEcfBx2q4H8ZBQucc9ktSA5sUGZWw==}
+    peerDependencies:
+      svelte: ^3.2.1 || ^4.0.0-next.1 || ^5.0.0-next.94
+
   svelte@5.25.2:
     resolution: {integrity: sha512-IxmBz4x15+bNbowhygUlwoVgqMLfEIDtyjUFDfOwb1f+7Fe5qeLfwGJHMql7QUSJBqNtXcOCPsZDDmuieZcpfA==}
     engines: {node: '>=18'}
@@ -1871,6 +1893,10 @@ snapshots:
       '@tauri-apps/cli-win32-ia32-msvc': 2.3.1
       '@tauri-apps/cli-win32-x64-msvc': 2.3.1
 
+  '@tauri-apps/plugin-dialog@2.2.2':
+    dependencies:
+      '@tauri-apps/api': 2.3.0
+
   '@tauri-apps/plugin-opener@2.2.6':
     dependencies:
       '@tauri-apps/api': 2.3.0
@@ -2018,6 +2044,8 @@ snapshots:
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
+
+  class-transformer@0.5.1: {}
 
   clsx@2.1.1: {}
 
@@ -2557,6 +2585,15 @@ snapshots:
       postcss-scss: 4.0.9(postcss@8.5.3)
       postcss-selector-parser: 7.1.0
     optionalDependencies:
+      svelte: 5.25.2
+
+  svelte-french-toast@1.2.0(svelte@5.25.2):
+    dependencies:
+      svelte: 5.25.2
+      svelte-writable-derived: 3.1.1(svelte@5.25.2)
+
+  svelte-writable-derived@3.1.1(svelte@5.25.2):
+    dependencies:
       svelte: 5.25.2
 
   svelte@5.25.2:

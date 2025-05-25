@@ -1,19 +1,17 @@
 <script lang="ts">
+	import type { Project } from '$lib/projects/project';
+	import { ProjectsService } from '$lib/projects/projects-service';
 	import { IconFolder, IconPlus, IconSearch } from '@tabler/icons-svelte';
+	import { getContext } from 'svelte';
+	import NewProjectModal from './new-project-modal.svelte';
 
 	let search = $state('');
-	type Project = {
-		id: number;
-		name: string;
-		location: string;
-	};
-	const projects: Project[] = $state([
-		{ id: 1, name: 'tablix', location: '~/Developer/github.com/me/tablix' },
-		{ id: 2, name: 'reminder-bot', location: '~/Developer/github.com/me/reminder-bot' },
-		{ id: 3, name: 'zed-editor', location: '~/Developer/github.com/zed/zed' },
-	]);
+	let isNewProjectModalOpen = $state(false);
+
+	const projectsService = getContext<ProjectsService>(ProjectsService);
+	const projects = $derived(projectsService.projects);
 	const filteredProjects: Project[] = $derived(
-		projects.filter((project) => project.name.indexOf(search) !== -1),
+		$projects?.filter((project) => project.name.indexOf(search) !== -1) ?? [],
 	);
 </script>
 
@@ -30,6 +28,7 @@
 					<div>
 						<button
 							class="btn btn-primary px-4 py-6 bg-base-100 border-base-300 hover:border-primary"
+							onclick={() => (isNewProjectModalOpen = true)}
 						>
 							<IconPlus class="text-primary fill-gray-800" />
 						</button>
@@ -64,13 +63,14 @@
 				<li class="list-row p-2 rounded-box hover:bg-primary">
 					<div class="w-100">
 						<div class="pb-1">{project.name}</div>
-						<div class="text-xs opacity-60">{project.location}</div>
+						<div class="text-xs opacity-60">{project.path}</div>
 					</div>
 				</li>
 			{/each}
 		</ul>
 	</div>
 </div>
+<NewProjectModal bind:open={isNewProjectModalOpen} />
 
 <style>
 	.search-input {

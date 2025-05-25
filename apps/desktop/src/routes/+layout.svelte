@@ -2,8 +2,18 @@
 	import '../app.css';
 
 	import { platformName } from '$lib/platform';
+	import type { LayoutData } from './$types';
+	import { setContext, type Snippet } from 'svelte';
+	import { ProjectsService } from '$lib/projects/projects-service';
 
-	let { children } = $props();
+	type Props = {
+		data: LayoutData;
+		children: Snippet;
+	};
+	let { data, children }: Props = $props();
+
+	setContext(ProjectsService, data.projectsService);
+
 	const dev = true;
 </script>
 
