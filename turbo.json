@@ -2,18 +2,10 @@
 	"$schema": "https://turbo.build/schema.json",
 	"tasks": {
 		"build": {
-			"outputs": [
-				".svelte-kit/**",
-				"!.sveltekit/types",
-				"!.sveltekit/*.d.ts",
-				"dist/**",
-				".vercel/**"
-			]
+			"outputs": ["dist/**", ".vercel/**"]
 		},
 		"check": {
-			"dependsOn": [
-				"^check"
-			]
+			"dependsOn": ["^check"]
 		},
 		"dev": {
 			"persistent": true,

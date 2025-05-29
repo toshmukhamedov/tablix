@@ -4,34 +4,36 @@
 	"description": "",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
+		"dev": "vite",
+		"build": "tsc && vite build",
 		"preview": "vite preview",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"tauri": "tauri"
 	},
 	"license": "MIT",
-	"dependencies": {
-		"@tabler/icons-svelte": "3.31.0",
-		"svelte-french-toast": "^1.2.0"
-	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^3.0.6",
-		"@sveltejs/kit": "^2.9.0",
-		"@sveltejs/vite-plugin-svelte": "^5.0.0",
-		"@tailwindcss/vite": "4.0.15",
+		"@chakra-ui/react": "^3.19.1",
+		"@tabler/icons-react": "3.33.0",
+		"@tanstack/react-form": "^1.11.3",
+		"@tanstack/react-router": "^1.120.10",
+		"@tanstack/react-router-devtools": "^1.120.10",
+		"@tanstack/router-plugin": "^1.120.10",
 		"@tauri-apps/api": "^2",
 		"@tauri-apps/cli": "^2",
 		"@tauri-apps/plugin-dialog": "^2.2.2",
 		"@tauri-apps/plugin-opener": "^2",
 		"@tauri-apps/plugin-os": "^2.2.1",
+		"@types/react": "^19.1.5",
+		"@types/react-dom": "^19.1.5",
+		"@vitejs/plugin-react": "^4.5.0",
 		"class-transformer": "^0.5.1",
-		"daisyui": "^5.0.9",
-		"svelte": "^5.0.0",
-		"svelte-check": "^4.0.0",
-		"tailwindcss": "4.0.15",
 		"typescript": "~5.6.2",
-		"vite": "^6.0.3"
+		"vite": "^6.0.3",
+		"zod": "^3.25.28"
+	},
+	"dependencies": {
+		"next-themes": "^0.4.6",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
+		"react-icons": "^5.5.0"
 	}
 }

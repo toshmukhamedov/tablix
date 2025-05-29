@@ -1,9 +1,9 @@
-export type KeyType = 'gitCredentialsHelper' | 'local' | 'systemExecutable';
+export type KeyType = "gitCredentialsHelper" | "local" | "systemExecutable";
 export type LocalKey = {
 	local: { private_key_path: string };
 };
 
-export type Key = Exclude<KeyType, 'local'> | LocalKey;
+export type Key = Exclude<KeyType, "local"> | LocalKey;
 
 export class Project {
 	id!: string;

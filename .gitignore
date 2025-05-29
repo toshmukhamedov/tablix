@@ -15,9 +15,8 @@ dist-ssr
 
 # Editor directories and files
 .vscode/*
-!.vscode/extensions.json
 .idea
-.DS_Store
+.zed
 *.suo
 *.ntvs*
 *.njsproj
@@ -33,7 +32,6 @@ cspell.json
 .DS_Store
 node_modules
 build
-.svelte-kit
 package
 .env
 .env.*
