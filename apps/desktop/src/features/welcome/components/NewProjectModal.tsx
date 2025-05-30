@@ -1,17 +1,10 @@
 import { projectsService } from "@/services/projects";
-import {
-	Button,
-	Dialog,
-	Field,
-	Group,
-	Input,
-	Portal,
-	Stack,
-} from "@chakra-ui/react";
+import { Button, Dialog, Field, Group, Input, Portal, Stack } from "@chakra-ui/react";
 import { IconFolderOpen } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import type { FormEventHandler } from "react";
 import { z } from "zod/v4";
+import { useProjects } from "../hooks/useProjects";
 
 type Props = {
 	open: boolean;
@@ -24,6 +17,7 @@ const formSchema = z.object({
 
 export function NewProjectModal({ close: _close, open }: Props) {
 	const defaultPath = "~/TablixProjects/";
+	const { dispatch } = useProjects();
 	const form = useForm({
 		defaultValues: {
 			name: "",
@@ -35,6 +29,12 @@ export function NewProjectModal({ close: _close, open }: Props) {
 		onSubmit: async ({ value }) => {
 			const success = await projectsService.addProject(value);
 			if (!success) return;
+			projectsService.loadAll().then((projects) => {
+				dispatch({
+					type: "reload",
+					payload: projects,
+				});
+			});
 			close();
 		},
 	});
@@ -101,9 +101,7 @@ export function NewProjectModal({ close: _close, open }: Props) {
 													required
 												/>
 												<Field.ErrorText>
-													{field.state.meta.errors
-														.map((error) => error?.message)
-														.join(",")}
+													{field.state.meta.errors.map((error) => error?.message).join(",")}
 												</Field.ErrorText>
 											</Field.Root>
 										)}
@@ -124,18 +122,12 @@ export function NewProjectModal({ close: _close, open }: Props) {
 														onChange={(e) => field.handleChange(e.target.value)}
 														disabled
 													/>
-													<Button
-														variant="outline"
-														outline="none"
-														onClick={onOpen}
-													>
+													<Button variant="outline" outline="none" onClick={onOpen}>
 														<IconFolderOpen className="size-4" />
 													</Button>
 												</Group>
 												<Field.ErrorText>
-													{field.state.meta.errors
-														.map((error) => error?.message)
-														.join(",")}
+													{field.state.meta.errors.map((error) => error?.message).join(",")}
 												</Field.ErrorText>
 											</Field.Root>
 										)}

@@ -1,2 +1,2 @@
-export * from "./project";
-export * from "./projects.service";
+export * from "./ProjectsService";
+export * from "./types";

@@ -2,7 +2,7 @@ import { toaster as toasts } from "@/components/ui/toaster";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { plainToInstance } from "class-transformer";
-import { type AddProject, Project } from "./project";
+import { type AddProject, Project } from "./types";
 
 const showError = (...args: string[]) =>
 	toasts.error({
@@ -14,48 +14,31 @@ const getErrorMessage = (e: unknown) => {
 };
 
 class ProjectsService {
-	projects: Project[] = [];
-
-	constructor(private readonly homeDir: string | undefined) {
-		this.reload();
-	}
+	constructor(private readonly homeDir: string | undefined) {}
 
 	async loadAll() {
-		return await invoke<Project[]>("list_projects").then((p) =>
-			plainToInstance(Project, p),
-		);
-	}
-
-	async reload(): Promise<void> {
-		this.projects = await this.loadAll();
+		return await invoke<Project[]>("list_projects").then((p) => plainToInstance(Project, p));
 	}
 
 	async setActiveProject(projectId: string): Promise<void> {
 		await invoke("set_project_active", { id: projectId });
-		await this.reload();
 	}
 
 	async getProject(projectId: string, noValidation?: boolean) {
-		return plainToInstance(
-			Project,
-			await invoke("get_project", { id: projectId, noValidation }),
-		);
+		return plainToInstance(Project, await invoke("get_project", { id: projectId, noValidation }));
 	}
 
 	async updateProject(project: Project & { unset_bool?: boolean }) {
 		await invoke("update_project", { project: project });
-		await this.reload();
 	}
 
 	private async add(data: AddProject) {
 		const project = plainToInstance(Project, await invoke("add_project", data));
-		await this.reload();
 		return project;
 	}
 
 	async deleteProject(id: string) {
 		await invoke("delete_project", { id });
-		await this.reload();
 	}
 
 	async promptForDirectory(): Promise<string | undefined> {
@@ -100,7 +83,6 @@ class ProjectsService {
 				path: this.getAbsolutePath(input.path),
 			};
 			const project = await this.add(data);
-			console.info(project, "project created");
 
 			if (!project) return true;
 			toasts.success({

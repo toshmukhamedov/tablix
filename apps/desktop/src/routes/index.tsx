@@ -1,10 +1,6 @@
-import { Welcome } from "@/pages/Welcome/Welcome";
+import { Welcome } from "@/features/welcome/Welcome";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-	component: Index,
+	component: Welcome,
 });
-
-function Index() {
-	return <Welcome />;
-}
