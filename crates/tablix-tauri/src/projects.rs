@@ -57,8 +57,12 @@ pub mod commands {
 
 	#[tauri::command(async)]
 	#[instrument(skip(projects), err(Debug))]
-	pub fn delete_project(projects: State<'_, Controller>, id: Uuid) -> Result<(), Error> {
-		projects.delete(id).map_err(Into::into)
+	pub fn delete_project(
+		projects: State<'_, Controller>,
+		id: Uuid,
+		cleanup: bool,
+	) -> Result<(), Error> {
+		projects.delete(id, cleanup).map_err(Into::into)
 	}
 }
 

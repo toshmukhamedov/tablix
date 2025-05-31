@@ -11,7 +11,7 @@ pub struct ProjectController {
 	projects_storage: storage::Storage,
 }
 
-impl<'n> ProjectController {
+impl ProjectController {
 	pub fn new(storage: tablix_storage::Storage) -> Self {
 		Self {
 			projects_storage: storage::Storage::new(storage),
@@ -25,13 +25,13 @@ impl<'n> ProjectController {
 			.list()
 			.context("failed to list projects from storage")?;
 		if all_projects.iter().any(|project| project.path == path) {
-			bail!("project already exists");
+			bail!("Project already exists");
 		}
 		if !path.exists() {
 			std::fs::create_dir_all(path)?;
 		}
 		if !path.is_dir() {
-			bail!("not a directory");
+			bail!("This is not a directory");
 		}
 
 		let id = Uuid::new_v4();
@@ -40,13 +40,12 @@ impl<'n> ProjectController {
 			id,
 			name,
 			path: path.to_owned(),
-			..Default::default()
 		};
 
 		self
 			.projects_storage
 			.add(&project)
-			.context("failed to add project to storage")?;
+			.context("Failed to add project to storage")?;
 
 		Ok(project)
 	}
@@ -71,16 +70,18 @@ impl<'n> ProjectController {
 		self.projects_storage.list()
 	}
 
-	pub fn delete(&self, id: Uuid) -> Result<()> {
+	pub fn delete(&self, id: Uuid, cleanup: bool) -> Result<()> {
 		let Some(project) = self.projects_storage.try_get(id)? else {
 			return Ok(());
 		};
 
 		self.projects_storage.purge(project.id)?;
 
-		if let Err(error) = std::fs::remove_dir_all(project.path) {
-			if error.kind() != std::io::ErrorKind::NotFound {
-				tracing::error!(project_id = %id, ?error, "failed to remove project data",);
+		if cleanup {
+			if let Err(error) = std::fs::remove_dir_all(project.path) {
+				if error.kind() != std::io::ErrorKind::NotFound {
+					tracing::error!(project_id = %id, ?error, "failed to remove project data",);
+				}
 			}
 		}
 

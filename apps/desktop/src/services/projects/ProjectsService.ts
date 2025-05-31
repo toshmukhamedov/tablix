@@ -38,7 +38,7 @@ class ProjectsService {
 	}
 
 	async deleteProject(id: string) {
-		await invoke("delete_project", { id });
+		await invoke("delete_project", { id, cleanup: false });
 	}
 
 	async promptForDirectory(): Promise<string | undefined> {
@@ -86,7 +86,7 @@ class ProjectsService {
 
 			if (!project) return true;
 			toasts.success({
-				title: `Project ${project.name} created`,
+				title: "Project added",
 			});
 			// linkProjectModal?.show(project.id);
 			// goto(`/${project.id}/board`);

@@ -31,6 +31,9 @@
 		"targets": "all",
 		"icon": [
 			"icons/icon.icns"
-		]
+		],
+		"macOS": {
+      "minimumSystemVersion": "10.13"
+    }
 	}
 }
