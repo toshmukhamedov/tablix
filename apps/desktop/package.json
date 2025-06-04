@@ -11,9 +11,12 @@
 	},
 	"license": "MIT",
 	"devDependencies": {
-		"@chakra-ui/react": "^3.19.1",
+		"@mantine/core": "^8.0.2",
+		"@mantine/form": "^8.0.2",
+		"@mantine/hooks": "^8.0.2",
+		"@mantine/modals": "^8.0.2",
+		"@mantine/notifications": "^8.0.2",
 		"@tabler/icons-react": "3.33.0",
-		"@tanstack/react-form": "^1.11.3",
 		"@tanstack/react-router": "^1.120.10",
 		"@tanstack/react-router-devtools": "^1.120.10",
 		"@tanstack/router-plugin": "^1.120.10",
@@ -26,6 +29,7 @@
 		"@types/react-dom": "^19.1.5",
 		"@vitejs/plugin-react": "^4.5.0",
 		"class-transformer": "^0.5.1",
+		"mantine-form-zod-resolver": "^1.2.1",
 		"typescript": "~5.6.2",
 		"vite": "^6.0.3",
 		"zod": "^3.25.28"

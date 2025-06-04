@@ -1,5 +1,5 @@
 import { projectsService } from "@/services/projects";
-import { Box, Button, Heading, Stack, Text, Wrap } from "@chakra-ui/react";
+import { Button, Flex, Stack, Text, Title } from "@mantine/core";
 import { IconFolder, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
 import { useProjects } from "../hooks/useProjects";
@@ -29,45 +29,36 @@ export function ProjectActions() {
 	};
 
 	return (
-		<Stack flex="3" justify="center" height={"dvh"} bgColor={"gray.950"}>
+		<Stack flex="3" justify="center" bg={"dark.8"}>
 			<Stack align="center">
-				<Heading size="2xl">Welcome to Tablix</Heading>
-				<Text
-					textStyle="sm"
-					fontWeight="medium"
-					paddingY={4}
-					textAlign={"center"}
-					color={"gray.500"}
-				>
+				<Title size="h2" fw="500">
+					Welcome to Tablix
+				</Title>
+				<Text size="sm" fw="500" py={4} ta="center" c="gray.5">
 					Create a new project to start from scratch.
 					<br />
 					Open existing project from disk.
 				</Text>
-				<Wrap justify="center" align={"center"} gap={6} paddingY="6">
-					<Stack align={"center"}>
+				<Flex justify="center" align={"center"} gap="lg" py="lg">
+					<Stack align={"center"} gap="xs">
 						<Button
-							size="md"
-							rounded={"lg"}
-							variant="outline"
-							paddingY={6}
-							className="border-base-300 hover:border-primary"
+							size="lg"
+							radius="md"
+							variant="light"
+							p="md"
 							onClick={() => setNewProjectDialogOpen(true)}
 						>
-							<Box color="blue.500">
-								<IconPlus />
-							</Box>
+							<IconPlus />
 						</Button>
-						<Text textStyle="sm">New</Text>
+						<Text size="sm">New</Text>
 					</Stack>
-					<Stack align="center">
-						<Button size="md" rounded={"lg"} variant="outline" paddingY={6} onClick={onOpenClick}>
-							<Box color="blue.500">
-								<IconFolder />
-							</Box>
+					<Stack align="center" gap="xs">
+						<Button size="lg" radius="md" variant="light" p="md" onClick={onOpenClick}>
+							<IconFolder />
 						</Button>
-						<Text textStyle="sm">Open</Text>
+						<Text size="sm">Open</Text>
 					</Stack>
-				</Wrap>
+				</Flex>
 			</Stack>
 			<NewProjectModal open={newProjectDialogOpen} close={() => setNewProjectDialogOpen(false)} />
 		</Stack>

@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
 import { platformName } from "@/lib/platform";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -27,22 +26,15 @@ export const Route = createRootRoute({
 			};
 		}, []);
 
-		const handleContextMenu = (e: React.MouseEvent) => {
+		const handleContextMenu: React.MouseEventHandler<HTMLDivElement> = (e) => {
 			if (!dev) e.preventDefault();
 		};
 
 		return (
-			<div
-				className="app-root"
-				role="application"
-				onContextMenu={handleContextMenu}
-			>
-				{platformName === "macos" && (
-					<div className="drag-region" data-tauri-drag-region />
-				)}
+			<div className="app-root" role="application" onContextMenu={handleContextMenu}>
+				{platformName === "macos" && <div className="drag-region" data-tauri-drag-region />}
 
 				<Outlet />
-				<Toaster />
 				<TanStackRouterDevtools />
 			</div>
 		);

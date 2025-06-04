@@ -1,8 +1,8 @@
 import { projectsService } from "@/services/projects";
-import { Button, Dialog, Field, Group, Input, Portal, Stack } from "@chakra-ui/react";
+import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { IconFolderOpen } from "@tabler/icons-react";
-import { useForm } from "@tanstack/react-form";
-import type { FormEventHandler } from "react";
+import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod/v4";
 import { useProjects } from "../hooks/useProjects";
 
@@ -10,38 +10,27 @@ type Props = {
 	open: boolean;
 	close: () => void;
 };
-const formSchema = z.object({
+export const formSchema = z.object({
 	name: z.string().trim().max(128, "Too long").nonempty("Required"),
 	path: z.string(),
 });
 
-export function NewProjectModal({ close: _close, open }: Props) {
+type FormValues = z.infer<typeof formSchema>;
+
+export function NewProjectModal({ close, open }: Props) {
 	const defaultPath = "~/TablixProjects/";
 	const { dispatch } = useProjects();
 	const form = useForm({
-		defaultValues: {
+		initialValues: {
 			name: "",
 			path: defaultPath,
 		},
-		validators: {
-			onChange: formSchema,
-		},
-		onSubmit: async ({ value }) => {
-			const success = await projectsService.addProject(value);
-			if (!success) return;
-			projectsService.loadAll().then((projects) => {
-				dispatch({
-					type: "reload",
-					payload: projects,
-				});
-			});
-			close();
-		},
+		validate: zod4Resolver(formSchema),
 	});
 
-	const close = () => {
+	const onClose = () => {
 		form.reset();
-		_close();
+		close();
 	};
 
 	const onOpen = async () => {
@@ -53,111 +42,62 @@ export function NewProjectModal({ close: _close, open }: Props) {
 		onNameChange(undefined, projectsService.getRelativePath(path));
 	};
 	const onNameChange = (name?: string, path?: string) => {
-		const localName = name ?? form.getFieldValue("name");
-		const localPath = path ?? form.getFieldValue("path");
+		const values = form.getValues();
+		const localName = name ?? values.name;
+		const localPath = path ?? values.path;
 		const parts = localPath.split("/");
 		const result = `${parts.slice(0, -1).join("/")}/${localName}`;
 		form.setFieldValue("path", result);
 	};
 
-	const onSubmit: FormEventHandler = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		form.handleSubmit();
+	const onSubmit = async (values: FormValues) => {
+		const success = await projectsService.addProject(values);
+		if (!success) return;
+		projectsService.loadAll().then((projects) => {
+			dispatch({
+				type: "reload",
+				payload: projects,
+			});
+		});
+		onClose();
 	};
 
 	return (
-		<Dialog.Root lazyMount open={open} placement="center">
-			<Portal>
-				<Dialog.Backdrop />
-				<Dialog.Positioner>
-					<Dialog.Content>
-						<Dialog.Header>
-							<Dialog.Title>New Project</Dialog.Title>
-						</Dialog.Header>
-						<form onSubmit={onSubmit}>
-							<Dialog.Body>
-								<Stack gap="4">
-									<form.Field
-										name="name"
-										children={(field) => (
-											<Field.Root invalid={!field.state.meta.isValid} required>
-												<Field.Label>
-													<Field.RequiredIndicator />
-													Enter new project name:
-												</Field.Label>
-												<Input
-													type="text"
-													autoCorrect="off"
-													autoComplete="off"
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													name={field.name}
-													onChange={(e) => {
-														onNameChange(e.target.value);
-														field.handleChange(e.target.value.trim());
-													}}
-													outline="none"
-													required
-												/>
-												<Field.ErrorText>
-													{field.state.meta.errors.map((error) => error?.message).join(",")}
-												</Field.ErrorText>
-											</Field.Root>
-										)}
-									/>
-									<form.Field
-										name="path"
-										children={(field) => (
-											<Field.Root invalid={!field.state.meta.isValid}>
-												<Field.Label>Enter root directory:</Field.Label>
-												<Group attached width="full">
-													<Input
-														type="text"
-														autoCorrect="off"
-														autoComplete="off"
-														value={field.state.value}
-														onBlur={field.handleBlur}
-														name={field.name}
-														onChange={(e) => field.handleChange(e.target.value)}
-														disabled
-													/>
-													<Button variant="outline" outline="none" onClick={onOpen}>
-														<IconFolderOpen className="size-4" />
-													</Button>
-												</Group>
-												<Field.ErrorText>
-													{field.state.meta.errors.map((error) => error?.message).join(",")}
-												</Field.ErrorText>
-											</Field.Root>
-										)}
-									/>
-								</Stack>
-							</Dialog.Body>
-							<Dialog.Footer>
-								<form.Subscribe
-									selector={(state) => [state.canSubmit, state.isSubmitting]}
-									children={([canSubmit, isSubmitting]) => (
-										<Stack direction="row">
-											<Button variant="outline" onClick={close}>
-												Close
-											</Button>
-											<Button
-												type="submit"
-												variant="outline"
-												disabled={!canSubmit}
-												loading={isSubmitting}
-											>
-												Save
-											</Button>
-										</Stack>
-									)}
-								/>
-							</Dialog.Footer>
-						</form>
-					</Dialog.Content>
-				</Dialog.Positioner>
-			</Portal>
-		</Dialog.Root>
+		<Modal opened={open} onClose={onClose} title="New Project" centered>
+			<form onSubmit={form.onSubmit(onSubmit)}>
+				<Stack>
+					<TextInput
+						withAsterisk
+						label="Enter new project name:"
+						key={form.key("name")}
+						{...form.getInputProps("name")}
+						onChange={(e) => {
+							form.getInputProps("name").onChange(e);
+							onNameChange(e.target.value);
+						}}
+					/>
+					<Group align="end" gap="0">
+						<TextInput
+							disabled
+							flex="1"
+							label="Enter root directory:"
+							autoCorrect="off"
+							autoComplete="off"
+							radius="4px 0 0 4px"
+							key={form.key("path")}
+							{...form.getInputProps("path")}
+						/>
+						<Button variant="default" c="dark.0" radius="0 4px 4px 0" onClick={onOpen}>
+							<IconFolderOpen className="size-4" />
+						</Button>
+					</Group>
+				</Stack>
+				<Group justify="flex-end" mt="lg">
+					<Button type="submit" variant="light" disabled={!form.isValid} loading={form.submitting}>
+						Save
+					</Button>
+				</Group>
+			</form>
+		</Modal>
 	);
 }

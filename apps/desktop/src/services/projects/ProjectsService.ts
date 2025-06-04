@@ -1,12 +1,13 @@
-import { toaster as toasts } from "@/components/ui/toaster";
+import { notifications as toasts } from "@mantine/notifications";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { plainToInstance } from "class-transformer";
 import { type AddProject, Project } from "./types";
 
 const showError = (...args: string[]) =>
-	toasts.error({
-		title: args.join(),
+	toasts.show({
+		message: args.join(),
+		color: "red",
 	});
 const getErrorMessage = (e: unknown) => {
 	if (typeof e === "string") return e;
@@ -28,7 +29,7 @@ class ProjectsService {
 		return plainToInstance(Project, await invoke("get_project", { id: projectId, noValidation }));
 	}
 
-	async updateProject(project: Project & { unset_bool?: boolean }) {
+	async updateProject(project: Partial<Project> & Pick<Project, "id">) {
 		await invoke("update_project", { project: project });
 	}
 
@@ -66,8 +67,9 @@ class ProjectsService {
 			const project = await this.getProject(projectId, true);
 			project.path = path;
 			await this.updateProject(project);
-			toasts.success({
-				title: `Project ${project.name} relocated`,
+			toasts.show({
+				color: "green",
+				message: `Project ${project.name} relocated`,
 			});
 
 			// goto(`/${project.id}/board`);
@@ -85,8 +87,9 @@ class ProjectsService {
 			const project = await this.add(data);
 
 			if (!project) return true;
-			toasts.success({
-				title: "Project added",
+			toasts.show({
+				color: "green",
+				message: "Project added",
 			});
 			// linkProjectModal?.show(project.id);
 			// goto(`/${project.id}/board`);
