@@ -25,6 +25,7 @@ export function NewProjectModal({ close, open }: Props) {
 			name: "",
 			path: defaultPath,
 		},
+		validateInputOnBlur: true,
 		validate: zod4Resolver(formSchema),
 	});
 
@@ -93,7 +94,12 @@ export function NewProjectModal({ close, open }: Props) {
 					</Group>
 				</Stack>
 				<Group justify="flex-end" mt="lg">
-					<Button type="submit" variant="light" disabled={!form.isValid} loading={form.submitting}>
+					<Button
+						type="submit"
+						variant="light"
+						disabled={!form.isValid()}
+						loading={form.submitting}
+					>
 						Save
 					</Button>
 				</Group>

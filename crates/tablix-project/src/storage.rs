@@ -1,6 +1,4 @@
-use std::path::PathBuf;
-
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -16,8 +14,7 @@ pub(crate) struct Storage {
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct UpdateRequest {
 	pub id: Uuid,
-	pub title: Option<String>,
-	pub path: Option<PathBuf>,
+	pub name: String,
 }
 
 impl Storage {
@@ -54,27 +51,28 @@ impl Storage {
 		let project = projects
 			.iter_mut()
 			.find(|p| p.id == update_request.id)
-			.with_context(|| "project {id} not found for update")?;
+			.with_context(|| "Project {id} not found for update")?;
 
-		if let Some(title) = &update_request.title {
-			project.name.clone_from(title);
+		let name = update_request.name.to_owned();
+		if project.name.eq(&name) {
+			return Ok(project.to_owned());
 		}
 
-		if let Some(path) = &update_request.path {
-			project.path = path.clone();
+		let parent = project.path.parent().expect("No parent directory found");
+		let path = parent.join(&name);
+		if path.exists() {
+			bail!("Project already exists");
 		}
+		std::fs::rename(project.path.clone(), &path).expect("Error while renaming");
+		project.path = path;
+		project.name = name;
 
+		let project = project.to_owned();
 		self
 			.inner
 			.write(PROJECTS_FILE, &serde_json::to_string_pretty(&projects)?)?;
 
-		Ok(
-			projects
-				.iter()
-				.find(|p| p.id == update_request.id)
-				.unwrap()
-				.clone(),
-		)
+		Ok(project)
 	}
 
 	pub fn purge(&self, id: Uuid) -> Result<()> {

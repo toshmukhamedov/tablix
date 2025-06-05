@@ -1,4 +1,4 @@
-import { notifications as toasts } from "@mantine/notifications";
+import { notifications, notifications as toasts } from "@mantine/notifications";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { plainToInstance } from "class-transformer";
@@ -29,8 +29,17 @@ class ProjectsService {
 		return plainToInstance(Project, await invoke("get_project", { id: projectId, noValidation }));
 	}
 
-	async updateProject(project: Partial<Project> & Pick<Project, "id">) {
-		await invoke("update_project", { project: project });
+	async updateProject(project: Omit<Project, "path">): Promise<boolean> {
+		try {
+			await invoke("update_project", { project: project });
+			return true;
+		} catch (e) {
+			notifications.show({
+				message: e as string,
+				color: "red",
+			});
+			return false;
+		}
 	}
 
 	private async add(data: AddProject) {

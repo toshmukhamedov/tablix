@@ -10,10 +10,11 @@ import { EditProjectModal } from "./EditProjectModal";
 export function ProjectsList() {
 	const { state: projects } = useProjects();
 
-	const [opened, handlers] = useDisclosure(false);
+	const [renameModalOpen, renameModalHandlers] = useDisclosure(false);
 
 	const [search, setSearch] = useState("");
-	const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+	const [activeProject, setActiveProject] = useState<Project | null>(null);
+	const [renamingProject, setRenamingProject] = useState<Project | null>(null);
 
 	const filteredProjects: Project[] = useMemo(() => {
 		const searchString = search.toLowerCase();
@@ -23,8 +24,8 @@ export function ProjectsList() {
 	}, [search, projects]);
 
 	const renameModalClose = () => {
-		handlers.close();
-		setActiveProjectId(null);
+		renameModalHandlers.close();
+		setRenamingProject(null);
 	};
 
 	return (
@@ -56,10 +57,11 @@ export function ProjectsList() {
 								<Table.Td>
 									<Flex justify="end" mr="sm">
 										<ProjectMenu
-											projectId={project.id}
-											setOpenProjectId={setActiveProjectId}
-											openProjectId={activeProjectId}
-											openRenameModal={handlers.open}
+											currentProject={project}
+											activeProject={activeProject}
+											setActiveProject={setActiveProject}
+											setRenamingProject={setRenamingProject}
+											openRenameModal={renameModalHandlers.open}
 										/>
 									</Flex>
 								</Table.Td>
@@ -68,7 +70,7 @@ export function ProjectsList() {
 					</Table.Tbody>
 				</Table>
 			</Table.ScrollContainer>
-			<EditProjectModal open={opened} close={renameModalClose} projectId={activeProjectId} />
+			<EditProjectModal open={renameModalOpen} close={renameModalClose} project={renamingProject} />
 		</Stack>
 	);
 }

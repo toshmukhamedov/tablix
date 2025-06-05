@@ -1,8 +1,9 @@
-import { projectsService } from "@/services/projects";
+import { type Project, projectsService } from "@/services/projects";
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
+import { useEffect } from "react";
 import type { z } from "zod/v4";
 import { useProjects } from "../hooks/useProjects";
 import { formSchema as createFormSchema } from "./NewProjectModal";
@@ -10,7 +11,7 @@ import { formSchema as createFormSchema } from "./NewProjectModal";
 type Props = {
 	open: boolean;
 	close: () => void;
-	projectId: string | null;
+	project: Project | null;
 };
 const formSchema = createFormSchema.pick({
 	name: true,
@@ -18,14 +19,22 @@ const formSchema = createFormSchema.pick({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function EditProjectModal({ close, open, projectId }: Props) {
+export function EditProjectModal({ close, project, open }: Props) {
 	const { dispatch, state: projects } = useProjects();
 	const form = useForm({
 		initialValues: {
-			name: projects.find((project) => project.id === projectId)?.name ?? "",
+			name: project?.name ?? "",
 		},
+		validateInputOnBlur: true,
 		validate: zod4Resolver(formSchema),
 	});
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	useEffect(() => {
+		if (project) {
+			form.setFieldValue("name", project.name);
+		}
+	}, [project]);
 
 	const onClose = () => {
 		form.reset();
@@ -33,8 +42,7 @@ export function EditProjectModal({ close, open, projectId }: Props) {
 	};
 
 	const onSubmit = async (values: FormValues) => {
-		if (!projectId) return;
-
+		if (!project) return;
 		const projectExists = projects.findIndex((project) => project.name === values.name) !== -1;
 		if (projectExists) {
 			notifications.show({
@@ -43,10 +51,11 @@ export function EditProjectModal({ close, open, projectId }: Props) {
 			});
 			return;
 		}
-		await projectsService.updateProject({
-			id: projectId,
+		const success = await projectsService.updateProject({
+			id: project.id,
 			name: values.name,
 		});
+		if (!success) return;
 		projectsService.loadAll().then((projects) => {
 			dispatch({
 				type: "reload",
@@ -68,7 +77,12 @@ export function EditProjectModal({ close, open, projectId }: Props) {
 					/>
 				</Stack>
 				<Group justify="flex-end" mt="lg">
-					<Button type="submit" variant="light" disabled={!form.isValid} loading={form.submitting}>
+					<Button
+						type="submit"
+						variant="light"
+						disabled={!form.isValid()}
+						loading={form.submitting}
+					>
 						Save
 					</Button>
 				</Group>

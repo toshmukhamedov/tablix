@@ -1,31 +1,32 @@
-import { projectsService } from "@/services/projects";
+import { type Project, projectsService } from "@/services/projects";
 import { Button, Menu } from "@mantine/core";
 import { IconDotsVertical } from "@tabler/icons-react";
 import type { Dispatch, SetStateAction } from "react";
 import { useProjects } from "../hooks/useProjects";
 
 type Props = {
-	projectId: string;
-	openProjectId: string | null;
-	setOpenProjectId: Dispatch<SetStateAction<string | null>>;
+	currentProject: Project;
+	activeProject: Project | null;
 	openRenameModal: () => void;
+	setActiveProject: Dispatch<SetStateAction<Project | null>>;
+	setRenamingProject: Dispatch<SetStateAction<Project | null>>;
 };
 
 export function ProjectMenu(props: Props) {
-	const open = props.projectId === props.openProjectId;
+	const open = props.currentProject === props.activeProject;
 
 	const { dispatch } = useProjects();
 	const onOpenChange = (open: boolean) => {
 		if (open) {
-			props.setOpenProjectId(props.projectId);
+			props.setActiveProject(props.currentProject);
 		} else {
-			props.setOpenProjectId(null);
+			props.setActiveProject(null);
 		}
 	};
 
 	const onDelete = async () => {
-		if (!props.openProjectId) return;
-		await projectsService.deleteProject(props.openProjectId);
+		if (!props.activeProject) return;
+		await projectsService.deleteProject(props.activeProject.id);
 		const projects = await projectsService.loadAll();
 		dispatch({
 			type: "reload",
@@ -34,7 +35,7 @@ export function ProjectMenu(props: Props) {
 	};
 
 	const onRename = () => {
-		props.setOpenProjectId(props.projectId);
+		props.setRenamingProject(props.currentProject);
 		props.openRenameModal();
 	};
 
