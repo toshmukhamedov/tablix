@@ -2,7 +2,11 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use tracing;
+use trash;
 use uuid::Uuid;
+
+#[cfg(target_os = "macos")]
+use trash::macos::TrashContextExtMacos;
 
 use super::{Project, storage, storage::UpdateRequest};
 
@@ -75,15 +79,20 @@ impl ProjectController {
 			return Ok(());
 		};
 
-		self.projects_storage.purge(project.id)?;
+		let mut trash_ctx = trash::TrashContext::new();
+
+		#[cfg(target_os = "macos")]
+		trash_ctx.set_delete_method(trash::macos::DeleteMethod::NsFileManager);
 
 		if cleanup {
-			if let Err(error) = std::fs::remove_dir_all(project.path) {
-				if error.kind() != std::io::ErrorKind::NotFound {
-					tracing::error!(project_id = %id, ?error, "failed to remove project data",);
-				}
+			if let Err(error) = trash_ctx.delete(project.path) {
+				let message = "Failed to remove project data";
+				tracing::error!(project_id = %id, ?error, message,);
+				bail!(message);
 			}
 		}
+
+		self.projects_storage.purge(project.id)?;
 
 		Ok(())
 	}

@@ -22,7 +22,8 @@
 		"rules": {
 			"recommended": true,
 			"correctness": {
-				"noChildrenProp": "off"
+				"noChildrenProp": "off",
+				"useExhaustiveDependencies": "off"
 			},
 			"style": {
 				"useSelfClosingElements": {

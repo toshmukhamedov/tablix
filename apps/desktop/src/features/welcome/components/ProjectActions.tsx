@@ -1,14 +1,27 @@
-import { projectsService } from "@/services/projects";
+import { type AddProject, projectsService } from "@/services/projects";
 import { Button, Flex, Stack, Text, Title } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { IconFolder, IconPlus } from "@tabler/icons-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useProjects } from "../hooks/useProjects";
 import { NewProjectModal } from "./NewProjectModal";
 
 export function ProjectActions() {
 	const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
 
-	const { dispatch } = useProjects();
+	const queryClient = useQueryClient();
+	const mutation = useMutation<void, string, AddProject>({
+		mutationFn: projectsService.addProject.bind(projectsService),
+		onError: (message) => {
+			notifications.show({
+				message,
+				color: "red",
+			});
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["projects"] });
+		},
+	});
 
 	const onOpenClick = async () => {
 		const path = await projectsService.getValidPath();
@@ -17,14 +30,9 @@ export function ProjectActions() {
 		const name = path.split("/").at(-1);
 		if (!name) return;
 
-		await projectsService.addProject({
+		mutation.mutate({
 			name,
 			path,
-		});
-		const projects = await projectsService.loadAll();
-		dispatch({
-			type: "reload",
-			payload: projects,
 		});
 	};
 

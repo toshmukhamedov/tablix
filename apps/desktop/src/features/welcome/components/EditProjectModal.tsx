@@ -1,11 +1,10 @@
-import { type Project, projectsService } from "@/services/projects";
+import { type EditProject, type Project, projectsService } from "@/services/projects";
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useEffect } from "react";
 import type { z } from "zod/v4";
-import { useProjects } from "../hooks/useProjects";
 import { formSchema as createFormSchema } from "./NewProjectModal";
 
 type Props = {
@@ -20,8 +19,11 @@ const formSchema = createFormSchema.pick({
 type FormValues = z.infer<typeof formSchema>;
 
 export function EditProjectModal({ close, project, open }: Props) {
-	const { dispatch, state: projects } = useProjects();
-	const form = useForm({
+	const { data: projects } = useQuery({
+		queryKey: ["projects"],
+		queryFn: projectsService.loadAll,
+	});
+	const form = useForm<FormValues>({
 		initialValues: {
 			name: project?.name ?? "",
 		},
@@ -29,40 +31,38 @@ export function EditProjectModal({ close, project, open }: Props) {
 		validate: zod4Resolver(formSchema),
 	});
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	useEffect(() => {
 		if (project) {
 			form.setFieldValue("name", project.name);
 		}
 	}, [project]);
 
+	const queryClient = useQueryClient();
 	const onClose = () => {
+		queryClient.invalidateQueries({ queryKey: ["projects"] });
 		form.reset();
 		close();
 	};
 
+	const mutation = useMutation<void, string, EditProject>({
+		mutationFn: projectsService.updateProject.bind(projectsService),
+		onError: (msg) => {
+			form.setFieldError("name", msg);
+		},
+		onSuccess: onClose,
+	});
+
 	const onSubmit = async (values: FormValues) => {
 		if (!project) return;
-		const projectExists = projects.findIndex((project) => project.name === values.name) !== -1;
+		const projectExists = projects?.findIndex((project) => project.name === values.name) !== -1;
 		if (projectExists) {
-			notifications.show({
-				message: "Project already exists",
-				color: "red",
-			});
+			form.setFieldError("name", "Project already exists");
 			return;
 		}
-		const success = await projectsService.updateProject({
+		mutation.mutate({
 			id: project.id,
-			name: values.name,
+			...values,
 		});
-		if (!success) return;
-		projectsService.loadAll().then((projects) => {
-			dispatch({
-				type: "reload",
-				payload: projects,
-			});
-		});
-		onClose();
 	};
 
 	return (

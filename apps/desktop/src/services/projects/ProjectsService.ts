@@ -1,8 +1,8 @@
-import { notifications, notifications as toasts } from "@mantine/notifications";
+import { notifications as toasts } from "@mantine/notifications";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { plainToInstance } from "class-transformer";
-import { type AddProject, Project } from "./types";
+import { type AddProject, type DeleteProject, type EditProject, Project } from "./types";
 
 const showError = (...args: string[]) =>
 	toasts.show({
@@ -25,21 +25,12 @@ class ProjectsService {
 		await invoke("set_project_active", { id: projectId });
 	}
 
-	async getProject(projectId: string, noValidation?: boolean) {
+	async getProject(projectId: string, noValidation?: boolean): Promise<Project> {
 		return plainToInstance(Project, await invoke("get_project", { id: projectId, noValidation }));
 	}
 
-	async updateProject(project: Omit<Project, "path">): Promise<boolean> {
-		try {
-			await invoke("update_project", { project: project });
-			return true;
-		} catch (e) {
-			notifications.show({
-				message: e as string,
-				color: "red",
-			});
-			return false;
-		}
+	async updateProject(project: EditProject): Promise<void> {
+		await invoke("update_project", { project });
 	}
 
 	private async add(data: AddProject) {
@@ -47,8 +38,8 @@ class ProjectsService {
 		return project;
 	}
 
-	async deleteProject(id: string) {
-		await invoke("delete_project", { id, cleanup: false });
+	async deleteProject(data: DeleteProject) {
+		await invoke("delete_project", data);
 	}
 
 	async promptForDirectory(): Promise<string | undefined> {
@@ -87,26 +78,20 @@ class ProjectsService {
 		}
 	}
 
-	async addProject(input: AddProject): Promise<boolean> {
-		try {
-			const data: AddProject = {
-				name: input.name,
-				path: this.getAbsolutePath(input.path),
-			};
-			const project = await this.add(data);
+	async addProject(input: AddProject): Promise<void> {
+		const data: AddProject = {
+			name: input.name,
+			path: this.getAbsolutePath(input.path),
+		};
+		const project = await this.add(data);
 
-			if (!project) return true;
-			toasts.show({
-				color: "green",
-				message: "Project added",
-			});
-			// linkProjectModal?.show(project.id);
-			// goto(`/${project.id}/board`);
-			return true;
-		} catch (e) {
-			showError(getErrorMessage(e));
-			return false;
-		}
+		if (!project) return;
+		toasts.show({
+			color: "green",
+			message: "Project added",
+		});
+		// linkProjectModal?.show(project.id);
+		// goto(`/${project.id}/board`);
 	}
 
 	async getValidPath(): Promise<string | undefined> {
