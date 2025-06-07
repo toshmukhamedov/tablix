@@ -11,20 +11,20 @@ type Props = {
 	close: () => void;
 };
 export const formSchema = z.object({
-	name: z.string().trim().max(128, "Too long").nonempty("Required"),
+	name: z.string().trim().max(128, "Too long").nonempty("Too small"),
 	path: z.string(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const defaultPath = "~/TablixProjects/";
 export function NewProjectModal({ close, open }: Props) {
 	const form = useForm<FormValues>({
 		initialValues: {
 			name: "",
-			path: defaultPath,
+			path: "~/TablixProjects/",
 		},
-		validateInputOnBlur: true,
+		validateInputOnChange: true,
+		transformValues: formSchema.parse,
 		validate: zod4Resolver(formSchema),
 	});
 
@@ -49,30 +49,24 @@ export function NewProjectModal({ close, open }: Props) {
 		if (!path.endsWith("/")) {
 			path += "/";
 		}
-		onNameChange(undefined, projectsService.getRelativePath(path));
 	};
-	const onNameChange = (name?: string, path?: string) => {
-		const values = form.getValues();
-		const localName = name ?? values.name;
-		const localPath = path ?? values.path;
-		const parts = localPath.split("/");
-		const result = `${parts.slice(0, -1).join("/")}/${localName}`;
-		form.setFieldValue("path", result);
+
+	const onSubmit = (values: FormValues) => {
+		values.path += values.name;
+		mutation.mutate(values);
 	};
 
 	return (
 		<Modal opened={open} onClose={onClose} title="New Project" centered>
-			<form onSubmit={form.onSubmit((values) => mutation.mutate(values))}>
+			<form onSubmit={form.onSubmit(onSubmit)}>
 				<Stack>
 					<TextInput
 						withAsterisk
+						data-autofocus
 						label="Enter new project name:"
 						key={form.key("name")}
 						{...form.getInputProps("name")}
-						onChange={(e) => {
-							form.getInputProps("name").onChange(e);
-							onNameChange(e.target.value);
-						}}
+						onBlur={(e) => e.target.focus()}
 					/>
 					<Group align="end" gap="0">
 						<TextInput
@@ -85,8 +79,8 @@ export function NewProjectModal({ close, open }: Props) {
 							key={form.key("path")}
 							{...form.getInputProps("path")}
 						/>
-						<Button variant="default" c="dark.0" radius="0 4px 4px 0" onClick={onOpen}>
-							<IconFolderOpen className="size-4" />
+						<Button variant="default" px="sm" c="blue" radius="0 4px 4px 0" onClick={onOpen}>
+							<IconFolderOpen size="20" />
 						</Button>
 					</Group>
 				</Stack>

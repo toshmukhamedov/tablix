@@ -11,6 +11,7 @@
 	},
 	"license": "MIT",
 	"devDependencies": {
+		"@gfazioli/mantine-split-pane": "^2.1.2",
 		"@mantine/core": "^8.0.2",
 		"@mantine/form": "^8.0.2",
 		"@mantine/hooks": "^8.0.2",
