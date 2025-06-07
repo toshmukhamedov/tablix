@@ -2,9 +2,9 @@ import { projectsService } from "@/services/projects";
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconFolderOpen } from "@tabler/icons-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod/v4";
-import { useProjects } from "../hooks/useProjects";
 
 type Props = {
 	open: boolean;
@@ -17,10 +17,9 @@ export const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const defaultPath = "~/TablixProjects/";
 export function NewProjectModal({ close, open }: Props) {
-	const defaultPath = "~/TablixProjects/";
-	const { dispatch } = useProjects();
-	const form = useForm({
+	const form = useForm<FormValues>({
 		initialValues: {
 			name: "",
 			path: defaultPath,
@@ -29,10 +28,20 @@ export function NewProjectModal({ close, open }: Props) {
 		validate: zod4Resolver(formSchema),
 	});
 
+	const queryClient = useQueryClient();
 	const onClose = () => {
+		queryClient.invalidateQueries({ queryKey: ["projects"] });
 		form.reset();
 		close();
 	};
+
+	const mutation = useMutation<void, string, FormValues>({
+		mutationFn: projectsService.addProject.bind(projectsService),
+		onError: (msg) => {
+			form.setFieldError("name", msg);
+		},
+		onSuccess: onClose,
+	});
 
 	const onOpen = async () => {
 		let path = await projectsService.getValidPath();
@@ -51,21 +60,9 @@ export function NewProjectModal({ close, open }: Props) {
 		form.setFieldValue("path", result);
 	};
 
-	const onSubmit = async (values: FormValues) => {
-		const success = await projectsService.addProject(values);
-		if (!success) return;
-		projectsService.loadAll().then((projects) => {
-			dispatch({
-				type: "reload",
-				payload: projects,
-			});
-		});
-		onClose();
-	};
-
 	return (
 		<Modal opened={open} onClose={onClose} title="New Project" centered>
-			<form onSubmit={form.onSubmit(onSubmit)}>
+			<form onSubmit={form.onSubmit((values) => mutation.mutate(values))}>
 				<Stack>
 					<TextInput
 						withAsterisk

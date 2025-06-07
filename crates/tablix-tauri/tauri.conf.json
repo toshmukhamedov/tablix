@@ -15,11 +15,16 @@
 				"title": "Tablix",
 				"dragDropEnabled": false,
 				"hiddenTitle": true,
+				"visible": false,
 				"titleBarStyle": "Overlay",
 				"width": 800,
 				"height": 600,
 				"minWidth": 800,
-				"minHeight": 600
+				"minHeight": 600,
+				"trafficLightPosition": {
+					"x": 10,
+					"y": 15
+				}
 			}
 		],
 		"security": {
@@ -29,11 +34,9 @@
 	"bundle": {
 		"active": true,
 		"targets": "all",
-		"icon": [
-			"icons/icon.icns"
-		],
+		"icon": ["icons/icon.icns"],
 		"macOS": {
-      "minimumSystemVersion": "10.13"
-    }
+			"minimumSystemVersion": "10.13"
+		}
 	}
 }

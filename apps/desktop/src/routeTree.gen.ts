@@ -12,12 +12,19 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as WorkspaceProjectIdImport } from './routes/workspace/$projectId'
 
 // Create/Update Routes
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const WorkspaceProjectIdRoute = WorkspaceProjectIdImport.update({
+  id: '/workspace/$projectId',
+  path: '/workspace/$projectId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -32,6 +39,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/workspace/$projectId': {
+      id: '/workspace/$projectId'
+      path: '/workspace/$projectId'
+      fullPath: '/workspace/$projectId'
+      preLoaderRoute: typeof WorkspaceProjectIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -39,32 +53,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/workspace/$projectId': typeof WorkspaceProjectIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/workspace/$projectId': typeof WorkspaceProjectIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/workspace/$projectId': typeof WorkspaceProjectIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/workspace/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/workspace/$projectId'
+  id: '__root__' | '/' | '/workspace/$projectId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  WorkspaceProjectIdRoute: typeof WorkspaceProjectIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  WorkspaceProjectIdRoute: WorkspaceProjectIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +96,15 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/workspace/$projectId"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/workspace/$projectId": {
+      "filePath": "workspace/$projectId.tsx"
     }
   }
 }

@@ -2,6 +2,7 @@ use tablix_project::controller::ProjectController;
 use tauri::Manager;
 
 mod app;
+mod commands;
 mod logs;
 mod projects;
 
@@ -13,6 +14,7 @@ pub fn run() {
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_dialog::init())
 		.invoke_handler(tauri::generate_handler![
+			commands::show_window,
 			projects::commands::add_project,
 			projects::commands::get_project,
 			projects::commands::update_project,
