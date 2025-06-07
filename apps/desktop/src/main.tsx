@@ -1,5 +1,6 @@
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import "@gfazioli/mantine-split-pane/styles.css";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
@@ -11,7 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { appService } from "./services/appService";
+import { appService } from "./services/AppService";
 
 // Create a new instances
 const router = createRouter({ routeTree });
@@ -26,12 +27,11 @@ declare module "@tanstack/react-router" {
 
 const App: React.FC = () => {
 	useEffect(() => {
-		console.info("app init...");
 		appService.showWindow();
 	});
 
 	return (
-		<MantineProvider defaultColorScheme="auto">
+		<MantineProvider defaultColorScheme="dark">
 			<ModalsProvider>
 				<QueryClientProvider client={queryClient}>
 					<Notifications />
