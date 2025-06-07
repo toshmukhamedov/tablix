@@ -9,8 +9,9 @@ import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
+import { appService } from "./services/appService";
 
 // Create a new instances
 const router = createRouter({ routeTree });
@@ -23,8 +24,13 @@ declare module "@tanstack/react-router" {
 	}
 }
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-	<React.StrictMode>
+const App: React.FC = () => {
+	useEffect(() => {
+		console.info("app init...");
+		appService.showWindow();
+	});
+
+	return (
 		<MantineProvider defaultColorScheme="auto">
 			<ModalsProvider>
 				<QueryClientProvider client={queryClient}>
@@ -33,5 +39,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 				</QueryClientProvider>
 			</ModalsProvider>
 		</MantineProvider>
+	);
+};
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+	<React.StrictMode>
+		<App />
 	</React.StrictMode>,
 );
