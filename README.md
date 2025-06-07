@@ -1,8 +1,10 @@
-# Tablix
+<div align="center">
+  <img align="center" width="128px" src="./crates/tablix-tauri/icons/icon.png" />
+	<h1 align="center"><b>Tablix</b></h1>
+	<p align="center">
+		Database management tool
+  </p>
+</div>
 
-<p align="center">
-	<img src="./crates/tablix-tauri/icons/icon.png" width="20%" alt="Logo" />
-</p>
+<img align="center" src="./assets/welcome.png" alt="Welcome Page Screenshot" />
 
-### Showcase
-<img src="./assets/welcome.png" width="50%" alt="Welcome Page Screenshot" />
