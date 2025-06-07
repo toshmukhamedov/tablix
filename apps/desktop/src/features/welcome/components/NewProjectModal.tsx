@@ -61,7 +61,6 @@ export function NewProjectModal({ close, open }: Props) {
 			<form onSubmit={form.onSubmit(onSubmit)}>
 				<Stack>
 					<TextInput
-						withAsterisk
 						data-autofocus
 						label="Enter new project name:"
 						key={form.key("name")}
