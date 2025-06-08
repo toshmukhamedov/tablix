@@ -1,14 +1,11 @@
+import { ConnectionType } from "@/services/connections";
 import { Group, NumberInput, PasswordInput, TextInput } from "@mantine/core";
-import type { UseFormReturnType } from "@mantine/form";
-import { ConnectionType } from "../constants";
-import type { FormValues } from "./AddConnectionModal";
+import { useAddConnectionFormContext } from "../context/form";
 
-type Props = {
-	form: UseFormReturnType<FormValues>;
-};
+export const ConnectionSpecificFields: React.FC = () => {
+	const form = useAddConnectionFormContext();
 
-export const ConnectionSpecificFields: React.FC<Props> = ({ form }) => {
-	switch (form.values.type) {
+	switch (form.values.details.type) {
 		case ConnectionType.PostgreSQL: {
 			return (
 				<>
@@ -16,33 +13,33 @@ export const ConnectionSpecificFields: React.FC<Props> = ({ form }) => {
 						<TextInput
 							size="xs"
 							label="Host"
-							key={form.key("host")}
-							{...form.getInputProps("host")}
+							key={form.key("details.host")}
+							{...form.getInputProps("details.host")}
 						/>
 						<NumberInput
 							size="xs"
 							label="Port"
-							key={form.key("port")}
-							{...form.getInputProps("port")}
+							key={form.key("details.port")}
+							{...form.getInputProps("details.port")}
 						/>
 					</Group>
 					<TextInput
 						size="xs"
 						label="User"
-						key={form.key("user")}
-						{...form.getInputProps("user")}
+						key={form.key("details.user")}
+						{...form.getInputProps("details.user")}
 					/>
 					<PasswordInput
 						size="xs"
 						label="Password"
-						key={form.key("password")}
-						{...form.getInputProps("password")}
+						key={form.key("details.password")}
+						{...form.getInputProps("details.password")}
 					/>
 					<TextInput
 						size="xs"
 						label="Database"
-						key={form.key("database")}
-						{...form.getInputProps("database")}
+						key={form.key("details.database")}
+						{...form.getInputProps("details.database")}
 					/>
 				</>
 			);

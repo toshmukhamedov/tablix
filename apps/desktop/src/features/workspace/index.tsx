@@ -8,7 +8,7 @@ export function Workspace() {
 		<Stack gap="0" h="100%">
 			<Menubar />
 			<Split size="1px" h="100%" spacing="0" opacity="0">
-				<Split.Pane maxWidth="50%" initialWidth="25%" minWidth="10%">
+				<Split.Pane maxWidth="50%" initialWidth="25%" minWidth="15%">
 					<Explorer />
 				</Split.Pane>
 				<Split.Resizer />

@@ -1,10 +1,50 @@
-import { Button, Flex, Stack, Title, Tooltip } from "@mantine/core";
+import { connectionsService } from "@/services/connections";
+import {
+	Button,
+	Flex,
+	Group,
+	type RenderTreeNodePayload,
+	Stack,
+	Text,
+	Title,
+	Tooltip,
+	Tree,
+	type TreeNodeData,
+	useTree,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconPlug } from "@tabler/icons-react";
+import { IconChevronRight, IconPlug } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import { useLoaderData } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { AddConnectionModal } from "./components/AddConnectionModal";
+import classes from "./tree.module.css";
+
+function Leaf({ node, elementProps }: RenderTreeNodePayload) {
+	return (
+		<Group gap={5} {...elementProps}>
+			<IconChevronRight size="16px" color="var(--mantine-color-dark-2)" />
+			<Text>{node.label}</Text>
+		</Group>
+	);
+}
 
 export const Explorer: React.FC = () => {
 	const [addConnectionModalOpened, addConnectionModalHandlers] = useDisclosure();
+	const project = useLoaderData({ from: "/workspace/$projectId" });
+	const query = useQuery({
+		queryKey: ["connections"],
+		queryFn: () => connectionsService.list({ projectId: project.id }),
+	});
+	const tree = useTree();
+
+	const treeData = useMemo<TreeNodeData[]>(() => {
+		if (!query.data) return [];
+		return query.data.map((conn) => ({
+			label: conn.name,
+			value: conn.id,
+		}));
+	}, [query.data]);
 
 	return (
 		<Stack
@@ -40,6 +80,14 @@ export const Explorer: React.FC = () => {
 					</Tooltip>
 				</Flex>
 			</Flex>
+			<Tree
+				classNames={classes}
+				data={treeData}
+				tree={tree}
+				renderNode={(payload) => <Leaf {...payload} />}
+				selectOnClick
+				clearSelectionOnOutsideClick
+			/>
 			<AddConnectionModal
 				opened={addConnectionModalOpened}
 				onClose={addConnectionModalHandlers.close}

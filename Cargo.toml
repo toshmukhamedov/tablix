@@ -6,19 +6,20 @@ resolver = "3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 anyhow = "1.0.97"
-uuid = {version = "1.16.0", features = ["v4"]}
+uuid = { version = "1.16.0", features = ["v4"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
 
 tablix-storage = { path = "crates/tablix-storage" }
 tablix-project = { path = "crates/tablix-project" }
+tablix-connection = { path = "crates/tablix-connection" }
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
 
 [profile.release]
 codegen-units = 1 # Allows LLVM to perform better optimization.
-lto = true # Enables link-time-optimizations.
-opt-level = "s" # Prioritizes small binary size. Use `3` if you prefer speed.
-panic = "abort" # Higher performance by disabling panic handlers.
-strip = true # Ensures debug symbols are removed.
+lto = true        # Enables link-time-optimizations.
+opt-level = "s"   # Prioritizes small binary size. Use `3` if you prefer speed.
+panic = "abort"   # Higher performance by disabling panic handlers.
+strip = true      # Ensures debug symbols are removed.

@@ -3584,6 +3584,7 @@ dependencies = [
  "anyhow",
  "serde",
  "serde_json",
+ "tablix-connection",
  "tablix-project",
  "tablix-storage",
  "tauri",
@@ -3594,6 +3595,20 @@ dependencies = [
  "tauri-plugin-store",
  "tracing",
  "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "tablix-connection"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+ "tablix-project",
+ "tablix-storage",
+ "tracing",
+ "trash",
  "uuid",
 ]
 

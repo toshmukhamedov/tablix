@@ -13,7 +13,7 @@ export const Menubar: React.FC = () => {
 			gap="sm"
 			styles={{ root: { borderBottom: "1px solid var(--mantine-color-dark-9)" } }}
 		>
-			<Badge variant="light" radius="sm">
+			<Badge variant="light" tt="none" radius="sm">
 				<Title size="xs">{project.name}</Title>
 			</Badge>
 			<Divider orientation="vertical" my="6px" />

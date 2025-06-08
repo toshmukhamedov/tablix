@@ -1,0 +1,31 @@
+.root {
+	font-size: 13px;
+	margin: 0 10px;
+}
+
+.label {
+	&[data-hovered] {
+		@mixin where-light {
+			background-color: var(--mantine-color-gray-9);
+		}
+
+		@mixin where-dark {
+			background-color: var(--mantine-color-dark-1);
+			color: var(--mantine-color-white);
+		}
+	}
+
+	&[data-selected] {
+		border-radius: var(--mantine-radius-xs);
+		@mixin light {
+			background-color: var(--mantine-color-blue-0);
+			color: var(--mantine-color-black);
+		}
+
+		@mixin dark {
+			/* biome-ignore lint/correctness/noUnknownFunction: not sure yet */
+			background-color: alpha(var(--mantine-color-blue-8), 0.35);
+			color: var(--mantine-color-blue-0);
+		}
+	}
+}

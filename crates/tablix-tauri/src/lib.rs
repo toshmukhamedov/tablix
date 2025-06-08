@@ -1,8 +1,10 @@
+use tablix_connection::controller::ConnectionController;
 use tablix_project::controller::ProjectController;
 use tauri::Manager;
 
 mod app;
 mod commands;
+mod connections;
 mod logs;
 mod projects;
 
@@ -20,6 +22,11 @@ pub fn run() {
 			projects::commands::update_project,
 			projects::commands::delete_project,
 			projects::commands::list_projects,
+			connections::commands::add_connection,
+			connections::commands::get_connection,
+			connections::commands::update_connection,
+			connections::commands::delete_connection,
+			connections::commands::list_connections,
 		])
 		.setup(|tauri_app| {
 			let app_data_dir = {
@@ -31,9 +38,11 @@ pub fn run() {
 
 			let app = app::App::new(app_data_dir);
 			let projects_controller = ProjectController::new(app.storage.clone());
+			let connections_controller = ConnectionController::default();
 
 			tauri_app.manage(app);
 			tauri_app.manage(projects_controller);
+			tauri_app.manage(connections_controller);
 
 			Ok(())
 		})
