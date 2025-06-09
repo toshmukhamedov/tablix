@@ -23,7 +23,8 @@
 			"recommended": true,
 			"correctness": {
 				"noChildrenProp": "off",
-				"useExhaustiveDependencies": "off"
+				"useExhaustiveDependencies": "off",
+				"noUnknownFunction": "off"
 			},
 			"style": {
 				"useSelfClosingElements": {
