@@ -1,19 +1,13 @@
 .root {
 	overflow-x: scroll;
 	height: 100%;
+	position: relative;
 }
 
 .node {
-	flex-wrap: nowrap;
-	margin: 0 10px;
+	position: relative;
 }
 
 .label {
-	border-radius: var(--mantine-radius-xs);
-	&[data-hovered] {
-		background-color: var(--mantine-color-dark-5);
-	}
-	&[data-selected] {
-		background-color: alpha(var(--mantine-color-blue-9), 0.5);
-	}
+	position: relative;
 }
