@@ -15,7 +15,7 @@ First of all, this is a Tauri app, which uses Rust for the backend and Javascrip
 
 1. Tauri Dev Deps (https://tauri.app/start/prerequisites/#system-dependencies)
 
-On Mac OS, ensure you've installed XCode and `cmake`. On Linux, if you're on Debian or one of its derivatives like Ubuntu, you can use the following command.
+On Mac OS, ensure you've installed XCode Command Line Tools. On Linux, if you're on Debian or one of its derivatives like Ubuntu, you can use the following command.
 
 <details>
 <summary>Linux Tauri dependencies</summary>
