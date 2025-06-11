@@ -16,11 +16,13 @@ export const TreeLabel: React.FC<RenderTreeNodePayload> = ({ node, elementProps,
 	return (
 		// Label
 		<Group {...labelProps}>
-			<div {...innerLabelProps}>
-				<TreeChevron expanded={expanded} />
-				<Text size="sm" fw="500" style={{ whiteSpace: "nowrap" }}>
-					{node.label}
-				</Text>
+			<div className="outer-label">
+				<div {...innerLabelProps}>
+					<TreeChevron expanded={expanded} />
+					<Text size="sm" fw="500" style={{ whiteSpace: "nowrap" }}>
+						{node.label}
+					</Text>
+				</div>
 			</div>
 		</Group>
 	);

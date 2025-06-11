@@ -3,7 +3,6 @@ import { Tree, type TreeNodeData, useTree } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useLoaderData } from "@tanstack/react-router";
 import { useMemo } from "react";
-import classes from "../styles/tree.module.css";
 import { TreeLabel } from "./TreeLabel";
 
 export const ExplorerTree: React.FC = () => {
@@ -24,7 +23,13 @@ export const ExplorerTree: React.FC = () => {
 
 	return (
 		<Tree
-			classNames={classes}
+			styles={{
+				root: {
+					overflowX: "scroll",
+					height: "100%",
+					marginRight: "1px",
+				},
+			}}
 			data={treeData}
 			tree={tree}
 			renderNode={(payload) => <TreeLabel {...payload} />}
