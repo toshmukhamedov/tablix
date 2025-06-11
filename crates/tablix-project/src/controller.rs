@@ -98,11 +98,6 @@ impl ProjectController {
 	}
 
 	pub fn project_metadata_dir(&self, id: Uuid) -> PathBuf {
-		self
-			.projects_storage
-			.inner
-			.app_data_dir
-			.join("projects")
-			.join(id.to_string())
+		self.projects_storage.get(id).unwrap().path.join(".tablix")
 	}
 }

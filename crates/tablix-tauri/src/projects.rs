@@ -1,15 +1,15 @@
-use tablix_project::project::Project;
-
 pub mod commands {
 	use std::path;
 
 	// use but_settings::AppSettingsWithDiskSync;
-	use tablix_project::{self as projects, controller::ProjectController as Controller, project};
+	use tablix_project::{
+		self as projects,
+		controller::ProjectController as Controller,
+		project::{self, Project},
+	};
 	use tauri::{Error, State};
 	use tracing::instrument;
 	use uuid::Uuid;
-
-	use crate::projects::ProjectForFrontend;
 
 	#[tauri::command(async)]
 	#[instrument(skip(projects), err(Debug))]
@@ -42,17 +42,8 @@ pub mod commands {
 
 	#[tauri::command(async)]
 	#[instrument(skip(projects), err(Debug))]
-	pub fn list_projects(projects: State<'_, Controller>) -> Result<Vec<ProjectForFrontend>, Error> {
-		projects.list().map_err(Into::into).map(|projects| {
-			projects
-				.into_iter()
-				.map(|project| ProjectForFrontend {
-					// is_open: open_projects.contains(&project.id),
-					is_open: false,
-					inner: project,
-				})
-				.collect()
-		})
+	pub fn list_projects(projects: State<'_, Controller>) -> Result<Vec<Project>, Error> {
+		projects.list().map_err(Into::into)
 	}
 
 	#[tauri::command(async)]
@@ -64,12 +55,4 @@ pub mod commands {
 	) -> Result<(), Error> {
 		projects.delete(id, cleanup).map_err(Into::into)
 	}
-}
-
-#[derive(serde::Deserialize, serde::Serialize)]
-pub struct ProjectForFrontend {
-	#[serde(flatten)]
-	pub inner: Project,
-	/// Tell if the project is known to be open in a Window in the frontend.
-	pub is_open: bool,
 }
