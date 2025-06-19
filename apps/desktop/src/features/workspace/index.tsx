@@ -13,8 +13,10 @@ export function Workspace() {
 				</Split.Pane>
 				<Split.Resizer />
 				<Split.Pane w="100%">
-					<Paper w="100%" h="100%" p="xs">
-						<Center h="100%">Editor/Table</Center>
+					<Paper w="100%" h="100%">
+						<Center h="100%" w="100%">
+							Editor/Table
+						</Center>
 					</Paper>
 				</Split.Pane>
 			</Split>

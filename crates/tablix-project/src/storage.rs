@@ -1,5 +1,6 @@
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
+use tablix_storage::StorageService;
 use uuid::Uuid;
 
 use crate::Project;
@@ -7,8 +8,8 @@ use crate::Project;
 const PROJECTS_FILE: &str = "projects.json";
 
 #[derive(Debug, Clone)]
-pub(crate) struct Storage {
-	pub inner: tablix_storage::Storage,
+pub(crate) struct Storage<T: StorageService> {
+	pub inner: T,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
@@ -17,8 +18,8 @@ pub struct UpdateRequest {
 	pub name: String,
 }
 
-impl Storage {
-	pub fn new(storage: tablix_storage::Storage) -> Self {
+impl<T: StorageService> Storage<T> {
+	pub fn new(storage: T) -> Self {
 		Storage { inner: storage }
 	}
 

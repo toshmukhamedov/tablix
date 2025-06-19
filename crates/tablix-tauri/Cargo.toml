@@ -29,6 +29,8 @@ tauri-plugin-os = "2"
 tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
 uuid.workspace = true
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "mysql"] }
+dashmap = { version = "6.1.0" }
 
 tablix-storage.workspace = true
 tablix-project.workspace = true

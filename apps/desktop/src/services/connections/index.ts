@@ -1,4 +1,3 @@
-import { sleep } from "@/lib/utils/sleep";
 import { invoke } from "@tauri-apps/api/core";
 import type {
 	AddConnection,
@@ -29,7 +28,6 @@ class ConnectionsService {
 	}
 
 	async add(data: AddConnection): Promise<Connection> {
-		await sleep(1000);
 		return await invoke<Connection>("add_connection", data);
 	}
 }

@@ -12,7 +12,7 @@ use super::{Project, storage, storage::UpdateRequest};
 
 #[derive(Clone)]
 pub struct ProjectController {
-	projects_storage: storage::Storage,
+	projects_storage: storage::Storage<tablix_storage::Storage>,
 }
 
 impl ProjectController {
@@ -22,8 +22,7 @@ impl ProjectController {
 		}
 	}
 
-	pub fn add<P: AsRef<Path>>(&self, name: String, path: P) -> Result<Project> {
-		let path = path.as_ref();
+	pub fn add(&self, name: String, path: &Path) -> Result<Project> {
 		let all_projects = self
 			.projects_storage
 			.list()

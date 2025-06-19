@@ -1,12 +1,14 @@
-use tablix_connection::controller::ConnectionController;
-use tablix_project::controller::ProjectController;
+use query_engine::pool::PoolManager;
 use tauri::Manager;
+
+use crate::app::AppState;
 
 mod app;
 mod commands;
 mod connections;
 mod logs;
 mod projects;
+mod query_engine;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -27,6 +29,8 @@ pub fn run() {
 			connections::commands::update_connection,
 			connections::commands::delete_connection,
 			connections::commands::list_connections,
+			query_engine::commands::create_pool,
+			query_engine::commands::get_databases,
 		])
 		.setup(|tauri_app| {
 			let app_data_dir = {
@@ -36,13 +40,16 @@ pub fn run() {
 
 			logs::init();
 
-			let app = app::App::new(app_data_dir);
-			let projects_controller = ProjectController::new(app.storage.clone());
-			let connections_controller = ConnectionController::default();
+			let app_state = AppState::new(app_data_dir);
+			let pool_manager = PoolManager::new();
 
-			tauri_app.manage(app);
-			tauri_app.manage(projects_controller);
-			tauri_app.manage(connections_controller);
+			let connections = app_state.connections.clone();
+			let projects = app_state.projects.clone();
+
+			tauri_app.manage(app_state);
+			tauri_app.manage(connections);
+			tauri_app.manage(projects);
+			tauri_app.manage(pool_manager);
 
 			Ok(())
 		})

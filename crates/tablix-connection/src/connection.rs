@@ -21,5 +21,54 @@ pub enum ConnectionDetails {
 	},
 	MySQL {
 		host: String,
+		port: u16,
+		user: String,
+		password: String,
+		database: String,
 	},
+}
+
+impl ConnectionDetails {
+	pub fn database(&self) -> &String {
+		match self {
+			ConnectionDetails::PostgreSQL {
+				database,
+				host: _,
+				port: _,
+				user: _,
+				password: _,
+			} => database,
+			ConnectionDetails::MySQL {
+				host: _,
+				port: _,
+				user: _,
+				password: _,
+				database,
+			} => database,
+		}
+	}
+	pub fn url(&self) -> String {
+		match self {
+			ConnectionDetails::PostgreSQL {
+				host,
+				port,
+				user,
+				password,
+				database,
+			} => format!(
+				"postgres://{}:{}@{}:{}/{}",
+				user, password, host, port, database
+			),
+			ConnectionDetails::MySQL {
+				host,
+				port,
+				user,
+				password,
+				database,
+			} => format!(
+				"mysql://{}:{}@{}:{}/{}",
+				user, password, host, port, database
+			),
+		}
+	}
 }
