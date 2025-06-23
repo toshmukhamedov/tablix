@@ -63,7 +63,6 @@ pub mod commands {
 		project_controller: State<'_, ProjectController>,
 		project_id: Uuid,
 		id: Uuid,
-		cleanup: bool,
 	) -> Result<(), Error> {
 		let project = project_controller.get(project_id)?;
 		connection_controller

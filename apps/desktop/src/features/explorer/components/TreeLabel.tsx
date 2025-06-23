@@ -1,47 +1,45 @@
-import { Group, type RenderTreeNodePayload, Text } from "@mantine/core";
+import { Flex, Text } from "@mantine/core";
 import { TreeChevron } from "./TreeChevron";
 
-import "../styles/tree-label.css";
 import { poolService } from "@/services/pool";
+import { notifications } from "@mantine/notifications";
 import { useMutation } from "@tanstack/react-query";
 import { useLoaderData } from "@tanstack/react-router";
-import { useEffect } from "react";
+import type { TreeNode } from "primereact/treenode";
 
-export const TreeLabel: React.FC<RenderTreeNodePayload> = ({ node, elementProps, expanded }) => {
+type TreeLabelProps = {
+	node: TreeNode;
+};
+
+export const TreeLabel: React.FC<TreeLabelProps> = ({ node }) => {
 	const project = useLoaderData({ from: "/workspace/$projectId" });
-
-	const labelProps: RenderTreeNodePayload["elementProps"] = {
-		...elementProps,
-		"data-hovered": undefined,
-		"data-selected": undefined,
-	};
-	const innerLabelProps: RenderTreeNodePayload["elementProps"] = {
-		...elementProps,
-		className: "inner-label",
-	};
-
 	const createPoolMutation = useMutation({
 		mutationFn: poolService.createPool,
+		onSuccess: () => {
+			console.info("Success");
+		},
+		onError: () => {
+			notifications.show({
+				color: "red",
+				message: "Creating pool",
+			});
+		},
 	});
-
-	useEffect(() => {
-		if (!expanded) return;
+	const onDoubleClick = () => {
+		if (createPoolMutation.isPending) return;
+		console.info("Double", node.data);
 		createPoolMutation.mutate({
 			projectId: project.id,
-			connId: node.value,
+			connId: node.data.id,
 		});
-	}, [expanded]);
+	};
 
 	return (
-		<Group {...labelProps}>
-			<div className="outer-label">
-				<div {...innerLabelProps}>
-					<TreeChevron expanded={expanded} loading={createPoolMutation.isPending} />
-					<Text size="sm" fw="500" style={{ whiteSpace: "nowrap" }}>
-						{node.label}
-					</Text>
-				</div>
-			</div>
-		</Group>
+		<Flex align="center" gap="6px" onDoubleClick={onDoubleClick}>
+			<TreeChevron loading={createPoolMutation.isPending} node={node} />
+			<Text size="sm" fw="500" style={{ whiteSpace: "nowrap", marginRight: "10px" }}>
+				{node.label}
+			</Text>
+		</Flex>
 	);
 };

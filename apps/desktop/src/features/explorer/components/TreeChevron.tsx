@@ -1,22 +1,30 @@
+import { type Connection, ConnectionType } from "@/services/connections";
 import { Loader } from "@mantine/core";
-import { IconChevronDown, IconChevronRight, type IconProps } from "@tabler/icons-react";
+import type { TreeNode } from "primereact/treenode";
+import { DiDatabase, DiMysql, DiPostgresql } from "react-icons/di";
+import type { IconBaseProps } from "react-icons/lib";
 
 type Props = {
-	expanded: boolean;
 	loading: boolean;
+	node: TreeNode;
 };
 
-export const TreeChevron: React.FC<Props> = ({ expanded, loading }) => {
+export const TreeChevron: React.FC<Props> = ({ loading, node }) => {
 	if (loading) {
-		return <Loader size={16} color="blue" />;
+		return <Loader size="14px" color="blue" />;
 	}
 
-	const iconProps: IconProps = {
+	const iconProps: IconBaseProps = {
 		style: { flexShrink: 0 },
 		size: "16px",
-		color: "var(--mantine-color-dark-2)",
 	};
-	const Icon = expanded ? IconChevronDown : IconChevronRight;
-
-	return <Icon {...iconProps} />;
+	const conn: Connection = node.data;
+	switch (conn.details.type) {
+		case ConnectionType.PostgreSQL:
+			return <DiPostgresql {...iconProps} color="#336790" strokeWidth="1px" />;
+		case ConnectionType.MySQL:
+			return <DiMysql {...iconProps} color="#02758f" strokeWidth="1px" />;
+		default:
+			return <DiDatabase {...iconProps} color="var(--blue-300)" />;
+	}
 };

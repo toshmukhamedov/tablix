@@ -1,0 +1,38 @@
+.p-tree {
+	background: none;
+	border: none;
+	padding: 0;
+	height: 100%;
+}
+
+.p-tree-container {
+	height: 100%;
+	margin-right: 1px;
+}
+
+.p-treenode {
+	padding: 0;
+}
+
+.p-treenode-content {
+	padding: 0;
+	cursor: default;
+	box-shadow: none;
+	border-radius: 0;
+	min-width: fit-content;
+}
+
+.p-tree-toggler {
+	margin-right: 0;
+	margin-left: 4px;
+	width: 24px;
+	cursor: default;
+}
+
+.p-tree-toggler:hover {
+	background-color: initial;
+}
+
+.p-tree-toggler-icon {
+	width: 12px;
+}

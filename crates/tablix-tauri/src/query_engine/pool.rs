@@ -8,7 +8,7 @@ use sqlx::{
 };
 use uuid::Uuid;
 
-use crate::{app::AppState, connections};
+use crate::app::AppState;
 
 type PoolKey = (Uuid, String);
 type PoolMap = DashMap<PoolKey, AnyPool>;
@@ -111,7 +111,7 @@ impl PoolManager {
 		Ok(dbs)
 	}
 
-	pub async fn get_schemas(&self, conn_id: Uuid, database: String) -> anyhow::Result<Vec<AnyRow>> {
+	pub async fn get_schemas(&self, conn_id: Uuid, database: String) -> anyhow::Result<Vec<String>> {
 		let cache_key: PoolKey = {
 			let mut part = database.clone();
 			part.push_str("schemas");
@@ -119,7 +119,7 @@ impl PoolManager {
 		};
 		let key: PoolKey = (conn_id, database);
 		if let Some(data) = self.cache.get(&cache_key) {
-			return Ok(data.to_owned());
+			return Ok(data.iter().map(|row| row.get(0)).collect());
 		}
 
 		let pool = self.get_conn(&key)?;
@@ -133,7 +133,8 @@ impl PoolManager {
 			)
 			.await?;
 
-		self.cache.insert(cache_key, result.clone());
-		Ok(result)
+		let schemas = result.iter().map(|row| row.get(0)).collect();
+		self.cache.insert(cache_key, result);
+		Ok(schemas)
 	}
 }

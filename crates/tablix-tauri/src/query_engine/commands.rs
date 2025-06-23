@@ -1,5 +1,4 @@
 use crate::{app::AppState, query_engine::pool::PoolManager};
-use sqlx::any::AnyRow;
 use tauri::{Error, State};
 use tracing::instrument;
 use uuid::Uuid;
@@ -24,4 +23,14 @@ pub async fn get_databases(
 	database: String,
 ) -> Result<Vec<String>, Error> {
 	Ok(pool_manager.get_databases(conn_id, database).await?)
+}
+
+#[tauri::command(async)]
+#[instrument(skip(pool_manager), err(Debug))]
+pub async fn get_schemas(
+	pool_manager: State<'_, PoolManager>,
+	conn_id: Uuid,
+	database: String,
+) -> Result<Vec<String>, Error> {
+	Ok(pool_manager.get_schemas(conn_id, database).await?)
 }

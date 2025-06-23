@@ -31,6 +31,7 @@ pub fn run() {
 			connections::commands::list_connections,
 			query_engine::commands::create_pool,
 			query_engine::commands::get_databases,
+			query_engine::commands::get_schemas,
 		])
 		.setup(|tauri_app| {
 			let app_data_dir = {
