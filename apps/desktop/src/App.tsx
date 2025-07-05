@@ -19,6 +19,8 @@ import "@gfazioli/mantine-split-pane/styles.css";
 import "primereact/resources/themes/lara-dark-blue/theme.css";
 import "primeicons/primeicons.css";
 
+import "@/lib/shortcuts";
+
 // Create a new instances
 const router = createRouter({ routeTree });
 const queryClient = new QueryClient();

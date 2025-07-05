@@ -1,0 +1,12 @@
+.p-contextmenu {
+	padding: 0;
+}
+
+.p-menuitem-link {
+	background: var(--gray-900);
+	padding: 5px 10px;
+}
+
+.p-menuitem-text {
+	font-size: 14px;
+}

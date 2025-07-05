@@ -1,15 +1,17 @@
 import { connectionsService } from "@/services/connections";
-import { notifications } from "@mantine/notifications";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { asyncDataLoaderFeature, selectionFeature } from "@headless-tree/core";
+import { useTree } from "@headless-tree/react";
+import { useQuery } from "@tanstack/react-query";
 import { useLoaderData } from "@tanstack/react-router";
-import { Tree, type TreeExpandedKeysType, type TreeNodeDoubleClickEvent } from "primereact/tree";
-import type { TreeNode } from "primereact/treenode";
-import { useEffect, useRef, useState } from "react";
+import cn from "classnames";
+import type { TreeExpandedKeysType } from "primereact/tree";
+import { useEffect, useState } from "react";
+import type { TreeNode } from "../types";
 import { TreeLabel } from "./TreeLabel";
 
 import "../styles/ExplorerTree.css";
-import type { ContextMenu } from "primereact/contextmenu";
-import { DataSourceContextMenu } from "./DataSourceContextMenu";
+import { Button, Flex } from "@mantine/core";
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const ExplorerTree: React.FC = () => {
 	const project = useLoaderData({ from: "/workspace/$projectId" });
@@ -21,7 +23,6 @@ export const ExplorerTree: React.FC = () => {
 	const [nodes, setNodes] = useState<TreeNode[]>([]);
 	const [expandedKeys, setExpandedKeys] = useState<TreeExpandedKeysType>({});
 	const [selectedNodeKey, setSelectedNodeKey] = useState<string>();
-	const contextMenuRef = useRef<ContextMenu>(null);
 
 	useEffect(() => {
 		if (!query.data) return;
@@ -35,22 +36,60 @@ export const ExplorerTree: React.FC = () => {
 		);
 	}, [query.data]);
 
+	const [loadingItemData, setLoadingItemData] = useState<string[]>([]);
+	const [loadingItemChildrens, setLoadingItemChildrens] = useState<string[]>([]);
+	const tree = useTree<string>({
+		state: { loadingItemData, loadingItemChildrens },
+		setLoadingItemData,
+		setLoadingItemChildrens,
+		rootItemId: "root",
+		getItemName: (item) => item.getItemData(),
+		isItemFolder: () => true,
+		createLoadingItemData: () => "Loading...",
+		dataLoader: {
+			getItem: (itemId) => wait(800).then(() => itemId),
+			getChildren: (itemId) => wait(800).then(() => [`${itemId}-1`, `${itemId}-2`, `${itemId}-3`]),
+		},
+		indent: 20,
+		features: [asyncDataLoaderFeature, selectionFeature],
+	});
+
 	return (
-		<>
-			<DataSourceContextMenu ref={contextMenuRef} nodes={nodes} selectedNodeKey={selectedNodeKey} />
-			<Tree
+		<div {...tree.getContainerProps()} className="tree">
+			{tree.getItems().map((item) => (
+				<Flex
+					{...item.getProps()}
+					key={item.getId()}
+					style={{ paddingLeft: `${item.getItemMeta().level * 20}px` }}
+				>
+					<Flex
+						className={cn("treeitem", {
+							focused: item.isFocused(),
+							expanded: item.isExpanded(),
+							selected: item.isSelected(),
+							folder: item.isFolder(),
+						})}
+					>
+						{item.getItemName()}
+						{item.isLoading() && " (loading...)"}
+					</Flex>
+					<Button size="compact-xs" onClick={() => item.invalidateItemData()}>
+						[i1]
+					</Button>
+					<Button size="compact-xs" onClick={() => item.invalidateChildrenIds()}>
+						[i2]
+					</Button>
+				</Flex>
+			))}
+			{/* <Tree
 				value={nodes}
-				nodeTemplate={(node) => <TreeLabel node={node} />}
+				nodeTemplate={(node) => <TreeLabel node={node as TreeNode} />}
 				selectionMode="single"
 				selectionKeys={selectedNodeKey}
 				onSelectionChange={(e) => setSelectedNodeKey(e.value as string)}
 				contextMenuSelectionKey={selectedNodeKey}
 				onContextMenuSelectionChange={(e) => {
 					setSelectedNodeKey(e.value as string);
-				}}
-				onContextMenu={(e) => {
-					console.info("SOMETHING");
-					contextMenuRef.current?.show(e.originalEvent);
 				}}
 				expandedKeys={expandedKeys}
 				onToggle={(e) => setExpandedKeys(e.value)}
@@ -66,7 +105,7 @@ export const ExplorerTree: React.FC = () => {
 				// }}
 				// selectOnClick
 				// clearSelectionOnOutsideClick
-			/>
-		</>
+			/> */}
+		</div>
 	);
 };

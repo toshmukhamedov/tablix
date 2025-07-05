@@ -5,7 +5,8 @@ import { poolService } from "@/services/pool";
 import { notifications } from "@mantine/notifications";
 import { useMutation } from "@tanstack/react-query";
 import { useLoaderData } from "@tanstack/react-router";
-import type { TreeNode } from "primereact/treenode";
+import type { TreeNode } from "../types";
+import { DataSourceContextMenu } from "./DataSourceContextMenu";
 
 type TreeLabelProps = {
 	node: TreeNode;
@@ -21,7 +22,7 @@ export const TreeLabel: React.FC<TreeLabelProps> = ({ node }) => {
 		onError: () => {
 			notifications.show({
 				color: "red",
-				message: "Creating pool",
+				message: "Creating pool failed",
 			});
 		},
 	});
@@ -35,11 +36,13 @@ export const TreeLabel: React.FC<TreeLabelProps> = ({ node }) => {
 	};
 
 	return (
-		<Flex align="center" gap="6px" onDoubleClick={onDoubleClick}>
-			<TreeChevron loading={createPoolMutation.isPending} node={node} />
-			<Text size="sm" fw="500" style={{ whiteSpace: "nowrap", marginRight: "10px" }}>
-				{node.label}
-			</Text>
-		</Flex>
+		<DataSourceContextMenu node={node}>
+			<Flex align="center" gap="6px" onDoubleClick={onDoubleClick}>
+				<TreeChevron loading={createPoolMutation.isPending} node={node} />
+				<Text size="sm" fw="500" style={{ whiteSpace: "nowrap", marginRight: "10px" }}>
+					{node.label}
+				</Text>
+			</Flex>
+		</DataSourceContextMenu>
 	);
 };

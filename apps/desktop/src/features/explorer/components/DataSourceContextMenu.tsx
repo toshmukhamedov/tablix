@@ -1,15 +1,22 @@
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuShortcut,
+	ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { connectionsService } from "@/services/connections";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLoaderData } from "@tanstack/react-router";
-import { ContextMenu } from "primereact/contextmenu";
 import type { MenuItem } from "primereact/menuitem";
-import type { TreeNode } from "primereact/treenode";
-import type { RefObject } from "react";
+import type { TreeNode } from "../types";
+
+import "../styles/DataSourceContextMenu.css";
 
 type Props = {
-	ref: RefObject<ContextMenu | null>;
-	nodes: TreeNode[];
-	selectedNodeKey: string | undefined;
+	node: TreeNode;
+	children: React.ReactNode;
 };
 
 const findNode = (nodes: TreeNode[], key: string): TreeNode | null => {
@@ -29,7 +36,7 @@ const findNode = (nodes: TreeNode[], key: string): TreeNode | null => {
 	return null;
 };
 
-export const DataSourceContextMenu: React.FC<Props> = ({ ref, selectedNodeKey, nodes }) => {
+export const DataSourceContextMenu: React.FC<Props> = ({ node, children }) => {
 	const project = useLoaderData({ from: "/workspace/$projectId" });
 	const queryClient = useQueryClient();
 	const deleteConnMutation = useMutation({
@@ -39,21 +46,29 @@ export const DataSourceContextMenu: React.FC<Props> = ({ ref, selectedNodeKey, n
 		},
 	});
 
-	const items: MenuItem[] = [
-		{
-			label: "Delete",
-			icon: "pi pi-delete-left",
-			command: async () => {
-				if (!selectedNodeKey) return;
-				const node = findNode(nodes, selectedNodeKey);
-				if (!node) return;
-				await deleteConnMutation.mutateAsync({
-					projectId: project.id,
-					id: node.data.id,
-				});
-			},
-		},
-	];
+	const onDelete = async () => {
+		if (!node) return;
+		await deleteConnMutation.mutateAsync({
+			projectId: project.id,
+			id: node.data.id,
+		});
+	};
 
-	return <ContextMenu model={items} ref={ref} breakpoint="767px" />;
+	return (
+		<ContextMenu>
+			<ContextMenuTrigger>{children}</ContextMenuTrigger>
+			<ContextMenuContent>
+				<ContextMenuItem inset disabled>
+					Edit
+				</ContextMenuItem>
+				<ContextMenuItem inset disabled>
+					Disconnect
+				</ContextMenuItem>
+				<ContextMenuSeparator />
+				<ContextMenuItem inset variant="destructive" onSelect={onDelete}>
+					Delete
+				</ContextMenuItem>
+			</ContextMenuContent>
+		</ContextMenu>
+	);
 };

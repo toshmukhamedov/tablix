@@ -29,9 +29,12 @@ export type ConnectionDetails = z.infer<typeof ConnectionDetailsSchema>;
 export type Connection = {
 	id: string;
 	name: string;
+	state?: ConnectionState;
 	details: ConnectionDetails;
 	createdAt: number;
 };
+
+export type ConnectionState = "connected" | "connecting";
 
 export type AddConnection = {
 	projectId: string;

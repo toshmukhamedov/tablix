@@ -1,8 +1,8 @@
 import { type Connection, ConnectionType } from "@/services/connections";
 import { Loader } from "@mantine/core";
-import type { TreeNode } from "primereact/treenode";
 import { DiDatabase, DiMysql, DiPostgresql } from "react-icons/di";
 import type { IconBaseProps } from "react-icons/lib";
+import type { TreeNode } from "../types";
 
 type Props = {
 	loading: boolean;

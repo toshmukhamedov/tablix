@@ -23,5 +23,8 @@
 	"packageManager": "pnpm@10.6.5",
 	"engines": {
 		"node": ">=22.11.0"
+	},
+	"dependencies": {
+		"@tauri-apps/plugin-global-shortcut": "~2"
 	}
 }

@@ -3,6 +3,8 @@ pub fn show_window(window: tauri::Window) -> Result<(), String> {
 	let is_visible = window
 		.is_visible()
 		.map_err(|_| "Failed to get window state")?;
+
+	println!("is_visible: {}", is_visible);
 	if is_visible {
 		return Ok(());
 	}
