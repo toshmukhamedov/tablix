@@ -1,4 +1,8 @@
-.app-root {
+html {
+	overscroll-behavior: none;
+}
+
+#app {
 	height: 100dvh;
 	user-select: none;
 	-webkit-user-select: none;

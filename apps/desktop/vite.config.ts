@@ -1,11 +1,10 @@
 import { resolve } from "node:path";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-	plugins: [TanStackRouterVite({ target: "react", autoCodeSplitting: true }), react()],
+	plugins: [react()],
 
 	resolve: {
 		alias: {
@@ -23,7 +22,7 @@ export default defineConfig(async () => ({
 		port: 1420,
 		strictPort: true,
 		watch: {
-			// 3. tell vite to ignore watching `src-tauri`
+			// 3. tell vite to ignore watching `crates`
 			ignored: ["**/crates/**"],
 		},
 	},
