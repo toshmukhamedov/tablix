@@ -1,10 +1,10 @@
+import { type Project, projectCommands } from "@/commands/project";
 import { Popconfirm } from "@/components/PopConfirm";
-import { type DeleteProject, type Project, projectsService } from "@/services/projects";
 import { Button, Checkbox, Menu } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type Dispatch, type SetStateAction, useState } from "react";
+import { useProjects } from "../ProjectsContext";
 
 type Props = {
 	currentProject: Project;
@@ -18,6 +18,7 @@ export function ProjectMenu(props: Props) {
 	const open = props.currentProject === props.activeProject;
 
 	const [cleanup, setCleanup] = useState(false);
+	const { dispatch } = useProjects();
 
 	const onOpenChange = (open: boolean) => {
 		if (open) {
@@ -27,26 +28,23 @@ export function ProjectMenu(props: Props) {
 		}
 	};
 
-	const queryClient = useQueryClient();
-	const mutation = useMutation<void, string, DeleteProject>({
-		mutationFn: projectsService.deleteProject,
-		onError: (message) =>
-			notifications.show({
-				message,
-				color: "red",
-			}),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["projects"] });
-			props.setActiveProject(null);
-		},
-	});
-
-	const onDelete = async () => {
+	const onDelete = () => {
 		if (!props.activeProject) return;
-		await mutation.mutateAsync({
-			id: props.activeProject.id,
-			cleanup,
-		});
+		projectCommands
+			.deleteProject({
+				id: props.activeProject.id,
+				cleanup,
+			})
+			.then(() => {
+				projectCommands.loadAll().then((projects) => dispatch({ type: "set", projects }));
+				props.setActiveProject(null);
+			})
+			.catch((message) => {
+				notifications.show({
+					message,
+					color: "red",
+				});
+			});
 	};
 
 	const onEdit = () => {

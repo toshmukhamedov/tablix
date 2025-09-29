@@ -1,10 +1,10 @@
-import { projectsService } from "@/services/projects";
+import { projectCommands } from "@/commands/project";
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconFolderOpen } from "@tabler/icons-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod/v4";
+import { useProjects } from "../ProjectsContext";
 
 type Props = {
 	open: boolean;
@@ -27,24 +27,16 @@ export function NewProjectModal({ close, open }: Props) {
 		transformValues: formSchema.parse,
 		validate: zod4Resolver(formSchema),
 	});
+	const { dispatch } = useProjects();
 
-	const queryClient = useQueryClient();
 	const onClose = () => {
-		queryClient.invalidateQueries({ queryKey: ["projects"] });
+		projectCommands.loadAll().then((projects) => dispatch({ type: "set", projects }));
 		form.reset();
 		close();
 	};
 
-	const mutation = useMutation<void, string, FormValues>({
-		mutationFn: projectsService.addProject.bind(projectsService),
-		onError: (msg) => {
-			form.setFieldError("name", msg);
-		},
-		onSuccess: onClose,
-	});
-
 	const onOpen = async () => {
-		let path = await projectsService.getValidPath();
+		let path = await projectCommands.getValidPath();
 		if (!path) return;
 		if (!path.endsWith("/")) {
 			path += "/";
@@ -53,7 +45,10 @@ export function NewProjectModal({ close, open }: Props) {
 
 	const onSubmit = (values: FormValues) => {
 		values.path += values.name;
-		mutation.mutate(values);
+		projectCommands
+			.addProject(values)
+			.then(onClose)
+			.catch((msg) => form.setFieldError("name", msg));
 	};
 
 	return (

@@ -2,7 +2,22 @@ import { notifications as toasts } from "@mantine/notifications";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { plainToInstance } from "class-transformer";
-import { type AddProject, type DeleteProject, type EditProject, Project } from "./types";
+
+export class Project {
+	id!: string;
+	name!: string;
+	path!: string;
+}
+
+export type AddProject = {
+	name: string;
+	path: string;
+};
+
+export type EditProject = Omit<Project, "path">;
+export type DeleteProject = Pick<Project, "id"> & {
+	cleanup: boolean;
+};
 
 const showError = (...args: string[]) =>
 	toasts.show({
@@ -14,7 +29,7 @@ const getErrorMessage = (e: unknown) => {
 	return e instanceof Error ? e.message : "unknown error";
 };
 
-class ProjectsService {
+class ProjectCommands {
 	constructor(private readonly homeDir: string | undefined) {}
 
 	async loadAll() {
@@ -149,4 +164,4 @@ class ProjectsService {
 }
 
 // FIXME
-export const projectsService = new ProjectsService("/Users/abdugani");
+export const projectCommands = new ProjectCommands("/Users/abdugani");

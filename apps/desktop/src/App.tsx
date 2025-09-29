@@ -2,10 +2,19 @@ import { platformName } from "@/lib/platform";
 import { useEffect } from "react";
 
 import "@/assets/index.css";
-import { appService } from "./services/AppService";
+import { appCommands } from "./commands/app";
+import { useView } from "./context/ViewContext";
+import { ProjectProvider } from "./features/explorer/context/ProjectContext";
+import { Welcome } from "./features/welcome";
+import { Workspace } from "./features/workspace";
+
+export type View = "welcome" | "workspace" | "settings";
 
 export const App: React.FC = () => {
+	// TODO: Implement stage
 	const dev = true;
+
+	const { view } = useView();
 
 	useEffect(() => {
 		const handleDragOver = (e: DragEvent) => {
@@ -19,7 +28,7 @@ export const App: React.FC = () => {
 		window.addEventListener("dragover", handleDragOver);
 		window.addEventListener("drop", handleDrop);
 
-		appService.showWindow();
+		appCommands.showWindow();
 
 		return () => {
 			window.removeEventListener("dragover", handleDragOver);
@@ -34,6 +43,15 @@ export const App: React.FC = () => {
 	return (
 		<div id="app" role="application" onContextMenu={handleContextMenu}>
 			{platformName === "macos" && <div className="drag-region" data-tauri-drag-region />}
+			<ProjectProvider>
+				{view === "welcome" ? (
+					<Welcome />
+				) : view === "workspace" ? (
+					<Workspace />
+				) : (
+					<div>Settings</div>
+				)}
+			</ProjectProvider>
 		</div>
 	);
 };

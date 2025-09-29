@@ -1,10 +1,10 @@
-import { type EditProject, type Project, projectsService } from "@/services/projects";
+import { type Project, projectCommands } from "@/commands/project";
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useEffect } from "react";
 import type { z } from "zod/v4";
+import { useProjects } from "../ProjectsContext";
 import { formSchema as createFormSchema } from "./NewProjectModal";
 
 type Props = {
@@ -19,10 +19,10 @@ const formSchema = createFormSchema.pick({
 type FormValues = z.infer<typeof formSchema>;
 
 export function EditProjectModal({ close, project, open }: Props) {
-	const { data: projects } = useQuery({
-		queryKey: ["projects"],
-		queryFn: projectsService.loadAll,
-	});
+	const {
+		state: { projects },
+		dispatch,
+	} = useProjects();
 	const form = useForm<FormValues>({
 		initialValues: {
 			name: project?.name ?? "",
@@ -37,32 +37,26 @@ export function EditProjectModal({ close, project, open }: Props) {
 		}
 	}, [project]);
 
-	const queryClient = useQueryClient();
 	const onClose = () => {
-		queryClient.invalidateQueries({ queryKey: ["projects"] });
+		projectCommands.loadAll().then((projects) => dispatch({ type: "set", projects }));
 		form.reset();
 		close();
 	};
 
-	const mutation = useMutation<void, string, EditProject>({
-		mutationFn: projectsService.updateProject.bind(projectsService),
-		onError: (msg) => {
-			form.setFieldError("name", msg);
-		},
-		onSuccess: onClose,
-	});
-
 	const onSubmit = async (values: FormValues) => {
 		if (!project) return;
-		const projectExists = projects?.findIndex((project) => project.name === values.name) !== -1;
+		const projectExists = projects.findIndex((project) => project.name === values.name) !== -1;
 		if (projectExists) {
 			form.setFieldError("name", "Project already exists");
 			return;
 		}
-		mutation.mutate({
-			id: project.id,
-			...values,
-		});
+		projectCommands
+			.updateProject({
+				id: project.id,
+				...values,
+			})
+			.then(onClose)
+			.catch((msg) => form.setFieldError("name", msg));
 	};
 
 	return (

@@ -1,4 +1,4 @@
-import { ConnectionType } from "@/services/connections";
+import { ConnectionType } from "@/commands/connection";
 import { Group, NumberInput, PasswordInput, TextInput } from "@mantine/core";
 import { useAddConnectionFormContext } from "../context/form";
 

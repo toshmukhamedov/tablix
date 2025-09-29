@@ -1,11 +1,11 @@
+import { ConnectionType, connectionCommands } from "@/commands/connection";
 import { CONNECTION_TYPES } from "@/features/explorer/constants";
-import { ConnectionType, connectionsService } from "@/services/connections";
 import { Button, Group, Modal, Select, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useLoaderData } from "@tanstack/react-router";
 import { zod4Resolver } from "mantine-form-zod-resolver";
+import { useConnections } from "../context/ConnectionsContext";
+import { useProject } from "../context/ProjectContext";
 import {
 	AddConnectionFormProvider,
 	AddConnectionFormSchema,
@@ -19,8 +19,9 @@ type Props = {
 };
 
 export const AddConnectionModal: React.FC<Props> = (props) => {
-	const project = useLoaderData({ from: "/workspace/$projectId" });
-	const queryClient = useQueryClient();
+	const { project } = useProject();
+
+	const { dispatch } = useConnections();
 	const form = useForm<AddConnectionFormValues>({
 		initialValues: {
 			name: "",
@@ -42,25 +43,24 @@ export const AddConnectionModal: React.FC<Props> = (props) => {
 		props.onClose();
 	};
 
-	const mutation = useMutation({
-		mutationFn: connectionsService.add,
-		onError: (err) => {
-			notifications.show({
-				message: err as unknown as string,
-				color: "red",
-			});
-		},
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: ["connections"] });
-			onClose();
-		},
-	});
-
 	const onSubmit = (values: AddConnectionFormValues) => {
-		mutation.mutate({
-			projectId: project.id,
-			data: values,
-		});
+		connectionCommands
+			.add({
+				projectId: project.id,
+				data: values,
+			})
+			.then(() => {
+				onClose();
+				connectionCommands
+					.list({ projectId: project.id })
+					.then((connections) => dispatch({ type: "set", connections }));
+			})
+			.catch((message) => {
+				notifications.show({
+					message,
+					color: "red",
+				});
+			});
 	};
 
 	return (
@@ -89,7 +89,7 @@ export const AddConnectionModal: React.FC<Props> = (props) => {
 							type="submit"
 							variant="light"
 							disabled={!form.isValid()}
-							loading={mutation.isPending}
+							loading={form.submitting}
 						>
 							Save
 						</Button>

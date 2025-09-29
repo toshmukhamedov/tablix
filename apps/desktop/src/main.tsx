@@ -8,13 +8,16 @@ import { Notifications } from "@mantine/notifications";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
+import { ViewProvider } from "./context/ViewContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	<React.StrictMode>
 		<MantineProvider defaultColorScheme="dark">
 			<ModalsProvider>
 				<Notifications />
-				<App />
+				<ViewProvider>
+					<App />
+				</ViewProvider>
 			</ModalsProvider>
 		</MantineProvider>
 	</React.StrictMode>,

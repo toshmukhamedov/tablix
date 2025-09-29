@@ -1,5 +1,6 @@
 import { isHost } from "@/lib/validator";
-import { z } from "zod/v4";
+import { invoke } from "@tauri-apps/api/core";
+import z from "zod/v4";
 
 export enum ConnectionType {
 	PostgreSQL = "PostgreSQL",
@@ -53,3 +54,27 @@ export type GetConnection = {
 export type GetConnections = {
 	projectId: string;
 };
+
+class ConnectionCommands {
+	async list(data: GetConnections): Promise<Connection[]> {
+		return await invoke<Connection[]>("list_connections", data);
+	}
+
+	async get(data: GetConnection): Promise<Connection> {
+		return await invoke<Connection>("get_connection", data);
+	}
+
+	async update(data: UpdateConnection): Promise<void> {
+		await invoke("update_connection", data);
+	}
+
+	async delete(data: DeleteConnection) {
+		await invoke("delete_connection", data);
+	}
+
+	async add(data: AddConnection): Promise<Connection> {
+		return await invoke<Connection>("add_connection", data);
+	}
+}
+
+export const connectionCommands = new ConnectionCommands();

@@ -1,4 +1,4 @@
-import type { Project } from "@/services/projects";
+import type { Project } from "@/commands/project";
 import { Divider, Stack, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";

@@ -1,39 +1,36 @@
-import { type AddProject, projectsService } from "@/services/projects";
+import { type AddProject, projectCommands } from "@/commands/project";
 import { Button, Flex, Stack, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconFolder, IconPlus } from "@tabler/icons-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useProjects } from "../ProjectsContext";
 import { NewProjectModal } from "./NewProjectModal";
 
 export function ProjectActions() {
 	const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
-
-	const queryClient = useQueryClient();
-	const mutation = useMutation<void, string, AddProject>({
-		mutationFn: projectsService.addProject.bind(projectsService),
-		onError: (message) => {
-			notifications.show({
-				message,
-				color: "red",
-			});
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["projects"] });
-		},
-	});
+	const { dispatch } = useProjects();
 
 	const onOpenClick = async () => {
-		const path = await projectsService.getValidPath();
+		const path = await projectCommands.getValidPath();
 		if (!path) return;
 
 		const name = path.split("/").at(-1);
 		if (!name) return;
 
-		mutation.mutate({
-			name,
-			path,
-		});
+		projectCommands
+			.addProject({
+				name,
+				path,
+			})
+			.then(() => {
+				projectCommands.loadAll().then((projects) => dispatch({ type: "set", projects }));
+			})
+			.catch((message) => {
+				notifications.show({
+					message,
+					color: "red",
+				});
+			});
 	};
 
 	return (

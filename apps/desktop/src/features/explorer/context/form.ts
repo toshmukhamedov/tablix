@@ -1,4 +1,4 @@
-import { ConnectionDetailsSchema } from "@/services/connections";
+import { ConnectionDetailsSchema } from "@/commands/connection";
 import { createFormContext } from "@mantine/form";
 import { z } from "zod/v4";
 
