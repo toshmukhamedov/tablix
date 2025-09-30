@@ -1,13 +1,12 @@
 import { notifications as toasts } from "@mantine/notifications";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { plainToInstance } from "class-transformer";
 
-export class Project {
-	id!: string;
-	name!: string;
-	path!: string;
-}
+export type Project = {
+	id: string;
+	name: string;
+	path: string;
+};
 
 export type AddProject = {
 	name: string;
@@ -33,7 +32,7 @@ class ProjectCommands {
 	constructor(private readonly homeDir: string | undefined) {}
 
 	async loadAll() {
-		return await invoke<Project[]>("list_projects").then((p) => plainToInstance(Project, p));
+		return await invoke<Project[]>("list_projects");
 	}
 
 	async setActiveProject(projectId: string): Promise<void> {
@@ -41,7 +40,7 @@ class ProjectCommands {
 	}
 
 	async getProject(projectId: string, noValidation?: boolean): Promise<Project> {
-		return plainToInstance(Project, await invoke("get_project", { id: projectId, noValidation }));
+		return await invoke("get_project", { id: projectId, noValidation });
 	}
 
 	async updateProject(project: EditProject): Promise<void> {
@@ -49,7 +48,7 @@ class ProjectCommands {
 	}
 
 	private async add(data: AddProject) {
-		const project = plainToInstance(Project, await invoke("add_project", data));
+		const project = await invoke("add_project", data);
 		return project;
 	}
 
@@ -70,29 +69,6 @@ class ProjectCommands {
 		}
 	}
 
-	async openProjectInNewWindow(projectId: string) {
-		await invoke("open_project_in_window", { id: projectId });
-	}
-
-	async relocateProject(projectId: string): Promise<void> {
-		const path = await this.getValidPath();
-		if (!path) return;
-
-		try {
-			const project = await this.getProject(projectId, true);
-			project.path = path;
-			await this.updateProject(project);
-			toasts.show({
-				color: "green",
-				message: `Project ${project.name} relocated`,
-			});
-
-			// goto(`/${project.id}/board`);
-		} catch (e) {
-			showError("Failed to relocate project:", getErrorMessage(e));
-		}
-	}
-
 	async addProject(input: AddProject): Promise<void> {
 		const data: AddProject = {
 			name: input.name,
@@ -105,8 +81,6 @@ class ProjectCommands {
 			color: "green",
 			message: "Project added",
 		});
-		// linkProjectModal?.show(project.id);
-		// goto(`/${project.id}/board`);
 	}
 
 	async getValidPath(): Promise<string | undefined> {

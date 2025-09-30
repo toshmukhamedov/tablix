@@ -1,10 +1,10 @@
 import { type Project, projectCommands } from "@/commands/project";
 import { Flex, Space, Table, Text } from "@mantine/core";
 
+import { useProjectContext } from "@/context/ProjectContext";
+import { useProjects } from "@/context/ProjectsContext";
 import { useView } from "@/context/ViewContext";
-import { useProjectContext } from "@/features/explorer/context/ProjectContext";
 import { useMemo, useState } from "react";
-import { useProjects } from "../ProjectsContext";
 import { ProjectMenu } from "../components/ProjectMenu";
 
 type Props = {

@@ -1,0 +1,12 @@
+.input {
+	&[data-variant="default"] {
+		@mixin dark {
+			background-color: var(--mantine-color-dark-7);
+			border-color: var(--mantine-color-dark-5);
+		}
+	}
+}
+
+.dropdown {
+	background-color: var(--mantine-color-dark-8);
+}

@@ -1,6 +1,6 @@
+import { useConnections } from "@/context/ConnectionsContext";
 import { Tree, type TreeNodeData, useTree } from "@mantine/core";
 import { useMemo } from "react";
-import { useConnections } from "../context/ConnectionsContext";
 import { TreeLabel } from "./TreeLabel";
 
 export const ExplorerTree: React.FC = () => {

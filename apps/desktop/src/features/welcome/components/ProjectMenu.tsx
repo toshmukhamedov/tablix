@@ -1,10 +1,10 @@
 import { type Project, projectCommands } from "@/commands/project";
 import { Popconfirm } from "@/components/PopConfirm";
+import { useProjects } from "@/context/ProjectsContext";
 import { Button, Checkbox, Menu } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import { type Dispatch, type SetStateAction, useState } from "react";
-import { useProjects } from "../ProjectsContext";
 
 type Props = {
 	currentProject: Project;

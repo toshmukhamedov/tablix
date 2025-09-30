@@ -1,9 +1,9 @@
 import { type AddProject, projectCommands } from "@/commands/project";
+import { useProjects } from "@/context/ProjectsContext";
 import { Button, Flex, Stack, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconFolder, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
-import { useProjects } from "../ProjectsContext";
 import { NewProjectModal } from "./NewProjectModal";
 
 export function ProjectActions() {
@@ -34,7 +34,7 @@ export function ProjectActions() {
 	};
 
 	return (
-		<Stack flex="3" justify="center" bg={"dark.8"}>
+		<Stack flex="3" justify="center" bg="dark.9">
 			<Stack align="center">
 				<Title size="h2" fw="500">
 					Welcome to Tablix
@@ -50,7 +50,7 @@ export function ProjectActions() {
 							size="lg"
 							radius="md"
 							variant="light"
-							p="md"
+							p="sm"
 							onClick={() => setNewProjectDialogOpen(true)}
 						>
 							<IconPlus />
@@ -58,7 +58,7 @@ export function ProjectActions() {
 						<Text size="sm">New</Text>
 					</Stack>
 					<Stack align="center" gap="xs">
-						<Button size="lg" radius="md" variant="light" p="md" onClick={onOpenClick}>
+						<Button size="lg" radius="md" variant="light" p="sm" onClick={onOpenClick}>
 							<IconFolder />
 						</Button>
 						<Text size="sm">Open</Text>

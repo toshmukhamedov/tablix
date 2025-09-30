@@ -1,10 +1,10 @@
 import { platformName } from "@/lib/platform";
 import { useEffect } from "react";
 
-import "@/assets/index.css";
+import "./App.css";
 import { appCommands } from "./commands/app";
+import { ProjectProvider } from "./context/ProjectContext";
 import { useView } from "./context/ViewContext";
-import { ProjectProvider } from "./features/explorer/context/ProjectContext";
 import { Welcome } from "./features/welcome";
 import { Workspace } from "./features/workspace";
 

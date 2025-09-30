@@ -28,7 +28,7 @@ export const Explorer: React.FC = () => {
 			>
 				<Title size="sm">Explorer</Title>
 				<Flex>
-					<Tooltip label="Add connection" position="bottom" color="dark" fz="xs" c="dark.0">
+					<Tooltip label="Add connection" position="bottom" color="dark" fz="xs">
 						<Button
 							color="gray"
 							p="4px"

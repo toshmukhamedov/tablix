@@ -1,5 +1,5 @@
 import { Flex } from "@mantine/core";
-import { ProjectsProvider } from "./ProjectsContext";
+import { ProjectsProvider } from "../../context/ProjectsContext";
 import { ProjectActions } from "./components/ProjectActions";
 import { ProjectsList } from "./components/ProjectsList";
 

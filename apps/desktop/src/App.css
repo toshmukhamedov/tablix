@@ -1,3 +1,5 @@
+@import "./styles/fonts.css";
+
 html {
 	overscroll-behavior: none;
 }
@@ -16,4 +18,12 @@ html {
 	left: 0;
 	width: 100%;
 	height: 35px;
+}
+
+:root {
+	@mixin dark-root {
+		--mantine-color-body: var(--mantine-color-dark-8);
+		--mantine-color-default-border: var(--mantine-color-dark-9);
+		--mantine-color-error: var(--mantine-color-red-4);
+	}
 }

@@ -1,5 +1,6 @@
-import type { Connection } from "@/commands/connection";
-import { createContext, useContext, useReducer } from "react";
+import { type Connection, connectionCommands } from "@/commands/connection";
+import { createContext, useContext, useEffect, useReducer } from "react";
+import { useProject } from "./ProjectContext";
 
 type ConnectionsContextState = {
 	connections: Connection[];
@@ -29,7 +30,12 @@ type Props = {
 };
 export const ConnectionsProvider: React.FC<Props> = ({ children }) => {
 	const [state, dispatch] = useReducer(reducer, { connections: [] });
-
+	const { project } = useProject();
+	useEffect(() => {
+		connectionCommands
+			.list({ projectId: project.id })
+			.then((connections) => dispatch({ type: "set", connections }));
+	}, []);
 	return (
 		<ConnectionsContext.Provider value={{ state, dispatch }}>
 			{children}

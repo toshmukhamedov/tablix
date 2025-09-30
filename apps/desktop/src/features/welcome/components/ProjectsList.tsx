@@ -18,7 +18,7 @@ export const ProjectsList: React.FC = () => {
 	};
 
 	return (
-		<Stack flex="4" p="md" gap="sm" bg="dark.7">
+		<Stack flex="4" p="md" gap="sm">
 			<TextInput
 				autoCorrect="off"
 				mt="xs"

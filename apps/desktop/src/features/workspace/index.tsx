@@ -1,9 +1,10 @@
+import { ConnectionsProvider } from "@/context/ConnectionsContext";
+import { useProject } from "@/context/ProjectContext";
 import { useView } from "@/context/ViewContext";
 import { Split } from "@gfazioli/mantine-split-pane";
 import { Center, Paper, Stack } from "@mantine/core";
+import { Editor } from "../editor/Editor";
 import { Explorer } from "../explorer";
-import { ConnectionsProvider } from "../explorer/context/ConnectionsContext";
-import { useProject } from "../explorer/context/ProjectContext";
 import { Menubar } from "./components/Menubar";
 
 export function Workspace() {
@@ -26,7 +27,7 @@ export function Workspace() {
 					<Split.Resizer />
 					<Split.Pane w="100%">
 						<Paper w="100%" h="100%" p="xs">
-							<Center h="100%">Editor/Table</Center>
+							<Editor />
 						</Paper>
 					</Split.Pane>
 				</Split>

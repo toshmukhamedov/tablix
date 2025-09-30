@@ -1,5 +1,5 @@
 import { projectCommands } from "@/commands/project";
-import { useProject } from "@/features/explorer/context/ProjectContext";
+import { useProject } from "@/context/ProjectContext";
 import { Badge, Code, Divider, Flex, Title } from "@mantine/core";
 
 export const Menubar: React.FC = () => {

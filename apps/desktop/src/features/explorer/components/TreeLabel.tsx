@@ -14,7 +14,6 @@ export const TreeLabel: React.FC<RenderTreeNodePayload> = ({ node, elementProps,
 		className: "inner-label",
 	};
 	return (
-		// Label
 		<Group {...labelProps}>
 			<div className="outer-label">
 				<div {...innerLabelProps}>

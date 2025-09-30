@@ -1,11 +1,11 @@
 import { ConnectionType, connectionCommands } from "@/commands/connection";
+import { useConnections } from "@/context/ConnectionsContext";
+import { useProject } from "@/context/ProjectContext";
 import { CONNECTION_TYPES } from "@/features/explorer/constants";
 import { Button, Group, Modal, Select, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { useConnections } from "../context/ConnectionsContext";
-import { useProject } from "../context/ProjectContext";
 import {
 	AddConnectionFormProvider,
 	AddConnectionFormSchema,
