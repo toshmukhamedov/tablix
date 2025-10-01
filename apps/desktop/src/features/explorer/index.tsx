@@ -31,7 +31,7 @@ export const Explorer: React.FC = () => {
 				<Flex>
 					<Tooltip label="Add connection" position="bottom" color="dark" fz="xs">
 						<Button
-							color="gray"
+							color="gray.2"
 							p="4px"
 							size="compact-xs"
 							variant="subtle"

@@ -38,7 +38,7 @@ export const ProjectsTable: React.FC<Props> = ({
 
 	return (
 		<Table.ScrollContainer minWidth="max-content" scrollAreaProps={{ scrollbarSize: "0.5rem" }}>
-			<Table highlightOnHoverColor="dark.4" highlightOnHover>
+			<Table highlightOnHoverColor="dark.6" highlightOnHover>
 				<Table.Tbody>
 					{projects.map((project) => (
 						<Table.Tr key={project.id}>

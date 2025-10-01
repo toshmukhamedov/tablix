@@ -1,4 +1,4 @@
-import { type AddProject, projectCommands } from "@/commands/project";
+import { projectCommands } from "@/commands/project";
 import { useProjects } from "@/context/ProjectsContext";
 import { Button, Flex, Stack, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -39,7 +39,7 @@ export function ProjectActions() {
 				<Title size="h2" fw="500">
 					Welcome to Tablix
 				</Title>
-				<Text size="sm" fw="500" py={4} ta="center" c="gray.5">
+				<Text size="sm" fw="500" py={4} ta="center" c="gray.3">
 					Create a new project to start from scratch.
 					<br />
 					Open existing project from disk.

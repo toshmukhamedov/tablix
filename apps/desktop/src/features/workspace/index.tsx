@@ -2,7 +2,7 @@ import { ConnectionsProvider } from "@/context/ConnectionsContext";
 import { useProject } from "@/context/ProjectContext";
 import { useView } from "@/context/ViewContext";
 import { Split } from "@gfazioli/mantine-split-pane";
-import { Paper, Stack } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { Editor } from "../editor/Editor";
 import { Explorer } from "../explorer";
 import { Menubar } from "./components/Menubar";
@@ -20,15 +20,13 @@ export function Workspace() {
 		<ConnectionsProvider>
 			<Stack gap="0" h="100%">
 				<Menubar />
-				<Split size="1px" h="100%" spacing="0" opacity="0">
-					<Split.Pane maxWidth="50%" initialWidth="25%" minWidth="15%">
+				<Split size="1px" h="100%" w="100%" spacing="0" opacity="0">
+					<Split.Pane maxWidth="50%" minWidth="25%">
 						<Explorer />
 					</Split.Pane>
 					<Split.Resizer />
-					<Split.Pane w="100%">
-						<Paper w="100%" h="100%" p="xs">
-							<Editor />
-						</Paper>
+					<Split.Pane grow>
+						<Editor />
 					</Split.Pane>
 				</Split>
 			</Stack>

@@ -21,6 +21,9 @@ const extensions = [
 			".cm-fat-cursor": {
 				background: "var(--mantine-color-blue-6) !important",
 			},
+			"&:not(.cm-focused) .cm-fat-cursor": {
+				display: "none"
+			}
 		},
 		{ dark: true },
 	),
@@ -35,7 +38,6 @@ export const Editor: React.FC = () => {
 		value: code,
 		theme: "dark",
 		height: "100%",
-		width: "100%",
 	});
 
 	useEffect(() => {
@@ -44,5 +46,5 @@ export const Editor: React.FC = () => {
 		}
 	}, [editor.current]);
 
-	return <div style={{ height: "100%", width: "100%" }} ref={editor} />;
+	return <div className="h-full" ref={editor} />;
 };
