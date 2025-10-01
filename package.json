@@ -15,12 +15,12 @@
 		"tauri": "tauri"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@biomejs/biome": "2.2.4",
 		"@tauri-apps/cli": "^2",
-		"turbo": "^2.4.4",
-		"typescript": "~5.6.3"
+		"turbo": "^2.5.8",
+		"typescript": "~5.9.3"
 	},
-	"packageManager": "pnpm@10.6.5",
+	"packageManager": "pnpm@10.17.1",
 	"engines": {
 		"node": ">=22.11.0"
 	}
