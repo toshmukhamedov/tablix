@@ -26,6 +26,9 @@
 				"useExhaustiveDependencies": "off",
 				"noUnknownFunction": "off"
 			},
+			"a11y": {
+				"useKeyWithClickEvents": "off"
+			},
 			"style": {
 				"useSelfClosingElements": {
 					"level": "warn",

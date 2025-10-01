@@ -27,6 +27,9 @@ pub fn run() {
 			connections::commands::update_connection,
 			connections::commands::delete_connection,
 			connections::commands::list_connections,
+			connections::commands::test_connection,
+			connections::commands::connect_connection,
+			connections::commands::disconnect_connection,
 		])
 		.setup(|tauri_app| {
 			let app_data_dir = {

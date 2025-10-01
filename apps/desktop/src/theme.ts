@@ -37,7 +37,7 @@ export default createTheme({
 			"#3574F0",
 			"#366ACE",
 			"#375FAD",
-			"#35538F",
+			"#2E436E",
 			"#25324D",
 		],
 		green: [

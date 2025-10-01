@@ -7,6 +7,8 @@ pub struct Connection {
 	pub name: String,
 	pub details: ConnectionDetails,
 	pub created_at: u64,
+	#[serde(default)]
+	pub connected: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -18,8 +20,5 @@ pub enum ConnectionDetails {
 		user: String,
 		password: String,
 		database: String,
-	},
-	MySQL {
-		host: String,
 	},
 }

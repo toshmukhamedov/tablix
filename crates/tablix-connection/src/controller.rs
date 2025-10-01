@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::{Context, Result};
 use tablix_project::project::Project;
 use uuid::Uuid;
@@ -7,9 +9,14 @@ use crate::{
 	storage::{self, AddConnection, UpdateConnection},
 };
 
+pub enum ConnectionClient {
+	PostgreSQL { client: tokio_postgres::Client },
+}
+
 #[derive(Clone, Default)]
 pub struct ConnectionController {
 	connections_storage: storage::ConnectionStorage,
+	pub connected: Arc<dashmap::DashMap<Uuid, ConnectionClient>>,
 }
 
 impl ConnectionController {
@@ -21,6 +28,7 @@ impl ConnectionController {
 			name: connection.name,
 			details: connection.details,
 			created_at: crate::utils::now(),
+			connected: false,
 		};
 
 		self
@@ -41,7 +49,15 @@ impl ConnectionController {
 	}
 
 	pub fn list(&self, project: Project) -> Result<Vec<Connection>> {
-		self.connections_storage.list(&project)
+		match self.connections_storage.list(&project) {
+			Ok(mut connections) => {
+				for connection in &mut connections {
+					connection.connected = self.connected.contains_key(&connection.id);
+				}
+				Ok(connections)
+			}
+			Err(e) => Err(e),
+		}
 	}
 
 	pub fn delete(&self, project: Project, id: Uuid) -> Result<()> {

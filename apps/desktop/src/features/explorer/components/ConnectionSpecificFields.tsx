@@ -14,6 +14,7 @@ export const ConnectionSpecificFields: React.FC = () => {
 							size="xs"
 							label="Host"
 							key={form.key("details.host")}
+							autoCorrect="off"
 							{...form.getInputProps("details.host")}
 						/>
 						<NumberInput
@@ -27,6 +28,7 @@ export const ConnectionSpecificFields: React.FC = () => {
 						size="xs"
 						label="User"
 						key={form.key("details.user")}
+						autoCorrect="off"
 						{...form.getInputProps("details.user")}
 					/>
 					<PasswordInput
@@ -39,6 +41,7 @@ export const ConnectionSpecificFields: React.FC = () => {
 						size="xs"
 						label="Database"
 						key={form.key("details.database")}
+						autoCorrect="off"
 						{...form.getInputProps("details.database")}
 					/>
 				</>

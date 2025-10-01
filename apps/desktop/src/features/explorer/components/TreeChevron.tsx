@@ -7,7 +7,7 @@ type Props = {
 export const TreeChevron: React.FC<Props> = ({ expanded }) => {
 	const iconProps: IconProps = {
 		style: { flexShrink: 0 },
-		size: "16px",
+		size: "14px",
 		color: "var(--mantine-color-dark-2)",
 	};
 	const Icon = expanded ? IconChevronDown : IconChevronRight;

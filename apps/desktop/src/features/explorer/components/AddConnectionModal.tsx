@@ -2,10 +2,24 @@ import { ConnectionType, connectionCommands } from "@/commands/connection";
 import { useConnections } from "@/context/ConnectionsContext";
 import { useProject } from "@/context/ProjectContext";
 import { CONNECTION_TYPES } from "@/features/explorer/constants";
-import { Button, Group, Modal, Select, Stack, TextInput } from "@mantine/core";
+import {
+	Button,
+	Flex,
+	Group,
+	Loader,
+	Modal,
+	NativeSelect,
+	Popover,
+	Stack,
+	Text,
+	TextInput,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
+import { IconCheck, IconExclamationCircle } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
+import { useState } from "react";
 import {
 	AddConnectionFormProvider,
 	AddConnectionFormSchema,
@@ -17,11 +31,25 @@ type Props = {
 	opened: boolean;
 	onClose: () => void;
 };
+type ConnectionTestResult =
+	| {
+			type: "pending";
+	  }
+	| {
+			type: "error";
+			message: string;
+	  }
+	| {
+			type: "success";
+	  };
 
 export const AddConnectionModal: React.FC<Props> = (props) => {
 	const { project } = useProject();
 
 	const { dispatch } = useConnections();
+	const [testResult, setTestResult] = useState<ConnectionTestResult | null>(null);
+	const [popoverOpened, { close: popoverClose, open: popoverOpen }] = useDisclosure(false);
+
 	const form = useForm<AddConnectionFormValues>({
 		initialValues: {
 			name: "",
@@ -63,15 +91,34 @@ export const AddConnectionModal: React.FC<Props> = (props) => {
 			});
 	};
 
+	const testConnection = async () => {
+		setTestResult({
+			type: "pending",
+		});
+
+		const { details } = form.getValues();
+
+		try {
+			await connectionCommands.test(details);
+			setTestResult({
+				type: "success",
+			});
+		} catch (e) {
+			setTestResult({
+				type: "error",
+				message: e as string,
+			});
+		}
+	};
+
 	return (
 		<Modal opened={props.opened} onClose={onClose} title="Add connection" centered>
 			<AddConnectionFormProvider form={form}>
 				<form onSubmit={form.onSubmit(onSubmit)}>
 					<Stack gap="xs">
-						<Select
+						<NativeSelect
 							size="xs"
 							label="Type"
-							allowDeselect={false}
 							data={CONNECTION_TYPES}
 							key={form.key("details.type")}
 							{...form.getInputProps("details.type")}
@@ -80,11 +127,56 @@ export const AddConnectionModal: React.FC<Props> = (props) => {
 							size="xs"
 							label="Name"
 							key={form.key("name")}
+							autoCorrect="off"
 							{...form.getInputProps("name")}
 						/>
 						<ConnectionSpecificFields />
 					</Stack>
-					<Group justify="flex-end" mt="lg">
+					<Group justify="space-between" mt="lg">
+						<Flex>
+							<button
+								className="flex items-center text-[var(--mantine-primary-color-3)] cursor-pointer disabled:text-[var(--mantine-color-dark-3)]"
+								type="button"
+								disabled={!form.isValid() || testResult?.type === "pending"}
+								onClick={testConnection}
+							>
+								<span className="text-sm font-medium mr-2">Test connection</span>
+								{testResult?.type === "pending" && <Loader size="xs" />}
+							</button>
+							{testResult?.type === "success" && (
+								<Popover position="top" withArrow opened={popoverOpened}>
+									<Popover.Target>
+										<Button
+											unstyled
+											c="green"
+											onMouseEnter={popoverOpen}
+											onMouseLeave={popoverClose}
+										>
+											<IconCheck size="20" />
+										</Button>
+									</Popover.Target>
+									<Popover.Dropdown p="xs">
+										<Text size="xs" c="green">
+											Successfully connected
+										</Text>
+									</Popover.Dropdown>
+								</Popover>
+							)}
+							{testResult?.type === "error" && (
+								<Popover position="top" withArrow opened={popoverOpened}>
+									<Popover.Target>
+										<Button unstyled c="red" onMouseEnter={popoverOpen} onMouseLeave={popoverClose}>
+											<IconExclamationCircle size="20" />
+										</Button>
+									</Popover.Target>
+									<Popover.Dropdown p="xs">
+										<Text size="xs" c="red">
+											{testResult.message}
+										</Text>
+									</Popover.Dropdown>
+								</Popover>
+							)}
+						</Flex>
 						<Button
 							type="submit"
 							variant="light"

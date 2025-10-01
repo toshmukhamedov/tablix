@@ -1,6 +1,6 @@
 import { PostgreSQL, sql } from "@codemirror/lang-sql";
 import { vim } from "@replit/codemirror-vim";
-import { EditorView, basicSetup, useCodeMirror } from "@uiw/react-codemirror";
+import { EditorView, useCodeMirror } from "@uiw/react-codemirror";
 import { useEffect, useRef } from "react";
 
 const code = "SELECT * FROM products\n\n\n";
@@ -35,6 +35,7 @@ export const Editor: React.FC = () => {
 		value: code,
 		theme: "dark",
 		height: "100%",
+		width: "100%",
 	});
 
 	useEffect(() => {
@@ -43,5 +44,5 @@ export const Editor: React.FC = () => {
 		}
 	}, [editor.current]);
 
-	return <div style={{ height: "100%" }} ref={editor} />;
+	return <div style={{ height: "100%", width: "100%" }} ref={editor} />;
 };

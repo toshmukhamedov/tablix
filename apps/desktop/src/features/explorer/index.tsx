@@ -1,3 +1,4 @@
+import { TreeNodeProvider } from "@/context/TreeNodeContext";
 import { Button, Flex, Stack, Title, Tooltip } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlug } from "@tabler/icons-react";
@@ -41,7 +42,10 @@ export const Explorer: React.FC = () => {
 					</Tooltip>
 				</Flex>
 			</Flex>
-			<ExplorerTree />
+			<TreeNodeProvider>
+				<ExplorerTree />
+			</TreeNodeProvider>
+
 			<AddConnectionModal
 				opened={addConnectionModalOpened}
 				onClose={addConnectionModalHandlers.close}

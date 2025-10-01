@@ -2,7 +2,7 @@ import { ConnectionsProvider } from "@/context/ConnectionsContext";
 import { useProject } from "@/context/ProjectContext";
 import { useView } from "@/context/ViewContext";
 import { Split } from "@gfazioli/mantine-split-pane";
-import { Center, Paper, Stack } from "@mantine/core";
+import { Paper, Stack } from "@mantine/core";
 import { Editor } from "../editor/Editor";
 import { Explorer } from "../explorer";
 import { Menubar } from "./components/Menubar";

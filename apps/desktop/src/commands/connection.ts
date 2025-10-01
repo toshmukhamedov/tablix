@@ -4,20 +4,11 @@ import z from "zod/v4";
 
 export enum ConnectionType {
 	PostgreSQL = "PostgreSQL",
-	MySQL = "MySQL",
 }
 
 export const ConnectionDetailsSchema = z.union([
 	z.object({
 		type: z.literal(ConnectionType.PostgreSQL),
-		host: isHost,
-		port: z.number().min(0).max(65535),
-		user: z.string().trim().nonempty(),
-		password: z.string().nonempty(),
-		database: z.string().nonempty(),
-	}),
-	z.object({
-		type: z.literal(ConnectionType.MySQL),
 		host: isHost,
 		port: z.number().min(0).max(65535),
 		user: z.string().trim().nonempty(),
@@ -32,16 +23,17 @@ export type Connection = {
 	name: string;
 	details: ConnectionDetails;
 	createdAt: number;
+	connected: boolean;
 };
 
 export type AddConnection = {
 	projectId: string;
-	data: Omit<Connection, "id" | "createdAt">;
+	data: Pick<Connection, "name" | "details">;
 };
 
 export type UpdateConnection = {
 	projectId: string;
-	data: Pick<Connection, "name">;
+	data: Pick<Connection, "name" | "id">;
 };
 export type DeleteConnection = {
 	projectId: string;
@@ -54,6 +46,11 @@ export type GetConnection = {
 export type GetConnections = {
 	projectId: string;
 };
+export type ConnectConnection = {
+	projectId: string;
+	connectionId: string;
+};
+export type DisconnectConnection = ConnectConnection;
 
 class ConnectionCommands {
 	async list(data: GetConnections): Promise<Connection[]> {
@@ -74,6 +71,16 @@ class ConnectionCommands {
 
 	async add(data: AddConnection): Promise<Connection> {
 		return await invoke<Connection>("add_connection", data);
+	}
+
+	async test(connectionDetails: ConnectionDetails): Promise<void> {
+		return await invoke("test_connection", { connectionDetails });
+	}
+	async connect(data: ConnectConnection): Promise<void> {
+		return await invoke("connect_connection", data);
+	}
+	async disconnect(data: DisconnectConnection): Promise<void> {
+		return await invoke("disconnect_connection", data);
 	}
 }
 

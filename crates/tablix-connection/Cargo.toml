@@ -13,3 +13,5 @@ tracing.workspace = true
 
 tablix-storage.workspace = true
 tablix-project.workspace = true
+tokio-postgres = { version = "0.7.14", features = ["with-serde_json-1"] }
+dashmap = "6.1.0"
