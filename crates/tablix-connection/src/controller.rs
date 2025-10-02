@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
+use dashmap::DashMap;
+use serde::Serialize;
 use tablix_project::project::Project;
 use uuid::Uuid;
 
@@ -12,11 +14,29 @@ use crate::{
 pub enum ConnectionClient {
 	PostgreSQL { client: tokio_postgres::Client },
 }
+#[derive(Debug, Serialize, Clone, Default)]
+pub struct ConnectionSchema {
+	pub schemas: DashMap<String, Schema>,
+}
+#[derive(Debug, Serialize, Clone, Default)]
+pub struct Schema {
+	pub tables: DashMap<String, Table>,
+}
+#[derive(Debug, Serialize, Clone, Default)]
+pub struct Table {
+	pub columns: Vec<Column>,
+}
+#[derive(Debug, Serialize, Clone)]
+pub struct Column {
+	pub name: String,
+	pub data_type: String,
+}
 
 #[derive(Clone, Default)]
 pub struct ConnectionController {
 	connections_storage: storage::ConnectionStorage,
-	pub connected: Arc<dashmap::DashMap<Uuid, ConnectionClient>>,
+	pub connected: Arc<DashMap<Uuid, ConnectionClient>>,
+	pub schemas: DashMap<Uuid, ConnectionSchema>,
 }
 
 impl ConnectionController {

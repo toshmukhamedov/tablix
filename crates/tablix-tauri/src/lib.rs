@@ -30,6 +30,7 @@ pub fn run() {
 			connections::commands::test_connection,
 			connections::commands::connect_connection,
 			connections::commands::disconnect_connection,
+			connections::commands::get_connection_schema,
 		])
 		.setup(|tauri_app| {
 			let app_data_dir = {

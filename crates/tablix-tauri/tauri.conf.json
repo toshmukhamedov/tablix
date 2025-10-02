@@ -7,7 +7,7 @@
 		"beforeDevCommand": "pnpm dev:internal-tauri",
 		"devUrl": "http://localhost:1420",
 		"beforeBuildCommand": "[ \"$CI\" = \"true\" ] || pnpm build:desktop -- --mode development",
-		"frontendDist": "../../apps/desktop/build"
+		"frontendDist": "../../apps/desktop/dist"
 	},
 	"app": {
 		"windows": [
