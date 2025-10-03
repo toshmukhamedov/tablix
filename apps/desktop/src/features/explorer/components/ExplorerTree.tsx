@@ -1,150 +1,71 @@
-import { type Connection, connectionCommands } from "@/commands/connection";
+import { Tree, type TreeNodeData, useTree } from "@mantine/core";
+import { useMemo, useState } from "react";
 import { useConnections } from "@/context/ConnectionsContext";
-import { useProject } from "@/context/ProjectContext";
-import { useTreeNode } from "@/context/TreeNodeContext";
-import { useDisclosure } from "@mantine/hooks";
-import { Menu } from "@tauri-apps/api/menu";
-import { confirm } from "@tauri-apps/plugin-dialog";
-import { useMemo } from "react";
+import { EditConnectionModalContext } from "../context/EditConnectionModalContext";
+import classes from "../styles/ExplorerTree.module.css";
 import { EditConnectionModal } from "./EditConnectionModal";
-import { ConnectionNode } from "./TreeLabel";
+import { TreeNode } from "./TreeLabel";
 
 export const ExplorerTree: React.FC = () => {
-	const { state, dispatch } = useConnections();
-	const { node, setNode } = useTreeNode();
-	const { project } = useProject();
-	const connection = useMemo(() => {
-		if (node?.type !== "connection") return;
-		return state.connections.find((conn) => conn.id === node?.id);
-	}, [state.connections, node]);
+	const { state } = useConnections();
+	const tree = useTree();
 
-	const [editConnectionModalOpened, editConnectionModalHandlers] = useDisclosure();
+	const [editConnectionModalOpened, setEditConnectionModalOpened] = useState(false);
 
-	const onDeleteConnection = async (connection: Connection) => {
-		try {
-			const confirmation = await confirm(`The connection '${connection.name}' will be deleted?`, {
-				title: "Confirmation",
-				kind: "warning",
-			});
-			if (!confirmation) return;
+	// TODO
+	const data = useMemo(
+		() =>
+			state.connections.map<TreeNodeData>((connection) => {
+				const nodeChildren: TreeNodeData[] = [];
+				const node: TreeNodeData = {
+					label: connection.name,
+					value: connection.id,
+					nodeProps: connection,
+					children: nodeChildren,
+				};
+				const connectionSchema = state.schemas.get(connection.id);
 
-			await connectionCommands.delete({
-				id: connection.id,
-				projectId: project.id,
-			});
-			const connections = await connectionCommands.list({
-				projectId: project.id,
-			});
-			dispatch({
-				connections,
-				type: "set",
-			});
-
-			setNode(null);
-		} catch (e) {
-			console.error("[onDeleteConnection]", e);
-		}
-	};
-
-	const onConnectionClick = (_: React.MouseEvent, connection: Connection) => {
-		setNode({
-			id: connection.id,
-			type: "connection",
-		});
-	};
-
-	const onContextMenu = async (e: React.MouseEvent, connection: Connection) => {
-		e.preventDefault();
-		try {
-			setNode({
-				id: connection.id,
-				type: "connection",
-			});
-			const menu = await Menu.new({
-				items: [
-					connection.connected
-						? {
-								text: "Disconnect",
-								action: () => disconnectConnection(e, connection),
-							}
-						: {
-								text: "Connect",
-								action: () => connectConnection(e, connection),
-							},
-					{
-						text: "Edit",
-						action: editConnectionModalHandlers.open,
-					},
-					{
-						text: "Delete",
-						action: () => onDeleteConnection(connection),
-					},
-				],
-			});
-
-			await menu.popup();
-		} catch (e) {
-			console.error("[onConnectionContextMenu]", e);
-		}
-	};
-
-	const connectConnection = async (_: React.MouseEvent, connection: Connection) => {
-		if (connection.connected) return;
-		try {
-			await connectionCommands.connect({
-				projectId: project.id,
-				connectionId: connection.id,
-			});
-			const connections = await connectionCommands.list({
-				projectId: project.id,
-			});
-			dispatch({
-				connections,
-				type: "set",
-			});
-		} catch (e) {
-			console.error("[connect]", e);
-		}
-	};
-
-	const disconnectConnection = async (_: React.MouseEvent, connection: Connection) => {
-		if (!connection.connected) return;
-		try {
-			await connectionCommands.disconnect({
-				projectId: project.id,
-				connectionId: connection.id,
-			});
-			const connections = await connectionCommands.list({
-				projectId: project.id,
-			});
-			dispatch({
-				connections,
-				type: "set",
-			});
-		} catch (e) {
-			console.error("[connect]", e);
-		}
-	};
+				if (connectionSchema) {
+					for (const schema of Object.values(connectionSchema.schemas)) {
+						nodeChildren.push({
+							label: schema.name,
+							value: `${connection.id}.${schema.name}`,
+							children: Object.values(schema.tables).map((table) => ({
+								label: table.name,
+								value: `${connection.id}.${schema.name}.${table.name}`,
+								children: table.columns.map((column) => ({
+									label: column.name,
+									value: `${connection.id}.${schema.name}.${table.name}.${column.name}`,
+								})),
+							})),
+						});
+					}
+				}
+				return node;
+			}),
+		[state.connections, state.schemas],
+	);
 
 	return (
-		<>
-			<ul>
-				{state.connections.map((conn) => (
-					<ConnectionNode
-						connection={conn}
-						key={conn.id}
-						onContextMenu={onContextMenu}
-						onConnectionClick={onConnectionClick}
-					/>
-				))}
-			</ul>
-			{connection && (
-				<EditConnectionModal
-					opened={editConnectionModalOpened}
-					onClose={editConnectionModalHandlers.close}
-					connection={connection}
-				/>
-			)}
-		</>
+		<EditConnectionModalContext.Provider
+			value={{
+				opened: editConnectionModalOpened,
+				setOpened: setEditConnectionModalOpened,
+			}}
+		>
+			<Tree
+				classNames={classes}
+				tree={tree}
+				data={data}
+				selectOnClick
+				expandOnClick={false}
+				renderNode={TreeNode}
+			/>
+			<EditConnectionModal
+				opened={editConnectionModalOpened}
+				onClose={() => setEditConnectionModalOpened(false)}
+				tree={tree}
+			/>
+		</EditConnectionModalContext.Provider>
 	);
 };

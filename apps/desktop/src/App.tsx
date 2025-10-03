@@ -1,5 +1,5 @@
-import { platformName } from "@/lib/platform";
 import { useEffect } from "react";
+import { platformName } from "@/lib/platform";
 
 import "./App.css";
 import { appCommands } from "./commands/app";

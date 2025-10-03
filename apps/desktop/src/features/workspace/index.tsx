@@ -1,8 +1,8 @@
+import { Split } from "@gfazioli/mantine-split-pane";
+import { Stack } from "@mantine/core";
 import { ConnectionsProvider } from "@/context/ConnectionsContext";
 import { useProject } from "@/context/ProjectContext";
 import { useView } from "@/context/ViewContext";
-import { Split } from "@gfazioli/mantine-split-pane";
-import { Stack } from "@mantine/core";
 import { Editor } from "../editor/Editor";
 import { Explorer } from "../explorer";
 import { Menubar } from "./components/Menubar";

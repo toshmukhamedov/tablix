@@ -1,6 +1,6 @@
-import { isHost } from "@/lib/validator";
 import { invoke } from "@tauri-apps/api/core";
 import z from "zod/v4";
+import { isHost } from "@/lib/validator";
 
 export enum ConnectionType {
 	PostgreSQL = "PostgreSQL",
@@ -51,6 +51,24 @@ export type ConnectConnection = {
 	connectionId: string;
 };
 export type DisconnectConnection = ConnectConnection;
+export type GetConnectionSchema = ConnectConnection & {
+	refresh?: boolean;
+};
+export type ConnectionSchema = {
+	schemas: Schema[];
+};
+export type Schema = {
+	name: string;
+	tables: Table[];
+};
+export type Table = {
+	name: string;
+	columns: Column[];
+};
+export type Column = {
+	name: string;
+	dataType: string;
+};
 
 class ConnectionCommands {
 	async list(data: GetConnections): Promise<Connection[]> {
@@ -81,6 +99,11 @@ class ConnectionCommands {
 	}
 	async disconnect(data: DisconnectConnection): Promise<void> {
 		return await invoke("disconnect_connection", data);
+	}
+
+	async getSchema(data: GetConnectionSchema): Promise<ConnectionSchema> {
+		data.refresh ??= false;
+		return await invoke("get_connection_schema", data);
 	}
 }
 

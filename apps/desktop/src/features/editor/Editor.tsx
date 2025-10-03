@@ -18,12 +18,15 @@ const extensions = [
 			".cm-tooltip.cm-tooltip-autocomplete ul": {
 				fontFamily: "JetBrains Mono",
 			},
+			".cm-gutterElement": {
+				fontFamily: "JetBrains Mono",
+			},
 			".cm-fat-cursor": {
 				background: "var(--mantine-color-blue-6) !important",
 			},
 			"&:not(.cm-focused) .cm-fat-cursor": {
-				display: "none"
-			}
+				display: "none",
+			},
 		},
 		{ dark: true },
 	),

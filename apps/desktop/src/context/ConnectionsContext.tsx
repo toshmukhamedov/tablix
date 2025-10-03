@@ -1,9 +1,10 @@
-import { type Connection, connectionCommands } from "@/commands/connection";
 import { createContext, useContext, useEffect, useReducer } from "react";
+import { type Connection, type ConnectionSchema, connectionCommands } from "@/commands/connection";
 import { useProject } from "./ProjectContext";
 
 type ConnectionsContextState = {
 	connections: Connection[];
+	schemas: Map<string, ConnectionSchema>;
 };
 
 type ConnectionsContext = {
@@ -13,15 +14,24 @@ type ConnectionsContext = {
 
 const ConnectionsContext = createContext<ConnectionsContext | null>(null);
 
-export type ConnectionsAction = {
-	type: "set";
-	connections: Connection[];
-};
+export type ConnectionsAction =
+	| {
+			type: "set";
+			connections: Connection[];
+	  }
+	| {
+			type: "schemas";
+			schemas: Map<string, ConnectionSchema>;
+	  };
 
-const reducer: React.Reducer<ConnectionsContextState, ConnectionsAction> = (_, action) => {
+const reducer: React.Reducer<ConnectionsContextState, ConnectionsAction> = (state, action) => {
 	switch (action.type) {
 		case "set":
-			return { connections: action.connections };
+			state.connections = action.connections;
+			return { ...state };
+		case "schemas":
+			state.schemas = new Map(action.schemas);
+			return { ...state };
 	}
 };
 
@@ -29,7 +39,7 @@ type Props = {
 	children: React.ReactNode;
 };
 export const ConnectionsProvider: React.FC<Props> = ({ children }) => {
-	const [state, dispatch] = useReducer(reducer, { connections: [] });
+	const [state, dispatch] = useReducer(reducer, { connections: [], schemas: new Map() });
 	const { project } = useProject();
 	useEffect(() => {
 		connectionCommands

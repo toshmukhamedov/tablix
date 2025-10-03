@@ -16,14 +16,16 @@ pub enum ConnectionClient {
 }
 #[derive(Debug, Serialize, Clone, Default)]
 pub struct ConnectionSchema {
-	pub schemas: DashMap<String, Schema>,
+	pub schemas: Vec<Schema>,
 }
 #[derive(Debug, Serialize, Clone, Default)]
 pub struct Schema {
-	pub tables: DashMap<String, Table>,
+	pub name: String,
+	pub tables: Vec<Table>,
 }
 #[derive(Debug, Serialize, Clone, Default)]
 pub struct Table {
+	pub name: String,
 	pub columns: Vec<Column>,
 }
 #[derive(Debug, Serialize, Clone)]

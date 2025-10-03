@@ -51,7 +51,7 @@ export const Popconfirm: React.FC<PopconfirmProps> = ({
 			closeOnEscape
 		>
 			<Popover.Target>
-				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+				{/** biome-ignore lint/a11y/noStaticElementInteractions: I don't know the right way yet */}
 				<span onClick={() => setOpened(true)}>{children}</span>
 			</Popover.Target>
 

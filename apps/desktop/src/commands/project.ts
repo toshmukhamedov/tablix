@@ -23,10 +23,6 @@ const showError = (...args: string[]) =>
 		message: args.join(),
 		color: "red",
 	});
-const getErrorMessage = (e: unknown) => {
-	if (typeof e === "string") return e;
-	return e instanceof Error ? e.message : "unknown error";
-};
 
 class ProjectCommands {
 	constructor(private readonly homeDir: string | undefined) {}
@@ -56,16 +52,18 @@ class ProjectCommands {
 		await invoke("delete_project", data);
 	}
 
-	async promptForDirectory(): Promise<string | undefined> {
-		const selectedPath = open({
-			directory: true,
-			recursive: true,
-			defaultPath: this.homeDir,
-		});
-		if (selectedPath) {
-			if (selectedPath === null) return;
-			if (Array.isArray(selectedPath) && selectedPath.length !== 1) return;
-			return Array.isArray(selectedPath) ? selectedPath[0] : await selectedPath;
+	async promptForDirectory(): Promise<string | null> {
+		try {
+			const selectedPath = await open({
+				directory: true,
+				recursive: true,
+				defaultPath: this.homeDir,
+			});
+
+			return selectedPath;
+		} catch (e) {
+			console.error("[promptForDirectory]", e);
+			return null;
 		}
 	}
 
@@ -83,10 +81,11 @@ class ProjectCommands {
 		});
 	}
 
-	async getValidPath(): Promise<string | undefined> {
+	async getValidPath(): Promise<string | null> {
 		const path = await this.promptForDirectory();
-		if (!path) return undefined;
-		if (!this.validateProjectPath(path)) return undefined;
+		if (path && !this.validateProjectPath(path)) {
+			return null;
+		}
 		return path;
 	}
 

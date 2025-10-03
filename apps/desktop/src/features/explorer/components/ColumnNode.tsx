@@ -1,0 +1,29 @@
+import { type RenderTreeNodePayload, Text } from "@mantine/core";
+import { IconLayoutSidebar } from "@tabler/icons-react";
+
+type Props = {
+	payload: RenderTreeNodePayload;
+};
+export const ColumnNode: React.FC<Props> = ({ payload }) => {
+	const toggleExpanded = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		payload.tree.toggleExpanded(payload.node.value);
+	};
+
+	return (
+		<div role="menu" onDoubleClick={toggleExpanded} {...payload.elementProps}>
+			<div className="pl-6">
+				<span className="text-[var(--mantine-color-dark-2)]">
+					<IconLayoutSidebar size="16" />
+				</span>
+				<span
+					className="h-1 w-1 self-end rounded-full data-[connected=true]:bg-[var(--mantine-color-green-2)]"
+					data-connected={payload.node.nodeProps?.connected}
+				/>
+			</div>
+			<Text size="sm" fw="500">
+				{payload.node.label}
+			</Text>
+		</div>
+	);
+};

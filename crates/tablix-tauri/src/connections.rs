@@ -1,5 +1,5 @@
 pub mod commands {
-	use std::time::Duration;
+	use std::{collections::HashMap, time::Duration};
 
 	use anyhow::anyhow;
 	use tablix_connection::{
@@ -207,12 +207,10 @@ pub mod commands {
 		connection_id: Uuid,
 		refresh: bool,
 	) -> Result<ConnectionSchema, String> {
-		if let Some(schema_ref) = connection_controller.schemas.get(&connection_id) {
-			if refresh {
-				connection_controller.schemas.remove(&connection_id);
-			} else {
-				return Ok(schema_ref.value().clone());
-			}
+		if refresh {
+			connection_controller.schemas.remove(&connection_id);
+		} else if let Some(schema_ref) = connection_controller.schemas.get(&connection_id) {
+			return Ok(schema_ref.value().clone());
 		}
 
 		let project = project_controller
@@ -237,7 +235,7 @@ pub mod commands {
 		};
 		let client = client_ref.value();
 
-		let connection_schema = ConnectionSchema::default();
+		let mut connection_schema = ConnectionSchema::default();
 		match client {
 			ConnectionClient::PostgreSQL { client } => {
 				let schema_rows = client
@@ -247,6 +245,7 @@ pub mod commands {
 						from information_schema.schemata
 						where schema_name not like 'pg_%'
 						and schema_name != 'information_schema'
+						order by schema_name
 						",
 						&[],
 					)
@@ -255,7 +254,6 @@ pub mod commands {
 
 				for schema_row in schema_rows {
 					let name: String = schema_row.get(0);
-					let schema = Schema::default();
 
 					let table_rows = client
 						.query(
@@ -267,22 +265,24 @@ pub mod commands {
 							from information_schema.tables t
 							left join information_schema.columns c
 							on c.table_name = t.table_name and c.table_schema = $1
-							where table_schema = $1 and table_type = 'BASE TABLE'
+							where t.table_schema = $1 and t.table_type = 'BASE TABLE'
+							order by t.table_name, c.column_name
 							",
 							&[&name],
 						)
 						.await
 						.map_err(|e| e.to_string())?;
 
+					let mut tables: HashMap<String, Table> = HashMap::default();
 					for table_row in table_rows {
 						let table_name: String = table_row.get(0);
 						let column_name: String = table_row.get(1);
 						let column_data_type: String = table_row.get(2);
 
-						let mut table = schema
-							.tables
-							.entry(table_name.clone())
-							.or_insert_with(Table::default);
+						let table = tables.entry(table_name.clone()).or_insert_with(|| Table {
+							name: table_name.clone(),
+							columns: Vec::default(),
+						});
 
 						table.columns.push(Column {
 							name: column_name,
@@ -290,7 +290,15 @@ pub mod commands {
 						});
 					}
 
-					connection_schema.schemas.insert(name, schema);
+					let mut tables: Vec<Table> = tables.into_values().collect();
+					tables.sort_by(|a, b| a.name.cmp(&b.name));
+
+					let schema = Schema {
+						name: name.clone(),
+						tables,
+					};
+
+					connection_schema.schemas.push(schema);
 				}
 
 				connection_controller

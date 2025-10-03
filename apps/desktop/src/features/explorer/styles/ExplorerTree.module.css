@@ -1,0 +1,30 @@
+.root {
+	overflow: auto;
+	height: 100%;
+	overscroll-behavior: none;
+	margin-right: 1px;
+}
+
+.node {
+	width: max-content;
+	min-width: 100%;
+}
+
+.label {
+	display: flex;
+	align-items: center;
+	text-overflow: ellipsis;
+	gap: calc(var(--spacing) * 1);
+	padding-right: calc(var(--spacing) * 2);
+	width: 100%;
+	cursor: default;
+	padding-top: calc(var(--spacing) * 1);
+	padding-bottom: calc(var(--spacing) * 1);
+	white-space: nowrap;
+
+	&[data-selected] {
+		@mixin dark {
+			background-color: var(--mantine-color-blue-8);
+		}
+	}
+}

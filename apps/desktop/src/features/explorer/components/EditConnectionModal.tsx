@@ -1,9 +1,10 @@
-import { type Connection, connectionCommands } from "@/commands/connection";
-import { useConnections } from "@/context/ConnectionsContext";
-import { useProject } from "@/context/ProjectContext";
-import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
+import { Button, Group, Modal, Stack, TextInput, type UseTreeReturnType } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
+import { useMemo } from "react";
+import { connectionCommands } from "@/commands/connection";
+import { useConnections } from "@/context/ConnectionsContext";
+import { useProject } from "@/context/ProjectContext";
 import {
 	EditConnectionFormProvider,
 	EditConnectionFormSchema,
@@ -14,24 +15,32 @@ import {
 type Props = {
 	opened: boolean;
 	onClose: () => void;
-	connection: Connection;
+	tree: UseTreeReturnType;
 };
 
-export const EditConnectionModal: React.FC<Props> = (props) => {
+export const EditConnectionModal: React.FC<Props> = ({ onClose, opened, tree }) => {
 	const { project } = useProject();
+	const { dispatch, state } = useConnections();
+	const connection = useMemo(() => {
+		const selectedNodeValue = tree.selectedState[0];
+		if (!selectedNodeValue) return;
+		return state.connections.find((conn) => conn.id === selectedNodeValue);
+	}, [tree.selectedState]);
 
-	const { dispatch } = useConnections();
 	const form = useEditConnectionForm({
-		initialValues: {
-			name: props.connection.name,
-		},
 		validateInputOnBlur: true,
 		transformValues: EditConnectionFormSchema.parse,
 		validate: zod4Resolver(EditConnectionFormSchema),
 	});
-	const onClose = () => {
+	if (!connection) return;
+
+	form.setInitialValues({
+		name: connection.name,
+	});
+
+	const closeModal = () => {
 		form.reset();
-		props.onClose();
+		onClose();
 	};
 
 	const onSubmit = (values: EditConnectionFormValues) => {
@@ -39,12 +48,12 @@ export const EditConnectionModal: React.FC<Props> = (props) => {
 			.update({
 				projectId: project.id,
 				data: {
-					id: props.connection.id,
+					id: connection.id,
 					...values,
 				},
 			})
 			.then(() => {
-				onClose();
+				closeModal();
 				connectionCommands
 					.list({ projectId: project.id })
 					.then((connections) => dispatch({ type: "set", connections }));
@@ -58,7 +67,7 @@ export const EditConnectionModal: React.FC<Props> = (props) => {
 	};
 
 	return (
-		<Modal opened={props.opened} onClose={onClose} title="Edit connection" centered>
+		<Modal opened={opened} onClose={onClose} title="Edit connection" centered>
 			<EditConnectionFormProvider form={form}>
 				<form onSubmit={form.onSubmit(onSubmit)}>
 					<Stack gap="xs">
