@@ -20,7 +20,7 @@ export function Workspace() {
 		<ConnectionsProvider>
 			<Stack gap="0" h="100%">
 				<Menubar />
-				<Split size="1px" h="100%" w="100%" spacing="0" opacity="0">
+				<Split size="1px" w="100%" spacing="0" opacity="0" style={{ minHeight: 0, flex: 1 }}>
 					<Split.Pane maxWidth="50%" minWidth="25%">
 						<Explorer />
 					</Split.Pane>

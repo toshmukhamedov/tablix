@@ -1,6 +1,6 @@
+import { Badge, Code, Divider, Flex, Title } from "@mantine/core";
 import { projectCommands } from "@/commands/project";
 import { useProject } from "@/context/ProjectContext";
-import { Badge, Code, Divider, Flex, Title } from "@mantine/core";
 
 export const Menubar: React.FC = () => {
 	const { project } = useProject();
@@ -11,7 +11,7 @@ export const Menubar: React.FC = () => {
 			bg="dark.6"
 			pl="80px"
 			gap="sm"
-			styles={{ root: { borderBottom: "1px solid var(--mantine-color-dark-9)" } }}
+			styles={{ root: { borderBottom: "1px solid var(--mantine-color-dark-9)", flexShrink: 0 } }}
 		>
 			<Badge variant="light" tt="none" radius="sm">
 				<Title size="xs">{project.name}</Title>

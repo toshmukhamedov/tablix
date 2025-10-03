@@ -1,5 +1,4 @@
-import { TreeNodeProvider } from "@/context/TreeNodeContext";
-import { Button, Flex, Stack, Title, Tooltip } from "@mantine/core";
+import { Button, Flex, Title, Tooltip } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlug } from "@tabler/icons-react";
 import { AddConnectionModal } from "./components/AddConnectionModal";
@@ -9,14 +8,12 @@ export const Explorer: React.FC = () => {
 	const [addConnectionModalOpened, addConnectionModalHandlers] = useDisclosure();
 
 	return (
-		<Stack
+		<Flex
+			direction="column"
+			h="100%"
 			styles={{
 				root: {
-					height: "100%",
-					width: "100%",
-					border: "1px solid var(--mantine-color-dark-9)",
-					borderTop: "none",
-					borderLeft: "none",
+					borderRight: "1px solid var(--mantine-color-dark-9)",
 				},
 			}}
 		>
@@ -42,14 +39,12 @@ export const Explorer: React.FC = () => {
 					</Tooltip>
 				</Flex>
 			</Flex>
-			<TreeNodeProvider>
-				<ExplorerTree />
-			</TreeNodeProvider>
+			<ExplorerTree />
 
 			<AddConnectionModal
 				opened={addConnectionModalOpened}
 				onClose={addConnectionModalHandlers.close}
 			/>
-		</Stack>
+		</Flex>
 	);
 };
