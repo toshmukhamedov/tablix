@@ -1,5 +1,6 @@
 import { type RenderTreeNodePayload, Text } from "@mantine/core";
 import { IconTable } from "@tabler/icons-react";
+import { useMainTabs } from "@/context/MainTabsContext";
 import { TreeChevron } from "./TreeChevron";
 
 type Props = {
@@ -10,9 +11,20 @@ export const TableNode: React.FC<Props> = ({ payload }) => {
 		e.stopPropagation();
 		payload.tree.toggleExpanded(payload.node.value);
 	};
+	const { dispatch } = useMainTabs();
 
 	const onDoubleClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
+		const [connectionId, schema, table] = payload.node.value.split(".");
+		dispatch({
+			type: "new",
+			tab: {
+				type: "view",
+				connectionId,
+				schema,
+				table,
+			},
+		});
 	};
 
 	return (

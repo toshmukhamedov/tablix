@@ -6,6 +6,7 @@ mod app;
 mod commands;
 mod connections;
 mod logs;
+mod postgres;
 mod projects;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -31,6 +32,7 @@ pub fn run() {
 			connections::commands::connect_connection,
 			connections::commands::disconnect_connection,
 			connections::commands::get_connection_schema,
+			connections::commands::get_table_data,
 		])
 		.setup(|tauri_app| {
 			let app_data_dir = {

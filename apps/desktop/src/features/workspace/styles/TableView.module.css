@@ -1,0 +1,45 @@
+.table {
+	border-collapse: separate; /* Don't collapse */
+	border-spacing: 0;
+	font-size: 13px;
+	font-family: var(--font-mono);
+	color: var(--mantine-color-dark-1);
+	white-space: nowrap;
+}
+
+.table th {
+	/* Apply both top and bottom borders to the <th> */
+	border-top: 1px solid var(--mantine-color-dark-7);
+	border-bottom: 1px solid var(--mantine-color-dark-7);
+	border-right: 1px solid var(--mantine-color-dark-7);
+	background-color: var(--mantine-color-dark-8);
+
+	position: sticky;
+	top: 0;
+	padding: calc(var(--spacing) * 1);
+	text-align: start;
+}
+
+.table td {
+	/* For cells, apply the border to one of each side only (right but not left, bottom but not top) */
+	border-bottom: 1px solid var(--mantine-color-dark-7);
+	border-right: 1px solid var(--mantine-color-dark-7);
+	padding: calc(var(--spacing) * 1);
+	background-color: var(--mantine-color-dark-9);
+}
+
+.table th:first-child {
+	border-left: 1px solid var(--mantine-color-dark-7);
+	position: sticky;
+	left: 0;
+	z-index: 20;
+}
+.table td:first-child {
+	/* Apply a left border on the first <td> or <th> in a row */
+	border-left: 1px solid var(--mantine-color-dark-7);
+	color: var(--mantine-color-dark-5);
+	position: sticky;
+	left: 0;
+	z-index: 10;
+	text-align: center;
+}

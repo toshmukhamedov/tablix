@@ -21,6 +21,11 @@ html {
 	height: 35px;
 }
 
+@theme {
+	--font-mono: "JetBrains Mono", monospace;
+	/* ... */
+}
+
 :root {
 	@mixin dark-root {
 		--mantine-color-body: var(--mantine-color-dark-8);

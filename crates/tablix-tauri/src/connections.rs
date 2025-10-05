@@ -1,7 +1,12 @@
 pub mod commands {
-	use std::{collections::HashMap, time::Duration};
+	use std::{collections::HashMap, net::IpAddr, time::Duration};
 
+	use crate::postgres::interval::PgInterval;
 	use anyhow::anyhow;
+	use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+	use rust_decimal::Decimal;
+	use serde::{Deserialize, Serialize};
+	use serde_json::{Value, json};
 	use tablix_connection::{
 		connection::{Connection, ConnectionDetails},
 		controller::{Column, ConnectionClient, ConnectionController, ConnectionSchema, Schema, Table},
@@ -9,8 +14,10 @@ pub mod commands {
 	};
 	use tablix_project::controller::ProjectController;
 	use tauri::{Error, State};
+	use tokio_postgres::types::Type;
 	use tracing::instrument;
 	use uuid::Uuid;
+	use validator::Validate;
 
 	#[tauri::command(async)]
 	#[instrument(skip(connection_controller, project_controller), err(Debug))]
@@ -307,6 +314,132 @@ pub mod commands {
 
 				return Ok(connection_schema);
 			}
+		}
+	}
+
+	#[derive(Default, Serialize)]
+	pub struct TableData {
+		pub columns: Vec<Column>,
+		pub rows: Vec<Vec<Value>>,
+	}
+
+	#[derive(Deserialize, Debug, Validate)]
+	#[serde(rename_all = "camelCase")]
+	pub struct Pagination {
+		#[validate(range(min = 1))]
+		pub page: i64,
+		#[validate(range(min = 1))]
+		pub per_page: i64,
+	}
+
+	#[tauri::command]
+	#[instrument(skip(connection_controller, project_controller), err(Debug))]
+	pub async fn get_table_data(
+		connection_controller: State<'_, ConnectionController>,
+		project_controller: State<'_, ProjectController>,
+		project_id: Uuid,
+		connection_id: Uuid,
+		schema: String,
+		table: String,
+		pagination: Pagination,
+	) -> Result<TableData, String> {
+		if let Err(e) = pagination.validate() {
+			return Err(e.to_string());
+		}
+
+		let project = project_controller
+			.get(project_id)
+			.map_err(|e| e.to_string())?;
+		let _ = connection_controller
+			.get(project, connection_id)
+			.map_err(|e| e.to_string())?;
+
+		// Make sure to have client
+		connect_connection(
+			connection_controller.clone(),
+			project_controller,
+			project_id,
+			connection_id,
+		)
+		.await?;
+
+		let client_ref = match connection_controller.connected.get(&connection_id) {
+			Some(client_ref) => client_ref,
+			None => return Err("Couldn't establish connection".to_string()),
+		};
+		let client = client_ref.value();
+
+		let offset = (pagination.page - 1) * pagination.per_page;
+		let limit = pagination.per_page;
+
+		match client {
+			ConnectionClient::PostgreSQL { client } => {
+				let query = format!("select * from {}.{} offset $1 limit $2", schema, table);
+
+				tracing::info!("Executing query: {}", query);
+				let mut data = TableData::default();
+
+				let statement = client.prepare(&query).await.map_err(|e| e.to_string())?;
+
+				for column in statement.columns() {
+					data.columns.push(Column {
+						name: column.name().to_string(),
+						data_type: column.type_().to_string(),
+					});
+				}
+
+				let rows = client
+					.query(&statement, &[&offset, &limit])
+					.await
+					.map_err(|e| e.to_string())?;
+
+				for row in rows {
+					let mut values: Vec<Value> = Vec::default();
+					for (i, column) in row.columns().iter().enumerate() {
+						let data_type = column.type_();
+						let value: Value = match *data_type {
+							Type::BOOL => to_json(row.try_get::<_, bool>(i)),
+							Type::INT2 => to_json(row.try_get::<_, i16>(i)),
+							Type::INT4 => to_json(row.try_get::<_, i32>(i)),
+							Type::INT8 => to_json(row.try_get::<_, i64>(i)),
+							Type::FLOAT4 => to_json(row.try_get::<_, f32>(i)),
+							Type::FLOAT8 => to_json(row.try_get::<_, f64>(i)),
+							Type::NUMERIC => to_json(row.try_get::<_, Decimal>(i)),
+							Type::JSON | Type::JSONB => to_json(row.try_get::<_, Value>(i)),
+							Type::TEXT_ARRAY => to_json(row.try_get::<_, Vec<String>>(i)),
+							Type::INT4_ARRAY => to_json(row.try_get::<_, Vec<i32>>(i)),
+							Type::INT8_ARRAY => to_json(row.try_get::<_, Vec<i64>>(i)),
+							Type::TIMESTAMP => to_json(row.try_get::<_, NaiveDateTime>(i)),
+							Type::TIMESTAMPTZ => to_json(row.try_get::<_, DateTime<Utc>>(i)),
+							Type::DATE => to_json(row.try_get::<_, NaiveDate>(i)),
+							Type::TIME => to_json(row.try_get::<_, NaiveTime>(i)),
+							Type::INTERVAL => to_json(row.try_get::<_, PgInterval>(i)),
+							Type::INET => to_json(row.try_get::<_, IpAddr>(i)),
+							Type::TEXT | Type::VARCHAR => to_json(row.try_get::<_, &str>(i)),
+							Type::UUID => to_json(row.try_get::<_, Uuid>(i)),
+							Type::UUID_ARRAY => to_json(row.try_get::<_, Vec<Uuid>>(i)),
+							_ => {
+								tracing::error!(
+									"Unknown data type `{:?}`, kind: {:?}",
+									data_type,
+									data_type.kind()
+								);
+								json!("unknown")
+							}
+						};
+						values.push(value);
+					}
+					data.rows.push(values);
+				}
+
+				return Ok(data);
+			}
+		}
+	}
+	fn to_json(v: Result<impl serde::Serialize, tokio_postgres::Error>) -> Value {
+		match v {
+			Ok(x) => json!(x),
+			Err(_) => Value::Null,
 		}
 	}
 }

@@ -69,6 +69,22 @@ export type Column = {
 	name: string;
 	dataType: string;
 };
+export type Pagination = {
+	page: number;
+	perPage: number;
+};
+export type GetTableData = ConnectConnection & {
+	schema: string;
+	table: string;
+	pagination: Pagination;
+};
+
+export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+export type Row = Json[];
+export type TableData = {
+	columns: Column[];
+	rows: Row[];
+};
 
 class ConnectionCommands {
 	async list(data: GetConnections): Promise<Connection[]> {
@@ -104,6 +120,10 @@ class ConnectionCommands {
 	async getSchema(data: GetConnectionSchema): Promise<ConnectionSchema> {
 		data.refresh ??= false;
 		return await invoke("get_connection_schema", data);
+	}
+
+	async getTableData(data: GetTableData): Promise<TableData> {
+		return await invoke("get_table_data", data);
 	}
 }
 

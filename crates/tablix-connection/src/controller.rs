@@ -29,6 +29,7 @@ pub struct Table {
 	pub columns: Vec<Column>,
 }
 #[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Column {
 	pub name: String,
 	pub data_type: String,
