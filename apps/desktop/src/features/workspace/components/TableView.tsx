@@ -43,7 +43,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 				header: () => (
 					<>
 						<span className="pr-2">{column.name}</span>
-						<span className="text-[var(--mantine-color-gray-4)]">{column.dataType}</span>
+						<span className="text-[var(--mantine-color-dark-4)] text-xs">{column.dataType}</span>
 					</>
 				),
 				accessorFn: (row) => {
@@ -70,7 +70,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 	});
 
 	return (
-		<div className="bg-[var(--mantine-color-dark-9)] h-full overflow-auto">
+		<div className={classes.tableWrapper}>
 			<table className={classes.table}>
 				<thead>
 					{table.getHeaderGroups().map((headerGroup) => (

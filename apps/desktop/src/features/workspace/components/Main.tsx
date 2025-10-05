@@ -1,10 +1,18 @@
-import { CloseButton, Tabs } from "@mantine/core";
+import { Tabs } from "@mantine/core";
 import { IconTable, IconX } from "@tabler/icons-react";
 import { useMainTabs } from "@/context/MainTabsContext";
+import classes from "../styles/Tabs.module.css";
 import { TableView } from "./TableView";
 
 export const Main: React.FC = () => {
 	const { tabs, activeTabId, dispatch } = useMainTabs();
+
+	const closeTab = (tabId: string) => {
+		dispatch({
+			type: "close",
+			tabId,
+		});
+	};
 
 	return (
 		<Tabs
@@ -15,16 +23,7 @@ export const Main: React.FC = () => {
 					tabId,
 				})
 			}
-			styles={{
-				root: {
-					height: "100%",
-					display: "flex",
-					flexDirection: "column",
-				},
-				tab: {
-					cursor: "default",
-				},
-			}}
+			classNames={classes}
 		>
 			<Tabs.List>
 				{tabs.map((tab) => (
@@ -32,17 +31,14 @@ export const Main: React.FC = () => {
 						key={tab.id}
 						value={tab.id}
 						leftSection={<IconTable size="14" />}
-						rightSection={
-							<IconX
-								size="16"
-								onClick={() =>
-									dispatch({
-										type: "close",
-										tabId: tab.id,
-									})
-								}
-							/>
-						}
+						rightSection={<IconX size="14" stroke="1" onClick={() => closeTab(tab.id)} />}
+						onAuxClick={(e) => {
+							// https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
+							// 1: middle button
+							if (e.button === 1) {
+								closeTab(tab.id);
+							}
+						}}
 					>
 						{tab.schema}.{tab.table}
 					</Tabs.Tab>

@@ -18,15 +18,15 @@ export default createTheme({
 		],
 		gray: [
 			"#FFFFFF",
+			"#F0F1F2",
 			"#DFE1E5",
+			"#CED0D6",
 			"#B4B8BF",
+			"#9DA0A8",
 			"#868A91",
 			"#6F737A",
 			"#5A5D63",
 			"#43454A",
-			"#393B40",
-			"#2B2D30",
-			"#1E1F22",
 		],
 		blue: [
 			"#D1E0FF",

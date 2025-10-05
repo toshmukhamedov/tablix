@@ -18,9 +18,8 @@ export const Explorer: React.FC = () => {
 			}}
 		>
 			<Flex
-				h="xl"
 				align="center"
-				styles={{ root: { borderBottom: "1px solid var(--mantine-color-dark-9)" } }}
+				styles={{ root: { borderBottom: "1px solid var(--mantine-color-dark-9)", height: "40px" } }}
 				justify="space-between"
 				px="sm"
 			>

@@ -1,9 +1,17 @@
+.tableWrapper {
+	background-color: var(--mantine-color-dark-9);
+	height: 100%;
+	overflow: auto;
+	scrollbar-width: thin;
+	padding-bottom: 100px;
+}
+
 .table {
 	border-collapse: separate; /* Don't collapse */
 	border-spacing: 0;
 	font-size: 13px;
 	font-family: var(--font-mono);
-	color: var(--mantine-color-dark-1);
+	color: var(--mantine-color-gray-3);
 	white-space: nowrap;
 }
 
@@ -18,6 +26,7 @@
 	top: 0;
 	padding: calc(var(--spacing) * 1);
 	text-align: start;
+	min-width: 18px;
 }
 
 .table td {
