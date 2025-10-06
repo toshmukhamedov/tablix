@@ -50,7 +50,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 
 	useEffect(() => {
 		loadData().catch(console.error);
-	}, [pagination.pageIndex, pagination.pageSize]);
+	}, [pagination]);
 
 	const columns = useMemo(() => {
 		const columns: ColumnDef<Row>[] = [
@@ -103,17 +103,33 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 	const canPreviousPage = table.getCanPreviousPage();
 	const canNextPage = table.getCanNextPage();
 
-	console.info(tableData);
+	const refreshRowsCount = () => {
+		connectionCommands
+			.getTableDataCount({
+				projectId: project.id,
+				connectionId: tab.connectionId,
+				schema: tab.schema,
+				table: tab.table,
+			})
+			.then((rowsCount) => {
+				setTableData((prev) => ({ ...prev, rowsCount }));
+			});
+	};
+
 	return (
 		<div className="h-full flex flex-col">
 			<div className="h-10 p-1 flex items-center">
-				<ToolbarButton disabled={!canPreviousPage} onClick={table.firstPage}>
+				<ToolbarButton disabled={!canPreviousPage} onClick={table.firstPage} title="First Page">
 					<IconChevronsLeft stroke="1" size="20" />
 				</ToolbarButton>
-				<ToolbarButton disabled={!canPreviousPage} onClick={table.previousPage}>
+				<ToolbarButton
+					disabled={!canPreviousPage}
+					onClick={table.previousPage}
+					title="Previous Page"
+				>
 					<IconChevronLeft stroke="1" size="20" />
 				</ToolbarButton>
-				<ToolbarButton className="mr-1 relative">
+				<ToolbarButton className="mr-1 relative" title="Change Page Size">
 					<Text size="xs">
 						{tableData.rangeStart}-{tableData.rangeEnd}
 					</Text>
@@ -132,17 +148,17 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 					</select>
 				</ToolbarButton>
 
-				<ToolbarButton>
+				<ToolbarButton onClick={refreshRowsCount} title="Refresh total count">
 					<Text size="xs">of {tableData.rowsCount}</Text>
 				</ToolbarButton>
-				<ToolbarButton disabled={!canNextPage} onClick={table.nextPage}>
+				<ToolbarButton disabled={!canNextPage} onClick={table.nextPage} title="Next Page">
 					<IconChevronRight stroke="1" size="20" />
 				</ToolbarButton>
-				<ToolbarButton disabled={!canNextPage} onClick={table.lastPage}>
+				<ToolbarButton disabled={!canNextPage} onClick={table.lastPage} title="Last Page">
 					<IconChevronsRight stroke="1" size="20" />
 				</ToolbarButton>
 				<div className="border-l h-4 border-l-[var(--mantine-color-dark-5)] mx-2" />
-				<ToolbarButton>
+				<ToolbarButton onClick={() => setPagination((prev) => ({ ...prev }))} title="Refresh data">
 					<IconRefresh stroke="1" size="20" />
 				</ToolbarButton>
 			</div>
