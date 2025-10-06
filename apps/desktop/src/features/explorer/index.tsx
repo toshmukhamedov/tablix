@@ -8,15 +8,7 @@ export const Explorer: React.FC = () => {
 	const [addConnectionModalOpened, addConnectionModalHandlers] = useDisclosure();
 
 	return (
-		<Flex
-			direction="column"
-			h="100%"
-			styles={{
-				root: {
-					borderRight: "1px solid var(--mantine-color-dark-9)",
-				},
-			}}
-		>
+		<Flex direction="column" h="100%">
 			<Flex
 				align="center"
 				styles={{ root: { borderBottom: "1px solid var(--mantine-color-dark-9)", height: "40px" } }}

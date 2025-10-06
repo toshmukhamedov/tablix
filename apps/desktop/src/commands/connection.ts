@@ -70,20 +70,25 @@ export type Column = {
 	dataType: string;
 };
 export type Pagination = {
-	page: number;
-	perPage: number;
+	pageIndex: number;
+	pageSize: number;
 };
 export type GetTableData = ConnectConnection & {
 	schema: string;
 	table: string;
 	pagination: Pagination;
 };
+export type GetTableDataCount = Omit<GetTableData, "pagination">;
 
 export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 export type Row = Json[];
 export type TableData = {
 	columns: Column[];
 	rows: Row[];
+	rowsCount: number;
+	rangeStart: number;
+	rangeEnd: number;
+	hasMore: boolean;
 };
 
 class ConnectionCommands {
@@ -124,6 +129,9 @@ class ConnectionCommands {
 
 	async getTableData(data: GetTableData): Promise<TableData> {
 		return await invoke("get_table_data", data);
+	}
+	async getTableDataCount(data: GetTableDataCount): Promise<number> {
+		return await invoke("get_table_data_count", data);
 	}
 }
 

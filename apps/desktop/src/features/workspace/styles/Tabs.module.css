@@ -7,6 +7,10 @@
 .list {
 	background-color: var(--mantine-color-dark-9);
 	border: none;
+
+	&::before {
+		content: none;
+	}
 }
 
 .tab {

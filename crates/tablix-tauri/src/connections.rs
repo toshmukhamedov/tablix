@@ -317,19 +317,25 @@ pub mod commands {
 		}
 	}
 
+	pub type Row = Vec<Value>;
 	#[derive(Default, Serialize)]
+	#[serde(rename_all = "camelCase")]
 	pub struct TableData {
 		pub columns: Vec<Column>,
-		pub rows: Vec<Vec<Value>>,
+		pub rows: Vec<Row>,
+		pub rows_count: i64,
+		pub range_start: i64,
+		pub range_end: i64,
+		pub has_more: bool,
 	}
 
 	#[derive(Deserialize, Debug, Validate)]
 	#[serde(rename_all = "camelCase")]
 	pub struct Pagination {
+		#[validate(range(min = 0))]
+		pub page_index: i64,
 		#[validate(range(min = 1))]
-		pub page: i64,
-		#[validate(range(min = 1))]
-		pub per_page: i64,
+		pub page_size: i64,
 	}
 
 	#[tauri::command]
@@ -369,31 +375,35 @@ pub mod commands {
 		};
 		let client = client_ref.value();
 
-		let offset = (pagination.page - 1) * pagination.per_page;
-		let limit = pagination.per_page;
+		let offset = pagination.page_index * pagination.page_size;
+		let limit = pagination.page_size + 1;
 
 		match client {
 			ConnectionClient::PostgreSQL { client } => {
 				let query = format!("select * from {}.{} offset $1 limit $2", schema, table);
 
 				tracing::info!("Executing query: {}", query);
-				let mut data = TableData::default();
 
 				let statement = client.prepare(&query).await.map_err(|e| e.to_string())?;
 
-				for column in statement.columns() {
-					data.columns.push(Column {
+				let columns = statement
+					.columns()
+					.iter()
+					.map(|column| Column {
 						name: column.name().to_string(),
 						data_type: column.type_().to_string(),
-					});
-				}
+					})
+					.collect();
 
-				let rows = client
+				let mut table_rows = client
 					.query(&statement, &[&offset, &limit])
 					.await
 					.map_err(|e| e.to_string())?;
 
-				for row in rows {
+				let has_more = table_rows.len() as i64 > pagination.page_size;
+				table_rows.pop();
+				let mut rows: Vec<Row> = Vec::default();
+				for row in table_rows {
 					let mut values: Vec<Value> = Vec::default();
 					for (i, column) in row.columns().iter().enumerate() {
 						let data_type = column.type_();
@@ -429,8 +439,31 @@ pub mod commands {
 						};
 						values.push(value);
 					}
-					data.rows.push(values);
+					rows.push(values);
 				}
+
+				let count_query = format!("select count(*) from {}.{}", schema, table);
+
+				tracing::info!("Executing query: {}", count_query);
+
+				let count_rows = client
+					.query(&count_query, &[])
+					.await
+					.map_err(|e| e.to_string())?;
+
+				let rows_count: i64 = match count_rows.first() {
+					Some(row) => row.get(0),
+					None => 0,
+				};
+
+				let data = TableData {
+					columns,
+					rows,
+					rows_count,
+					has_more,
+					range_start: offset + 1,
+					range_end: offset + pagination.page_size,
+				};
 
 				return Ok(data);
 			}
@@ -440,6 +473,56 @@ pub mod commands {
 		match v {
 			Ok(x) => json!(x),
 			Err(_) => Value::Null,
+		}
+	}
+
+	#[tauri::command]
+	#[instrument(skip(connection_controller, project_controller), err(Debug))]
+	pub async fn get_table_data_count(
+		connection_controller: State<'_, ConnectionController>,
+		project_controller: State<'_, ProjectController>,
+		project_id: Uuid,
+		connection_id: Uuid,
+		schema: String,
+		table: String,
+	) -> Result<i64, String> {
+		let project = project_controller
+			.get(project_id)
+			.map_err(|e| e.to_string())?;
+		let _ = connection_controller
+			.get(project, connection_id)
+			.map_err(|e| e.to_string())?;
+
+		// Make sure to have client
+		connect_connection(
+			connection_controller.clone(),
+			project_controller,
+			project_id,
+			connection_id,
+		)
+		.await?;
+
+		let client_ref = match connection_controller.connected.get(&connection_id) {
+			Some(client_ref) => client_ref,
+			None => return Err("Couldn't establish connection".to_string()),
+		};
+		let client = client_ref.value();
+
+		match client {
+			ConnectionClient::PostgreSQL { client } => {
+				let query = format!("select count(*) from {}.{}", schema, table);
+
+				tracing::info!("Executing query: {}", query);
+
+				let rows = client.query(&query, &[]).await.map_err(|e| e.to_string())?;
+
+				if let Some(row) = rows.first() {
+					let count: i64 = row.get(0);
+					return Ok(count);
+				}
+
+				return Ok(0);
+			}
 		}
 	}
 }

@@ -22,20 +22,26 @@ export function Workspace() {
 			<MainTabsProvider>
 				<Stack gap="0" h="100%">
 					<Menubar />
-					<Split size="1px" w="100%" spacing="0" opacity="0" style={{ minHeight: 0, flex: 1 }}>
-						<Split.Pane minWidth="25%">
+					<Split size="1px" w="100%" spacing="0" style={{ minHeight: 0, flex: 1 }}>
+						<Split.Pane minWidth="200px">
 							<Explorer />
 						</Split.Pane>
-						<Split.Resizer />
+						<Split.Resizer
+							color="var(--mantine-color-dark-9)"
+							hoverColor="var(--mantine-color-dark-9)"
+						/>
 						<Split.Pane grow>
 							<Split size="1px" h="100%" spacing="0" orientation="horizontal">
 								<Split.Pane grow>
 									<Main />
 								</Split.Pane>
-								<Split.Resizer color="var(--mantine-color-dark-9)" />
-								<Split.Pane minHeight="25%">
+								<Split.Resizer
+									color="var(--mantine-color-dark-9)"
+									hoverColor="var(--mantine-color-dark-9)"
+								/>
+								<Split.Pane minHeight="150px">
 									<Paper>
-										<Title>Pane 2</Title>
+										<Title>Dock</Title>
 									</Paper>
 								</Split.Pane>
 							</Split>
