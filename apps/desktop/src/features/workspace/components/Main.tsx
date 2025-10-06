@@ -25,7 +25,11 @@ export const Main: React.FC = () => {
 			}
 			classNames={classes}
 		>
-			<Tabs.List>
+			<Tabs.List
+				onWheel={(e) => {
+					e.currentTarget.scrollLeft += e.deltaY;
+				}}
+			>
 				{tabs.map((tab) => (
 					<Tabs.Tab
 						key={tab.id}

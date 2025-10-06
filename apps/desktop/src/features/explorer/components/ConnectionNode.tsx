@@ -145,6 +145,7 @@ export const ConnectionNode: React.FC<Props> = ({ payload }) => {
 
 	const toggleExpanded = (e: React.MouseEvent) => {
 		e.stopPropagation();
+		getSchema();
 		payload.tree.toggleExpanded(payload.node.value);
 	};
 

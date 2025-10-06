@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer } from "react";
+import { act, createContext, useContext, useReducer } from "react";
 
 type BaseTab = {
 	id: string;
@@ -39,8 +39,18 @@ const reducer: React.Reducer<Omit<MainTabsContext, "dispatch">, MainTabsAction> 
 ) => {
 	switch (action.type) {
 		case "new": {
+			const newTab = action.tab;
+			const existedTab = state.tabs.find(
+				(tab) =>
+					tab.type === action.tab.type &&
+					tab.connectionId === newTab.connectionId &&
+					tab.schema === newTab.schema &&
+					tab.table === newTab.table,
+			);
+			if (existedTab) return { ...state, activeTabId: existedTab.id };
+
 			const tab: Tab = {
-				...action.tab,
+				...newTab,
 				id: crypto.randomUUID(),
 			};
 			const tabs = [...state.tabs, tab];
