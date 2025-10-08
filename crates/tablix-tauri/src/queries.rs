@@ -51,13 +51,13 @@ pub async fn add_query(
 		Err(e) => return Err(e.to_string()),
 	};
 
-	if let Err(e) = tokio::fs::File::create(&filename).await {
+	if let Err(e) = tokio::fs::File::create(&query_path).await {
 		return Err(e.to_string());
 	};
 
 	Ok(Query {
 		name: filename,
-		path: queries_path,
+		path: query_path,
 	})
 }
 
@@ -150,8 +150,8 @@ pub async fn rename_query(
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
 	name: String,
-	new_name: String,
-) -> Result<(), String> {
+	mut new_name: String,
+) -> Result<Query, String> {
 	let project = project_controller
 		.get(project_id)
 		.map_err(|e| e.to_string())?;
@@ -166,12 +166,19 @@ pub async fn rename_query(
 		Err(e) => return Err(e.to_string()),
 	};
 
-	let new_query_path = project.path.join("queries").join(new_name);
-	if let Err(e) = tokio::fs::rename(query_path, new_query_path).await {
+	if !new_name.ends_with(".sql") {
+		new_name.push_str(".sql");
+	}
+
+	let new_query_path = project.path.join("queries").join(&new_name);
+	if let Err(e) = tokio::fs::rename(query_path, &new_query_path).await {
 		return Err(e.to_string());
 	}
 
-	Ok(())
+	Ok(Query {
+		name: new_name,
+		path: new_query_path,
+	})
 }
 
 #[tauri::command]

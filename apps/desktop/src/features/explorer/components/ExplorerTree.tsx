@@ -54,6 +54,7 @@ export const ExplorerTree: React.FC = () => {
 			}}
 		>
 			<Tree
+				allowRangeSelection={false}
 				classNames={classes}
 				tree={tree}
 				data={data}

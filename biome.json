@@ -26,7 +26,10 @@
 				"useUniqueElementIds": "off"
 			},
 			"a11y": {
-				"useKeyWithClickEvents": "off"
+				"useKeyWithClickEvents": "off",
+				"noAutofocus": "off",
+				"useSemanticElements": "off",
+				"useFocusableInteractive": "off"
 			},
 			"suspicious": {
 				"noUnknownAtRules": "off"

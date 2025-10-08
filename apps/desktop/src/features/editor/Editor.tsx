@@ -2,8 +2,10 @@ import { PostgreSQL, sql } from "@codemirror/lang-sql";
 import { vim } from "@replit/codemirror-vim";
 import { EditorView, useCodeMirror } from "@uiw/react-codemirror";
 import { useEffect, useRef } from "react";
+import { queryCommands } from "@/commands/query";
+import type { EditorTab } from "@/context/MainTabsContext";
+import { useProject } from "@/context/ProjectContext";
 
-const code = "SELECT * FROM products\n\n\n";
 const extensions = [
 	vim(),
 	sql({ dialect: PostgreSQL }),
@@ -27,21 +29,42 @@ const extensions = [
 			"&:not(.cm-focused) .cm-fat-cursor": {
 				display: "none",
 			},
+			"&.cm-focused": {
+				outline: "none",
+			},
 		},
 		{ dark: true },
 	),
 ];
 
-export const Editor: React.FC = () => {
-	const editor = useRef(null);
+type Props = {
+	tab: EditorTab;
+};
+export const Editor: React.FC<Props> = ({ tab }) => {
+	const editor = useRef<HTMLDivElement | null>(null);
+	const { project } = useProject();
 
-	const { setContainer } = useCodeMirror({
+	const { setContainer, view } = useCodeMirror({
 		container: editor.current,
 		extensions,
-		value: code,
 		theme: "dark",
 		height: "100%",
 	});
+
+	const loadContent = async () => {
+		if (!view) return;
+		const content = await queryCommands.getContent({
+			projectId: project.id,
+			name: tab.query.name,
+		});
+		view.dispatch({
+			changes: { from: 0, to: view.state.doc.length, insert: content },
+		});
+	};
+
+	useEffect(() => {
+		loadContent().catch(console.error);
+	}, [view]);
 
 	useEffect(() => {
 		if (editor.current) {

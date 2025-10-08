@@ -5,6 +5,7 @@ import { MainTabsProvider } from "@/context/MainTabsContext";
 import { useProject } from "@/context/ProjectContext";
 import { useView } from "@/context/ViewContext";
 import { Explorer } from "../explorer";
+import { Queries } from "../queries";
 import { Main } from "./components/Main";
 import { Menubar } from "./components/Menubar";
 
@@ -33,7 +34,18 @@ export function Workspace() {
 						<Split.Pane grow>
 							<Split size="1px" h="100%" spacing="0" orientation="horizontal">
 								<Split.Pane grow>
-									<Main />
+									<Split size="1px" h="100%" spacing="0">
+										<Split.Pane grow>
+											<Main />
+										</Split.Pane>
+										<Split.Resizer
+											color="var(--mantine-color-dark-9)"
+											hoverColor="var(--mantine-color-dark-9)"
+										/>
+										<Split.Pane minWidth="200px">
+											<Queries />
+										</Split.Pane>
+									</Split>
 								</Split.Pane>
 								<Split.Resizer
 									color="var(--mantine-color-dark-9)"

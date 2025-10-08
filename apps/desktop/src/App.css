@@ -33,3 +33,10 @@ html {
 		--mantine-color-error: var(--mantine-color-red-4);
 	}
 }
+
+.scrollable {
+	overflow: auto;
+	scrollbar-width: thin;
+	transition: scrollbar-color 0.2s ease;
+	overscroll-behavior: none;
+}

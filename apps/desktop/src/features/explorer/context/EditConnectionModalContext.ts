@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react";
 
-type TreeNodeContext = {
+type EditConnectionModalContext = {
 	opened: boolean;
 	setOpened: React.Dispatch<boolean>;
 };
-export const EditConnectionModalContext = createContext<TreeNodeContext | null>(null);
+export const EditConnectionModalContext = createContext<EditConnectionModalContext | null>(null);
 
 export const useEditConnectionModal = () => {
 	const context = useContext(EditConnectionModalContext);
