@@ -12,9 +12,11 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@codemirror/lang-sql": "^6.10.0",
+		"@codemirror/language": "^6.11.3",
+		"@codemirror/state": "^6.5.2",
 		"@codemirror/view": "^6.38.4",
-		"@fsegurai/codemirror-theme-basic-dark": "^6.2.2",
 		"@gfazioli/mantine-split-pane": "^2.4.0",
+		"@lezer/highlight": "^1.2.1",
 		"@mantine/colors-generator": "^8.3.2",
 		"@mantine/core": "^8.3.2",
 		"@mantine/form": "^8.3.2",

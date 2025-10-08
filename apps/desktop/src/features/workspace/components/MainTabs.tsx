@@ -55,7 +55,13 @@ export const TabListItem: React.FC<Props> = ({ tab }) => {
 					rightSection={<IconX size="14" stroke="1" onClick={closeTab} />}
 					onAuxClick={onAuxClick}
 				>
-					<Indicator position="middle-end" offset={-6} size="6" disabled={!tab.isDirty}>
+					<Indicator
+						position="middle-end"
+						offset={-6}
+						size="6"
+						disabled={!tab.isDirty}
+						color="blue.6"
+					>
 						<Text size="sm">{filename(tab.query.name)}</Text>
 					</Indicator>
 				</Tabs.Tab>

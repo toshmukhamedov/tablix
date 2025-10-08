@@ -1,54 +1,12 @@
 import { PostgreSQL, sql } from "@codemirror/lang-sql";
-import { EditorView, keymap, useCodeMirror } from "@uiw/react-codemirror";
+import { keymap, useCodeMirror } from "@uiw/react-codemirror";
 import { useEffect, useRef, useState } from "react";
 import { queryCommands } from "@/commands/query";
 import { type EditorTab, useMainTabs } from "@/context/MainTabsContext";
 import { useProject } from "@/context/ProjectContext";
+import { tablix } from "./theme";
 
-const extensions = [
-	sql({ dialect: PostgreSQL, upperCaseKeywords: true }),
-	EditorView.theme(
-		{
-			"&": {
-				fontSize: "14px",
-				backgroundColor: "var(--mantine-color-dark-9) !important",
-			},
-			".cm-content": {
-				fontFamily: "JetBrains Mono",
-			},
-			".cm-tooltip.cm-tooltip-autocomplete ul": {
-				fontFamily: "JetBrains Mono",
-			},
-			".cm-gutterElement": {
-				fontFamily: "JetBrains Mono",
-				color: "var(--mantine-color-dark-4)",
-			},
-			".cm-gutters": {
-				borderRight: "1px solid var(--mantine-color-dark-8) !important",
-				backgroundColor: "var(--mantine-color-dark-9) !important",
-			},
-			".cm-activeLine": {
-				backgroundColor: "#26282e !important",
-			},
-			".cm-activeLineGutter": {
-				backgroundColor: "#26282e !important",
-			},
-			".cm-gutterElement.cm-activeLineGutter": {
-				color: "var(--mantine-color-dark-2)",
-			},
-			".cm-fat-cursor": {
-				background: "var(--mantine-color-blue-6) !important",
-			},
-			"&:not(.cm-focused) .cm-fat-cursor": {
-				display: "none",
-			},
-			"&.cm-focused": {
-				outline: "none",
-			},
-		},
-		{ dark: true },
-	),
-];
+const extensions = [sql({ dialect: PostgreSQL, upperCaseKeywords: true })];
 
 type Props = {
 	tab: EditorTab;
@@ -95,7 +53,7 @@ export const Editor: React.FC<Props> = ({ tab }) => {
 		container: editor.current,
 		extensions: [...extensions, saveKeymap],
 		value: content,
-		theme: "dark",
+		theme: tablix,
 		height: "100%",
 		onChange: (value) => {
 			dispatch({
