@@ -36,6 +36,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.38.4
         version: 6.38.4
+      '@fsegurai/codemirror-theme-basic-dark':
+        specifier: ^6.2.2
+        version: 6.2.2(@codemirror/language@6.11.3)(@codemirror/state@6.5.2)(@codemirror/view@6.38.4)(@lezer/highlight@1.2.1)
       '@gfazioli/mantine-split-pane':
         specifier: ^2.4.0
         version: 2.4.0(@mantine/core@8.3.2(@mantine/hooks@8.3.2(react@19.1.1))(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@mantine/hooks@8.3.2(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -475,6 +478,14 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@fsegurai/codemirror-theme-basic-dark@6.2.2':
+    resolution: {integrity: sha512-cVK4VheF7ZkuV0sfy20lmH2S7Q2xIfKoqN2HdU5rpGH8mZM2LVG9Tl+oHT0XNPpsWFqNAAKLzjYFw0IPX95Biw==}
+    peerDependencies:
+      '@codemirror/language': ^6.0.0
+      '@codemirror/state': ^6.0.0
+      '@codemirror/view': ^6.0.0
+      '@lezer/highlight': ^1.0.0
 
   '@gfazioli/mantine-split-pane@2.4.0':
     resolution: {integrity: sha512-ZzLYTVHYh2uOymBTwQVxSPMZc3rC8afVG0rDeFCVr3O1Vdd4vdHjcwE/qh6hXHZOeM6XTAMoeMij62nJJbLeJQ==}
@@ -1837,6 +1848,13 @@ snapshots:
       tabbable: 6.2.0
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@fsegurai/codemirror-theme-basic-dark@6.2.2(@codemirror/language@6.11.3)(@codemirror/state@6.5.2)(@codemirror/view@6.38.4)(@lezer/highlight@1.2.1)':
+    dependencies:
+      '@codemirror/language': 6.11.3
+      '@codemirror/state': 6.5.2
+      '@codemirror/view': 6.38.4
+      '@lezer/highlight': 1.2.1
 
   '@gfazioli/mantine-split-pane@2.4.0(@mantine/core@8.3.2(@mantine/hooks@8.3.2(react@19.1.1))(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@mantine/hooks@8.3.2(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:

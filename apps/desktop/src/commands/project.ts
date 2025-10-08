@@ -18,12 +18,6 @@ export type DeleteProject = Pick<Project, "id"> & {
 	cleanup: boolean;
 };
 
-const showError = (...args: string[]) =>
-	toasts.show({
-		message: args.join(),
-		color: "red",
-	});
-
 class ProjectCommands {
 	constructor(private readonly homeDir: string | undefined) {}
 
@@ -83,9 +77,6 @@ class ProjectCommands {
 
 	async getValidPath(): Promise<string | null> {
 		const path = await this.promptForDirectory();
-		if (path && !this.validateProjectPath(path)) {
-			return null;
-		}
 		return path;
 	}
 
@@ -103,28 +94,6 @@ class ProjectCommands {
 		}
 
 		return newPath;
-	}
-
-	validateProjectPath(path: string) {
-		if (/^\\\\wsl.localhost/i.test(path)) {
-			const errorMsg =
-				"For WSL2 projects, install the Linux version of GitButler inside of your WSL2 distro";
-			console.error(errorMsg);
-			showError("Use the Linux version of GitButler", errorMsg);
-
-			return false;
-		}
-
-		if (/^\\\\/i.test(path)) {
-			const errorMsg =
-				"Using git across a network is not recommended. Either clone the repo locally, or use the NET USE command to map a network drive";
-			console.error(errorMsg);
-			showError("UNC Paths are not directly supported", errorMsg);
-
-			return false;
-		}
-
-		return true;
 	}
 
 	// getLastOpenedProject() {

@@ -1,14 +1,12 @@
 import { PostgreSQL, sql } from "@codemirror/lang-sql";
-import { vim } from "@replit/codemirror-vim";
-import { EditorView, useCodeMirror } from "@uiw/react-codemirror";
-import { useEffect, useRef } from "react";
+import { EditorView, keymap, useCodeMirror } from "@uiw/react-codemirror";
+import { useEffect, useRef, useState } from "react";
 import { queryCommands } from "@/commands/query";
-import type { EditorTab } from "@/context/MainTabsContext";
+import { type EditorTab, useMainTabs } from "@/context/MainTabsContext";
 import { useProject } from "@/context/ProjectContext";
 
 const extensions = [
-	vim(),
-	sql({ dialect: PostgreSQL }),
+	sql({ dialect: PostgreSQL, upperCaseKeywords: true }),
 	EditorView.theme(
 		{
 			"&": {
@@ -22,6 +20,10 @@ const extensions = [
 			},
 			".cm-gutterElement": {
 				fontFamily: "JetBrains Mono",
+				color: "var(--mantine-color-dark-4)",
+			},
+			".cm-gutterElement.cm-activeLineGutter": {
+				color: "var(--mantine-color-dark-2)",
 			},
 			".cm-fat-cursor": {
 				background: "var(--mantine-color-blue-6) !important",
@@ -42,29 +44,57 @@ type Props = {
 };
 export const Editor: React.FC<Props> = ({ tab }) => {
 	const editor = useRef<HTMLDivElement | null>(null);
-	const { project } = useProject();
+	const [content, setContent] = useState<string>("");
 
-	const { setContainer, view } = useCodeMirror({
-		container: editor.current,
-		extensions,
-		theme: "dark",
-		height: "100%",
-	});
+	const { project } = useProject();
+	const { dispatch } = useMainTabs();
 
 	const loadContent = async () => {
-		if (!view) return;
 		const content = await queryCommands.getContent({
 			projectId: project.id,
 			name: tab.query.name,
 		});
-		view.dispatch({
-			changes: { from: 0, to: view.state.doc.length, insert: content },
-		});
+		setContent(content);
 	};
 
 	useEffect(() => {
 		loadContent().catch(console.error);
-	}, [view]);
+	}, []);
+
+	const saveKeymap = keymap.of([
+		{
+			key: "Ctrl-s",
+			mac: "Cmd-s",
+			run: (view) => {
+				queryCommands
+					.updateContent({
+						projectId: project.id,
+						name: tab.query.name,
+						content: view.state.doc.toString(),
+					})
+					.then(() => {
+						dispatch({ type: "mark_as_dirty", tabId: tab.id, isDirty: false });
+					});
+				return true;
+			},
+		},
+	]);
+
+	const { setContainer } = useCodeMirror({
+		container: editor.current,
+		extensions: [...extensions, saveKeymap],
+		value: content,
+		theme: "dark",
+		height: "100%",
+		onChange: (value) => {
+			dispatch({
+				type: "mark_as_dirty",
+				tabId: tab.id,
+				isDirty: value !== content,
+			});
+		},
+		autoFocus: true,
+	});
 
 	useEffect(() => {
 		if (editor.current) {

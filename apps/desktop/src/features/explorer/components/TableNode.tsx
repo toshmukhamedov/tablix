@@ -17,7 +17,7 @@ export const TableNode: React.FC<Props> = ({ payload }) => {
 		e.stopPropagation();
 		const [connectionId, schema, table] = payload.node.value.split(".");
 		dispatch({
-			type: "new",
+			type: "add_view_tab",
 			tab: {
 				type: "view",
 				connectionId,

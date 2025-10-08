@@ -13,6 +13,7 @@
 	"devDependencies": {
 		"@codemirror/lang-sql": "^6.10.0",
 		"@codemirror/view": "^6.38.4",
+		"@fsegurai/codemirror-theme-basic-dark": "^6.2.2",
 		"@gfazioli/mantine-split-pane": "^2.4.0",
 		"@mantine/colors-generator": "^8.3.2",
 		"@mantine/core": "^8.3.2",

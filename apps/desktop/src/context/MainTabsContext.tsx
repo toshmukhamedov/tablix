@@ -14,13 +14,18 @@ export type EditorTab = BaseTab & {
 	type: "editor";
 	connectionId: string | null;
 	query: Query;
+	isDirty: boolean;
 };
 export type Tab = TableViewTab | EditorTab;
 
 export type MainTabsAction =
 	| {
-			type: "new";
-			tab: Omit<TableViewTab, "id"> | Omit<EditorTab, "id">;
+			type: "add_view_tab";
+			tab: Omit<TableViewTab, "id">;
+	  }
+	| {
+			type: "add_editor_tab";
+			tab: Omit<EditorTab, "id" | "isDirty">;
 	  }
 	| {
 			type: "close";
@@ -38,6 +43,11 @@ export type MainTabsAction =
 	| {
 			type: "set_active_tab";
 			tabId: string | null;
+	  }
+	| {
+			type: "mark_as_dirty";
+			tabId: string;
+			isDirty: boolean;
 	  };
 
 type MainTabsContext = {
@@ -53,34 +63,37 @@ const reducer: React.Reducer<Omit<MainTabsContext, "dispatch">, MainTabsAction> 
 	action,
 ) => {
 	switch (action.type) {
-		case "new": {
+		case "add_view_tab": {
 			const newTab = action.tab;
-			switch (newTab.type) {
-				case "view": {
-					const existedTab = state.tabs.find(
-						(tab) =>
-							tab.type === "view" &&
-							tab.connectionId === newTab.connectionId &&
-							tab.schema === newTab.schema &&
-							tab.table === newTab.table,
-					);
-					if (existedTab) return { ...state, activeTabId: existedTab.id };
-					break;
-				}
-				case "editor": {
-					const existedTab = state.tabs.find(
-						(tab) =>
-							tab.type === "editor" &&
-							tab.connectionId === newTab.connectionId &&
-							tab.query.path === newTab.query.path,
-					);
-					if (existedTab) return { ...state, activeTabId: existedTab.id };
-					break;
-				}
-			}
+			const existedTab = state.tabs.find(
+				(tab) =>
+					tab.type === "view" &&
+					tab.connectionId === newTab.connectionId &&
+					tab.schema === newTab.schema &&
+					tab.table === newTab.table,
+			);
+			if (existedTab) return { ...state, activeTabId: existedTab.id };
 
-			const tab: Tab = {
+			const tab: TableViewTab = {
 				...newTab,
+				id: crypto.randomUUID(),
+			};
+			const tabs = [...state.tabs, tab];
+			return { tabs, activeTabId: tab.id };
+		}
+		case "add_editor_tab": {
+			const newTab = action.tab;
+			const existedTab = state.tabs.find(
+				(tab) =>
+					tab.type === "editor" &&
+					tab.connectionId === newTab.connectionId &&
+					tab.query.path === newTab.query.path,
+			);
+			if (existedTab) return { ...state, activeTabId: existedTab.id };
+
+			const tab: EditorTab = {
+				...newTab,
+				isDirty: false,
 				id: crypto.randomUUID(),
 			};
 			const tabs = [...state.tabs, tab];
@@ -118,6 +131,18 @@ const reducer: React.Reducer<Omit<MainTabsContext, "dispatch">, MainTabsAction> 
 				return tab;
 			});
 			return { activeTabId: state.activeTabId, tabs };
+		}
+		case "mark_as_dirty": {
+			const index = state.tabs.findIndex((tab) => tab.type === "editor" && tab.id === action.tabId);
+			if (index === -1) return state;
+
+			const tab = state.tabs[index] as EditorTab;
+			if (tab.isDirty === action.isDirty) return state;
+
+			const newTabs = [...state.tabs];
+			newTabs[index] = { ...tab, isDirty: action.isDirty };
+
+			return { ...state, tabs: newTabs };
 		}
 	}
 };

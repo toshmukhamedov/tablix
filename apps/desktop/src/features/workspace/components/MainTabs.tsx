@@ -1,4 +1,4 @@
-import { Tabs } from "@mantine/core";
+import { Indicator, Tabs, Text } from "@mantine/core";
 import { IconFileTypeSql, IconTable, IconX } from "@tabler/icons-react";
 import { type Tab, useMainTabs } from "@/context/MainTabsContext";
 import { Editor } from "@/features/editor/Editor";
@@ -55,7 +55,9 @@ export const TabListItem: React.FC<Props> = ({ tab }) => {
 					rightSection={<IconX size="14" stroke="1" onClick={closeTab} />}
 					onAuxClick={onAuxClick}
 				>
-					{filename(tab.query.name)}
+					<Indicator position="middle-end" offset={-6} size="6" disabled={!tab.isDirty}>
+						<Text size="sm">{filename(tab.query.name)}</Text>
+					</Indicator>
 				</Tabs.Tab>
 			);
 		}

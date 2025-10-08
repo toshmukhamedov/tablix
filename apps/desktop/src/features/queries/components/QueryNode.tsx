@@ -91,7 +91,7 @@ export const QueryNode: React.FC<Props> = ({
 			onClick={() => setSelectedQuery(query.name)}
 			onDoubleClick={() => {
 				dispatch({
-					type: "new",
+					type: "add_editor_tab",
 					tab: {
 						type: "editor",
 						connectionId: null,
@@ -100,7 +100,7 @@ export const QueryNode: React.FC<Props> = ({
 				});
 			}}
 			data-selected={selectedQuery === query.name}
-			className="flex items-center gap-2 data-[selected=true]:bg-[var(--mantine-color-blue-8)] py-1 pr-2"
+			className="flex items-center gap-1 data-[selected=true]:bg-[var(--mantine-color-blue-8)] py-1 pr-2"
 		>
 			<span className="text-[var(--mantine-color-orange-5)] pl-2">
 				<IconFileTypeSql size="16" />
