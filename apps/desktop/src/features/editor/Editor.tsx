@@ -11,6 +11,7 @@ const extensions = [
 		{
 			"&": {
 				fontSize: "14px",
+				backgroundColor: "var(--mantine-color-dark-9) !important",
 			},
 			".cm-content": {
 				fontFamily: "JetBrains Mono",
@@ -21,6 +22,16 @@ const extensions = [
 			".cm-gutterElement": {
 				fontFamily: "JetBrains Mono",
 				color: "var(--mantine-color-dark-4)",
+			},
+			".cm-gutters": {
+				borderRight: "1px solid var(--mantine-color-dark-8) !important",
+				backgroundColor: "var(--mantine-color-dark-9) !important",
+			},
+			".cm-activeLine": {
+				backgroundColor: "#26282e !important",
+			},
+			".cm-activeLineGutter": {
+				backgroundColor: "#26282e !important",
 			},
 			".cm-gutterElement.cm-activeLineGutter": {
 				color: "var(--mantine-color-dark-2)",
