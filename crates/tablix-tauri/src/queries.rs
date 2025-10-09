@@ -1,15 +1,31 @@
 use std::path::PathBuf;
 
 use serde::Serialize;
+use tablix_connection::controller::{Column, ConnectionClient, ConnectionController};
 use tablix_project::controller::ProjectController;
 use tauri::State;
+use tokio_postgres::NoTls;
 use tracing::instrument;
 use uuid::Uuid;
+
+use crate::connections::{Row, rows_to_json};
 
 #[derive(Serialize)]
 pub struct Query {
 	name: String,
 	path: PathBuf,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase", tag = "type")]
+pub enum QueryResult {
+	Modify {
+		affected_rows: u64,
+	},
+	Data {
+		columns: Vec<Column>,
+		rows: Vec<Row>,
+	},
 }
 
 #[tauri::command]
@@ -228,4 +244,107 @@ pub async fn update_query_content(
 	};
 
 	Ok(())
+}
+
+#[tauri::command]
+#[instrument(skip(project_controller, connection_controller), err(Debug))]
+pub async fn execute_query(
+	project_controller: State<'_, ProjectController>,
+	connection_controller: State<'_, ConnectionController>,
+	project_id: Uuid,
+	connection_id: Uuid,
+	query: String,
+) -> Result<QueryResult, String> {
+	let project = project_controller
+		.get(project_id)
+		.map_err(|e| e.to_string())?;
+
+	let _ = connection_controller
+		.get(project, connection_id)
+		.map_err(|e| e.to_string())?;
+
+	// Make sure to have client
+	crate::connections::connect_connection(
+		connection_controller.clone(),
+		project_controller,
+		project_id,
+		connection_id,
+	)
+	.await?;
+
+	let client_ref = match connection_controller.connected.get(&connection_id) {
+		Some(client_ref) => client_ref,
+		None => return Err("Couldn't establish connection".to_string()),
+	};
+	let client = client_ref.value();
+
+	match client {
+		ConnectionClient::PostgreSQL { client } => {
+			let query = query.trim();
+			tracing::info!("Executing query: {}", query);
+
+			let statement = client.prepare(query).await.map_err(|e| e.to_string())?;
+
+			let columns: Vec<Column> = statement
+				.columns()
+				.iter()
+				.map(|column| Column {
+					name: column.name().to_string(),
+					data_type: column.type_().to_string(),
+				})
+				.collect();
+
+			if columns.is_empty() {
+				let affected_rows = client
+					.execute(&statement, &[])
+					.await
+					.map_err(|e| e.to_string())?;
+
+				return Ok(QueryResult::Modify { affected_rows });
+			} else {
+				let table_rows = client
+					.query(&statement, &[])
+					.await
+					.map_err(|e| e.to_string())?;
+				let rows = rows_to_json(table_rows)?;
+
+				return Ok(QueryResult::Data { columns, rows });
+			}
+		}
+	}
+}
+
+#[tauri::command]
+#[instrument(skip(project_controller, connection_controller), err(Debug))]
+pub async fn cancel_query(
+	project_controller: State<'_, ProjectController>,
+	connection_controller: State<'_, ConnectionController>,
+	project_id: Uuid,
+	connection_id: Uuid,
+) -> Result<(), String> {
+	let project = project_controller
+		.get(project_id)
+		.map_err(|e| e.to_string())?;
+
+	let _ = connection_controller
+		.get(project, connection_id)
+		.map_err(|e| e.to_string())?;
+
+	let client_ref = match connection_controller.connected.get(&connection_id) {
+		Some(client_ref) => client_ref,
+		None => return Err("There is no connection to cancel executing query".to_string()),
+	};
+	let client = client_ref.value();
+
+	match client {
+		ConnectionClient::PostgreSQL { client } => {
+			let cancel_token = client.cancel_token();
+
+			if let Err(e) = cancel_token.cancel_query(NoTls).await {
+				return Err(e.to_string());
+			};
+
+			return Ok(());
+		}
+	}
 }
