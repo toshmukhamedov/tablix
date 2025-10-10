@@ -1,5 +1,8 @@
-use crate::postgres::interval::PgInterval;
-use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use crate::{
+	postgres::interval::PgInterval,
+	queries::{QueryOutput, QueryOutputType, emit_query_output},
+};
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use rust_decimal::Decimal;
 use serde_json::{Value, json};
 use std::net::IpAddr;
@@ -18,7 +21,7 @@ use tablix_connection::{
 	storage::{self, AddConnection},
 };
 use tablix_project::controller::ProjectController;
-use tauri::{Error, State};
+use tauri::{AppHandle, Error, State};
 use tracing::instrument;
 use validator::Validate;
 
@@ -70,8 +73,12 @@ pub fn list_connections(
 }
 
 #[tauri::command(async)]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
+#[instrument(
+	skip(app_handle, connection_controller, project_controller),
+	err(Debug)
+)]
 pub async fn delete_connection(
+	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -79,6 +86,7 @@ pub async fn delete_connection(
 ) -> Result<(), Error> {
 	let project = project_controller.get(project_id)?;
 	disconnect_connection(
+		app_handle,
 		connection_controller.clone(),
 		project_controller,
 		project_id,
@@ -121,8 +129,12 @@ pub async fn test_connection(connection_details: ConnectionDetails) -> Result<()
 }
 
 #[tauri::command]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
+#[instrument(
+	skip(app_handle, connection_controller, project_controller),
+	err(Debug)
+)]
 pub async fn disconnect_connection(
+	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -142,7 +154,16 @@ pub async fn disconnect_connection(
 
 	match connection_client {
 		ConnectionClient::PostgreSQL { .. } => {
-			tracing::info!("Client dropped")
+			tracing::info!("Client dropped");
+			emit_query_output(
+				&app_handle,
+				QueryOutput {
+					output_type: QueryOutputType::Info,
+					time: Local::now(),
+					message: "Disconnected".to_string(),
+					connection_id,
+				},
+			);
 		}
 	}
 
@@ -150,8 +171,12 @@ pub async fn disconnect_connection(
 }
 
 #[tauri::command]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
+#[instrument(
+	skip(app_handle, connection_controller, project_controller),
+	err(Debug)
+)]
 pub async fn connect_connection(
+	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -199,6 +224,15 @@ pub async fn connect_connection(
 						.insert(connection_id, ConnectionClient::PostgreSQL { client });
 
 					tracing::info!("Client connected");
+					emit_query_output(
+						&app_handle,
+						QueryOutput {
+							output_type: QueryOutputType::Info,
+							time: Local::now(),
+							message: "Connected".to_string(),
+							connection_id,
+						},
+					);
 
 					Ok(())
 				}
@@ -209,8 +243,12 @@ pub async fn connect_connection(
 }
 
 #[tauri::command]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
+#[instrument(
+	skip(app_handle, connection_controller, project_controller),
+	err(Debug)
+)]
 pub async fn get_connection_schema(
+	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -232,6 +270,7 @@ pub async fn get_connection_schema(
 
 	// Make sure to have client
 	connect_connection(
+		app_handle,
 		connection_controller.clone(),
 		project_controller,
 		project_id,
@@ -341,8 +380,12 @@ pub struct Pagination {
 }
 
 #[tauri::command]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
+#[instrument(
+	skip(app_handle, connection_controller, project_controller),
+	err(Debug)
+)]
 pub async fn get_table_data(
+	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -358,12 +401,13 @@ pub async fn get_table_data(
 	let project = project_controller
 		.get(project_id)
 		.map_err(|e| e.to_string())?;
-	let _ = connection_controller
+	let connection = connection_controller
 		.get(project, connection_id)
 		.map_err(|e| e.to_string())?;
 
 	// Make sure to have client
 	connect_connection(
+		app_handle.clone(),
 		connection_controller.clone(),
 		project_controller,
 		project_id,
@@ -382,9 +426,21 @@ pub async fn get_table_data(
 
 	match client {
 		ConnectionClient::PostgreSQL { client } => {
-			let query = format!("select * from {}.{} offset $1 limit $2", schema, table);
+			let query = format!(
+				"select * from {}.{} offset {} limit {}",
+				schema, table, offset, limit
+			);
 
 			tracing::info!("Executing query: {}", query);
+			emit_query_output(
+				&app_handle,
+				QueryOutput {
+					output_type: QueryOutputType::Info,
+					time: Local::now(),
+					message: format!("{}> {}", connection.details.get_database(), query),
+					connection_id,
+				},
+			);
 
 			let statement = client.prepare(&query).await.map_err(|e| e.to_string())?;
 
@@ -397,10 +453,18 @@ pub async fn get_table_data(
 				})
 				.collect();
 
-			let mut table_rows = client
-				.query(&statement, &[&offset, &limit])
-				.await
-				.map_err(|e| e.to_string())?;
+			let mut table_rows = client.query(&statement, &[]).await.map_err(|e| {
+				emit_query_output(
+					&app_handle,
+					QueryOutput {
+						output_type: QueryOutputType::Error,
+						time: Local::now(),
+						message: e.to_string(),
+						connection_id,
+					},
+				);
+				e.to_string()
+			})?;
 
 			let has_more = table_rows.len() as i64 > pagination.page_size;
 			table_rows.pop();
@@ -409,11 +473,28 @@ pub async fn get_table_data(
 			let count_query = format!("select count(*) from {}.{}", schema, table);
 
 			tracing::info!("Executing query: {}", count_query);
+			emit_query_output(
+				&app_handle,
+				QueryOutput {
+					output_type: QueryOutputType::Info,
+					time: Local::now(),
+					message: format!("{}> {}", connection.details.get_database(), count_query),
+					connection_id,
+				},
+			);
 
-			let count_rows = client
-				.query(&count_query, &[])
-				.await
-				.map_err(|e| e.to_string())?;
+			let count_rows = client.query(&count_query, &[]).await.map_err(|e| {
+				emit_query_output(
+					&app_handle,
+					QueryOutput {
+						output_type: QueryOutputType::Error,
+						time: Local::now(),
+						message: e.to_string(),
+						connection_id,
+					},
+				);
+				e.to_string()
+			})?;
 
 			let rows_count: i64 = match count_rows.first() {
 				Some(row) => row.get(0),
@@ -435,8 +516,12 @@ pub async fn get_table_data(
 }
 
 #[tauri::command]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
+#[instrument(
+	skip(app_handle, connection_controller, project_controller),
+	err(Debug)
+)]
 pub async fn get_table_data_count(
+	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -453,6 +538,7 @@ pub async fn get_table_data_count(
 
 	// Make sure to have client
 	connect_connection(
+		app_handle,
 		connection_controller.clone(),
 		project_controller,
 		project_id,

@@ -1,9 +1,11 @@
 use std::path::PathBuf;
 
+use chrono::{DateTime, Local};
 use serde::Serialize;
+use sqlparser::{dialect::PostgreSqlDialect, parser::Parser};
 use tablix_connection::controller::{Column, ConnectionClient, ConnectionController};
 use tablix_project::controller::ProjectController;
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
 use tokio_postgres::NoTls;
 use tracing::instrument;
 use uuid::Uuid;
@@ -26,6 +28,21 @@ pub enum QueryResult {
 		columns: Vec<Column>,
 		rows: Vec<Row>,
 	},
+}
+
+#[derive(Serialize, Clone)]
+pub enum QueryOutputType {
+	Info,
+	Error,
+}
+
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct QueryOutput {
+	pub time: DateTime<Local>,
+	pub message: String,
+	pub output_type: QueryOutputType,
+	pub connection_id: Uuid,
 }
 
 #[tauri::command]
@@ -247,24 +264,29 @@ pub async fn update_query_content(
 }
 
 #[tauri::command]
-#[instrument(skip(project_controller, connection_controller), err(Debug))]
+#[instrument(
+	skip(app_handle, project_controller, connection_controller),
+	err(Debug)
+)]
 pub async fn execute_query(
+	app_handle: tauri::AppHandle,
 	project_controller: State<'_, ProjectController>,
 	connection_controller: State<'_, ConnectionController>,
 	project_id: Uuid,
 	connection_id: Uuid,
 	query: String,
-) -> Result<QueryResult, String> {
+) -> Result<Vec<QueryResult>, String> {
 	let project = project_controller
 		.get(project_id)
 		.map_err(|e| e.to_string())?;
 
-	let _ = connection_controller
+	let connection = connection_controller
 		.get(project, connection_id)
 		.map_err(|e| e.to_string())?;
 
 	// Make sure to have client
 	crate::connections::connect_connection(
+		app_handle.clone(),
 		connection_controller.clone(),
 		project_controller,
 		project_id,
@@ -278,38 +300,81 @@ pub async fn execute_query(
 	};
 	let client = client_ref.value();
 
+	let mut results: Vec<QueryResult> = Vec::default();
+
 	match client {
 		ConnectionClient::PostgreSQL { client } => {
 			let query = query.trim();
 			tracing::info!("Executing query: {}", query);
+			emit_query_output(
+				&app_handle,
+				QueryOutput {
+					output_type: QueryOutputType::Info,
+					time: Local::now(),
+					message: format!("{}> {}", connection.details.get_database(), query),
+					connection_id,
+				},
+			);
 
-			let statement = client.prepare(query).await.map_err(|e| e.to_string())?;
+			let dialect = PostgreSqlDialect {};
+			let statements = Parser::parse_sql(&dialect, query).map_err(|e| e.to_string())?;
 
-			let columns: Vec<Column> = statement
-				.columns()
-				.iter()
-				.map(|column| Column {
-					name: column.name().to_string(),
-					data_type: column.type_().to_string(),
-				})
-				.collect();
-
-			if columns.is_empty() {
-				let affected_rows = client
-					.execute(&statement, &[])
+			for statement in statements {
+				let statement = client
+					.prepare(&statement.to_string())
 					.await
 					.map_err(|e| e.to_string())?;
 
-				return Ok(QueryResult::Modify { affected_rows });
-			} else {
-				let table_rows = client
-					.query(&statement, &[])
-					.await
-					.map_err(|e| e.to_string())?;
-				let rows = rows_to_json(table_rows)?;
+				let columns: Vec<Column> = statement
+					.columns()
+					.iter()
+					.map(|column| Column {
+						name: column.name().to_string(),
+						data_type: column.type_().to_string(),
+					})
+					.collect();
 
-				return Ok(QueryResult::Data { columns, rows });
+				if columns.is_empty() {
+					let affected_rows = match client.execute(&statement, &[]).await {
+						Ok(affected_rows) => affected_rows,
+						Err(e) => {
+							emit_query_output(
+								&app_handle,
+								QueryOutput {
+									output_type: QueryOutputType::Error,
+									time: Local::now(),
+									message: e.to_string(),
+									connection_id,
+								},
+							);
+							return Err(e.to_string());
+						}
+					};
+
+					results.push(QueryResult::Modify { affected_rows });
+				} else {
+					let table_rows = match client.query(&statement, &[]).await {
+						Ok(table_rows) => table_rows,
+						Err(e) => {
+							emit_query_output(
+								&app_handle,
+								QueryOutput {
+									output_type: QueryOutputType::Error,
+									time: Local::now(),
+									message: e.to_string(),
+									connection_id,
+								},
+							);
+							return Err(e.to_string());
+						}
+					};
+					let rows = rows_to_json(table_rows)?;
+
+					results.push(QueryResult::Data { columns, rows });
+				}
 			}
+
+			return Ok(results);
 		}
 	}
 }
@@ -347,4 +412,10 @@ pub async fn cancel_query(
 			return Ok(());
 		}
 	}
+}
+
+pub fn emit_query_output(app_handle: &AppHandle, output: QueryOutput) {
+	if let Err(e) = app_handle.emit("query_output", output) {
+		tracing::error!("Failed to emit query output {}", e);
+	};
 }

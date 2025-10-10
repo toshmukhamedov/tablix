@@ -40,3 +40,4 @@ chrono = { version = "0.4.42", features = ["serde"] }
 rust_decimal = { version = "1.38.0", features = ["db-tokio-postgres"] }
 bytes = "1.10.1"
 tokio = { version = "1.47.1", features = ["fs"] }
+sqlparser = "0.59.0"
