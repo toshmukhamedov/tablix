@@ -163,7 +163,7 @@ export const ConnectionNode: React.FC<Props> = ({ payload }) => {
 				{isConnecting ? (
 					<Loader size="16" color="dark.3" />
 				) : (
-					<span className="text-[#679ac5]">
+					<span className="text-[var(--postgresql)]">
 						<BiLogoPostgresql size="16" />
 					</span>
 				)}

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useReducer } from "react";
 import { type Connection, type ConnectionSchema, connectionCommands } from "@/commands/connection";
 import { useProject } from "./ProjectContext";
 
+// TODO: Separate schemas
 type ConnectionsContextState = {
 	connections: Connection[];
 	schemas: Map<string, ConnectionSchema>;

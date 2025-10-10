@@ -22,3 +22,11 @@ pub enum ConnectionDetails {
 		database: String,
 	},
 }
+
+impl ConnectionDetails {
+	pub fn get_database(&self) -> &String {
+		match &self {
+			ConnectionDetails::PostgreSQL { database, .. } => database,
+		}
+	}
+}

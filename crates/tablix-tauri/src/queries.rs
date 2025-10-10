@@ -305,25 +305,13 @@ pub async fn execute_query(
 	match client {
 		ConnectionClient::PostgreSQL { client } => {
 			let query = query.trim();
-			tracing::info!("Executing query: {}", query);
-			emit_query_output(
-				&app_handle,
-				QueryOutput {
-					output_type: QueryOutputType::Info,
-					time: Local::now(),
-					message: format!("{}> {}", connection.details.get_database(), query),
-					connection_id,
-				},
-			);
 
 			let dialect = PostgreSqlDialect {};
 			let statements = Parser::parse_sql(&dialect, query).map_err(|e| e.to_string())?;
 
 			for statement in statements {
-				let statement = client
-					.prepare(&statement.to_string())
-					.await
-					.map_err(|e| e.to_string())?;
+				let query = statement.to_string();
+				let statement = client.prepare(&query).await.map_err(|e| e.to_string())?;
 
 				let columns: Vec<Column> = statement
 					.columns()
@@ -333,6 +321,17 @@ pub async fn execute_query(
 						data_type: column.type_().to_string(),
 					})
 					.collect();
+
+				tracing::info!("Executing query: {}", query);
+				emit_query_output(
+					&app_handle,
+					QueryOutput {
+						output_type: QueryOutputType::Info,
+						time: Local::now(),
+						message: format!("{}> {}", connection.details.get_database(), query),
+						connection_id,
+					},
+				);
 
 				if columns.is_empty() {
 					let affected_rows = match client.execute(&statement, &[]).await {

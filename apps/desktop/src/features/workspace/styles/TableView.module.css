@@ -5,6 +5,7 @@
 	overflow: auto;
 	scrollbar-width: thin;
 	padding-bottom: 100px;
+	overscroll-behavior: none;
 }
 
 .table {

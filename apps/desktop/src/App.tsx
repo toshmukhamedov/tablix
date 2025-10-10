@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { platformName } from "@/lib/platform";
 
 import "./App.css";
 import { appCommands } from "./commands/app";
@@ -42,7 +41,6 @@ export const App: React.FC = () => {
 
 	return (
 		<div id="app" role="application" onContextMenu={handleContextMenu}>
-			{platformName === "macos" && <div className="drag-region" data-tauri-drag-region />}
 			<ProjectProvider>
 				{view === "welcome" ? (
 					<Welcome />

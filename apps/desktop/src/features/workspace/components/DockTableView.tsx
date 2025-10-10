@@ -6,62 +6,40 @@ import {
 	IconChevronsRight,
 	IconRefresh,
 } from "@tabler/icons-react";
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
 import {
-	connectionCommands,
-	type Pagination,
-	type Row,
-	type TableData,
-} from "@/commands/connection";
+	type ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	getPaginationRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
+import { useMemo, useState } from "react";
+import type { Pagination, Row } from "@/commands/connection";
 import { ToolbarButton } from "@/components/ToolbarButton";
-import type { TableViewTab } from "@/context/MainTabsContext";
-import { useProject } from "@/context/ProjectContext";
+import type { DataViewTab } from "@/context/DockTabsContext";
 import classes from "../styles/TableView.module.css";
 
 type Props = {
-	tab: TableViewTab;
+	tab: DataViewTab;
 };
-export const TableView: React.FC<Props> = ({ tab }) => {
-	const { project } = useProject();
-	const [tableData, setTableData] = useState<TableData>({
-		columns: [],
-		rows: [],
-		rowsCount: 0,
-		hasMore: true,
-		rangeStart: 1,
-		rangeEnd: 100,
-	});
+export const DockTableView: React.FC<Props> = ({ tab }) => {
 	const [pagination, setPagination] = useState<Pagination>({
 		pageIndex: 0,
 		pageSize: 100,
 	});
-
-	const loadData = async () => {
-		const tableData = await connectionCommands.getTableData({
-			projectId: project.id,
-			connectionId: tab.connectionId,
-			pagination,
-			schema: tab.schema,
-			table: tab.table,
-		});
-		setTableData(tableData);
-	};
-
-	useEffect(() => {
-		loadData().catch(console.error);
-	}, [pagination]);
+	const rangeStart = pagination.pageIndex * pagination.pageSize + 1;
+	const rangeEnd = (pagination.pageIndex + 1) * pagination.pageSize;
 
 	const columns = useMemo(() => {
 		const columns: ColumnDef<Row>[] = [
 			{
 				id: "index",
 				header: "",
-				accessorFn: (_, index) => index + tableData.rangeStart,
+				accessorFn: (_, index) => index + rangeStart,
 			},
 		];
-		for (let index = 0; index < tableData.columns.length; index++) {
-			const column = tableData.columns[index];
+		for (let index = 0; index < tab.columns.length; index++) {
+			const column = tab.columns[index];
 			columns.push({
 				id: index.toString(),
 				header: () => (
@@ -82,10 +60,10 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 			});
 		}
 		return columns;
-	}, [tableData]);
+	}, [tab.columns]);
 
 	const table = useReactTable({
-		data: tableData.rows,
+		data: tab.rows,
 		columns,
 		state: {
 			columnPinning: {
@@ -94,8 +72,8 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 			pagination,
 		},
 		getCoreRowModel: getCoreRowModel(),
-		rowCount: tableData.rowsCount,
-		manualPagination: true,
+		getPaginationRowModel: getPaginationRowModel(),
+		rowCount: tab.rows.length,
 		onPaginationChange: setPagination,
 		autoResetPageIndex: false,
 	});
@@ -104,16 +82,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 	const canNextPage = table.getCanNextPage();
 
 	const refreshRowsCount = () => {
-		connectionCommands
-			.getTableDataCount({
-				projectId: project.id,
-				connectionId: tab.connectionId,
-				schema: tab.schema,
-				table: tab.table,
-			})
-			.then((rowsCount) => {
-				setTableData((prev) => ({ ...prev, rowsCount }));
-			});
+		// TODO: Implement refreshRowsCount
 	};
 
 	return (
@@ -131,7 +100,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 				</ToolbarButton>
 				<ToolbarButton className="mr-1 relative" title="Change Page Size">
 					<Text size="xs">
-						{tableData.rangeStart}-{tableData.rangeEnd}
+						{rangeStart}-{rangeEnd}
 					</Text>
 					<select
 						value={pagination.pageSize}
@@ -149,7 +118,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 				</ToolbarButton>
 
 				<ToolbarButton onClick={refreshRowsCount} title="Refresh total count">
-					<Text size="xs">of {tableData.rowsCount}</Text>
+					<Text size="xs">of {tab.rows.length}</Text>
 				</ToolbarButton>
 				<ToolbarButton disabled={!canNextPage} onClick={table.nextPage} title="Next Page">
 					<IconChevronRight stroke="1" size="20" />

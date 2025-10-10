@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer } from "react";
 import type { Query } from "@/commands/query";
 
-type BaseTab = {
+export type BaseTab = {
 	id: string;
 };
 export type TableViewTab = BaseTab & {
@@ -43,6 +43,11 @@ export type MainTabsAction =
 	| {
 			type: "set_active_tab";
 			tabId: string | null;
+	  }
+	| {
+			type: "set_connection";
+			tabId: string;
+			connectionId: string | null;
 	  }
 	| {
 			type: "mark_as_dirty";
@@ -141,6 +146,18 @@ const reducer: React.Reducer<Omit<MainTabsContext, "dispatch">, MainTabsAction> 
 
 			const newTabs = [...state.tabs];
 			newTabs[index] = { ...tab, isDirty: action.isDirty };
+
+			return { ...state, tabs: newTabs };
+		}
+		case "set_connection": {
+			const index = state.tabs.findIndex((tab) => tab.id === action.tabId);
+			if (index === -1) return state;
+
+			const tab = state.tabs[index] as EditorTab;
+			if (tab.connectionId === action.connectionId) return state;
+
+			const newTabs = [...state.tabs];
+			newTabs[index] = { ...tab, connectionId: action.connectionId };
 
 			return { ...state, tabs: newTabs };
 		}

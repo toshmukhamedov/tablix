@@ -1,8 +1,17 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { Column, Row } from "./connection";
 
 export type Query = {
 	name: string;
 	path: string;
+};
+
+type QueryOutputType = "Info" | "Error";
+export type QueryOutput = {
+	outputType: QueryOutputType;
+	message: string;
+	time: string;
+	connectionId: string;
 };
 
 export type AddQuery = {
@@ -31,6 +40,22 @@ export type GetQueryContent = {
 export type GetQueries = {
 	projectId: string;
 };
+export type ExecuteQuery = {
+	projectId: string;
+	connectionId: string;
+	query: string;
+};
+export type QueryResult =
+	| {
+			type: "modify";
+			affectedRows: number;
+	  }
+	| {
+			type: "data";
+			columns: Column[];
+			rows: Row[];
+	  };
+export type CancelQuery = Omit<ExecuteQuery, "query">;
 
 class QueryCommands {
 	async list(data: GetQueries): Promise<Query[]> {
@@ -55,6 +80,12 @@ class QueryCommands {
 
 	async updateContent(data: UpdateQueryContent): Promise<void> {
 		return await invoke("update_query_content", data);
+	}
+	async execute(data: ExecuteQuery): Promise<QueryResult[]> {
+		return await invoke("execute_query", data);
+	}
+	async cancel(data: CancelQuery): Promise<void> {
+		return await invoke("cancel_query", data);
 	}
 }
 

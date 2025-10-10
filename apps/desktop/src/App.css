@@ -23,7 +23,8 @@ html {
 
 @theme {
 	--font-mono: "JetBrains Mono", monospace;
-	/* ... */
+	/* Custom variables */
+	--postgresql: #679ac5;
 }
 
 :root {

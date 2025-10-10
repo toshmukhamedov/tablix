@@ -1,5 +1,6 @@
 import { Indicator, Tabs, Text } from "@mantine/core";
 import { IconFileTypeSql, IconTable, IconX } from "@tabler/icons-react";
+import { confirm } from "@tauri-apps/plugin-dialog";
 import { type Tab, useMainTabs } from "@/context/MainTabsContext";
 import { Editor } from "@/features/editor/Editor";
 import { filename } from "@/lib/utils/filename";
@@ -11,8 +12,19 @@ type Props = {
 export const TabListItem: React.FC<Props> = ({ tab }) => {
 	const { dispatch } = useMainTabs();
 
-	const closeTab = (e: React.MouseEvent) => {
+	const closeTab = async (e: React.MouseEvent) => {
 		e.stopPropagation();
+
+		if (tab.type === "editor" && tab.isDirty) {
+			const confirmation = await confirm(
+				"This file has unsaved changes. Continue without saving?",
+				{
+					kind: "warning",
+				},
+			);
+			if (!confirmation) return;
+		}
+
 		dispatch({
 			type: "close",
 			tabId: tab.id,
