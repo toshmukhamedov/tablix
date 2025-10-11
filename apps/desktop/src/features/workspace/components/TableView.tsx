@@ -118,7 +118,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 
 	return (
 		<div className="h-full flex flex-col">
-			<div className="h-10 px-2 py-1 flex items-center">
+			<div className="h-10 px-2 py-1 flex items-center shrink-0">
 				<ToolbarButton disabled={!canPreviousPage} onClick={table.firstPage} title="First Page">
 					<IconChevronsLeft stroke="1" size="20" />
 				</ToolbarButton>

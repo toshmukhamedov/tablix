@@ -55,7 +55,7 @@ export function WorkspaceInner() {
 							</Split>
 						</Split.Pane>
 						<Split.Resizer {...getResizerProps()} />
-						<Split.Pane minHeight="150px" styles={getPaneStyles("dock")}>
+						<Split.Pane minHeight="250px" styles={getPaneStyles("dock")}>
 							<Dock />
 						</Split.Pane>
 					</Split>

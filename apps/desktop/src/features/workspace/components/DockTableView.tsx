@@ -4,7 +4,6 @@ import {
 	IconChevronRight,
 	IconChevronsLeft,
 	IconChevronsRight,
-	IconRefresh,
 } from "@tabler/icons-react";
 import {
 	type ColumnDef,
@@ -87,7 +86,7 @@ export const DockTableView: React.FC<Props> = ({ tab }) => {
 
 	return (
 		<div className="h-full flex flex-col">
-			<div className="h-10 px-2 py-1 flex items-center">
+			<div className="h-10 px-2 py-1 flex items-center shrink-0">
 				<ToolbarButton disabled={!canPreviousPage} onClick={table.firstPage} title="First Page">
 					<IconChevronsLeft stroke="1" size="20" />
 				</ToolbarButton>
@@ -126,36 +125,36 @@ export const DockTableView: React.FC<Props> = ({ tab }) => {
 				<ToolbarButton disabled={!canNextPage} onClick={table.lastPage} title="Last Page">
 					<IconChevronsRight stroke="1" size="20" />
 				</ToolbarButton>
-				<div className="border-l h-4 border-l-[var(--mantine-color-dark-5)] mx-2" />
-				<ToolbarButton onClick={() => setPagination((prev) => ({ ...prev }))} title="Refresh data">
-					<IconRefresh stroke="1" size="20" />
-				</ToolbarButton>
 			</div>
-			<div className={classes.tableWrapper}>
-				<table className={classes.table}>
-					<thead>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => (
-									<th key={header.id}>
-										{header.isPlaceholder
-											? null
-											: flexRender(header.column.columnDef.header, header.getContext())}
-									</th>
-								))}
-							</tr>
-						))}
-					</thead>
-					<tbody>
-						{table.getRowModel().rows.map((row) => (
-							<tr key={row.id}>
-								{row.getVisibleCells().map((cell) => (
-									<td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-								))}
-							</tr>
-						))}
-					</tbody>
-				</table>
+			<div className="flex-1 min-h-0 overflow-hidden">
+				<div className={classes.tableWrapper} style={{ height: "100%" }}>
+					<table className={classes.table}>
+						<thead>
+							{table.getHeaderGroups().map((headerGroup) => (
+								<tr key={headerGroup.id}>
+									{headerGroup.headers.map((header) => (
+										<th key={header.id}>
+											{header.isPlaceholder
+												? null
+												: flexRender(header.column.columnDef.header, header.getContext())}
+										</th>
+									))}
+								</tr>
+							))}
+						</thead>
+						<tbody>
+							{table.getRowModel().rows.map((row) => (
+								<tr key={row.id}>
+									{row.getVisibleCells().map((cell) => (
+										<td key={cell.id}>
+											{flexRender(cell.column.columnDef.cell, cell.getContext())}
+										</td>
+									))}
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	);
