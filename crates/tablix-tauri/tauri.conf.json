@@ -6,7 +6,7 @@
 	"build": {
 		"beforeDevCommand": "pnpm dev:internal-tauri",
 		"devUrl": "http://localhost:1420",
-		"beforeBuildCommand": "[ \"$CI\" = \"true\" ] || pnpm build:desktop -- --mode development",
+		"beforeBuildCommand": "pnpm build:desktop",
 		"frontendDist": "../../apps/desktop/dist"
 	},
 	"app": {
