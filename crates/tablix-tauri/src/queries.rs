@@ -21,9 +21,8 @@ pub struct Query {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum QueryResult {
-	Modify {
-		affected_rows: u64,
-	},
+	#[serde(rename_all = "camelCase")]
+	Modify { affected_rows: u64 },
 	Data {
 		columns: Vec<Column>,
 		rows: Vec<Row>,

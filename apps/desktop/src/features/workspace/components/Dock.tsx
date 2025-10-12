@@ -1,20 +1,32 @@
 import { Tabs } from "@mantine/core";
-import { useActiveConnection } from "@/context/ActiveConnectionContext";
-import { useConnectionOutputs } from "@/context/ConnectionOutputContext";
+import { useEffect } from "react";
 import { useDockTabs } from "@/context/DockTabsContext";
+import { useMainTabs } from "@/context/MainTabsContext";
+import { useOpenSections } from "@/context/OpenSectionsContext";
 import classes from "../styles/Tabs.module.css";
 import { DockTabs, TabContents } from "./DockTabs";
 
 export const Dock: React.FC = () => {
-	const { activeConnectionId } = useActiveConnection();
-	const { outputs } = useConnectionOutputs();
+	const { activeTabId } = useMainTabs();
 	const { state } = useDockTabs();
+	const { setOpenSections } = useOpenSections();
+
+	useEffect(() => {
+		console.info("Size", state.size);
+		if (state.size < 1) {
+			setOpenSections((prev) => {
+				const sections = new Set(prev);
+				sections.delete("dock");
+				return sections;
+			});
+		}
+	}, [state]);
 
 	return (
-		<Tabs classNames={classes} value={activeConnectionId}>
-			{Array.from(outputs.entries()).map(([connectionId, outputs]) => (
-				<Tabs.Panel key={connectionId} value={connectionId} h="100%">
-					<Tabs classNames={classes} value={state.get(connectionId)?.activeTabId}>
+		<Tabs classNames={classes} value={activeTabId}>
+			{Array.from(state.entries()).map(([mainTabId, group]) => (
+				<Tabs.Panel key={mainTabId} value={mainTabId} h="100%">
+					<Tabs classNames={classes} value={state.get(mainTabId)?.activeTabId}>
 						<Tabs.List
 							styles={{
 								list: {
@@ -23,9 +35,9 @@ export const Dock: React.FC = () => {
 								},
 							}}
 						>
-							<DockTabs connectionId={connectionId} />
+							<DockTabs connectionId={mainTabId} />
 						</Tabs.List>
-						<TabContents outputs={outputs} connectionId={connectionId} />
+						<TabContents group={group} />
 					</Tabs>
 				</Tabs.Panel>
 			))}

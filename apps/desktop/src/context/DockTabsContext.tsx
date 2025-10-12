@@ -1,56 +1,65 @@
 import { createContext, useContext, useReducer } from "react";
-import type { TableData } from "@/commands/connection";
+import type { DataResult, ModifyResult } from "@/commands/query";
 import type { BaseTab } from "./MainTabsContext";
 
-export type DataViewTab = BaseTab & Pick<TableData, "columns" | "rows">;
+export type DataResultTab = BaseTab & DataResult;
+export type ModifyResultTab = BaseTab & ModifyResult;
+export type DockTab = DataResultTab | ModifyResultTab;
 export type DockTabsAction =
 	| {
 			type: "set_tabs";
-			connectionId: string;
-			tabs: Omit<DataViewTab, "id">[];
+			mainTabId: string;
+			tabs: Omit<DockTab, "id">[];
 	  }
 	| {
 			type: "set_active_tab";
-			connectionId: string;
+			mainTabId: string;
 			tabId: string;
 	  }
 	| {
 			type: "close_tab";
-			connectionId: string;
+			mainTabId: string;
 			tabId: string;
+	  }
+	| {
+			type: "close_group";
+			mainTabId: string;
 	  };
 
-type ConnectionTab = {
+export type DockTabGroup = {
 	activeTabId: string;
-	tabs: DataViewTab[];
+	tabs: DockTab[];
 };
 type DockTabsContext = {
-	state: Map<string, ConnectionTab>;
+	state: Map<string, DockTabGroup>;
 	dispatch: React.Dispatch<DockTabsAction>;
 };
 
 const DockTabsContext = createContext<DockTabsContext | null>(null);
 
-const reducer: React.Reducer<Map<string, ConnectionTab>, DockTabsAction> = (state, action) => {
+const reducer: React.Reducer<Map<string, DockTabGroup>, DockTabsAction> = (state, action) => {
 	const newState = new Map(state);
 
 	switch (action.type) {
 		case "set_tabs": {
-			const tabs = action.tabs.map<DataViewTab>((tab) => ({
-				id: crypto.randomUUID(),
-				...tab,
-			}));
-			newState.set(action.connectionId, {
+			const tabs = action.tabs.map(
+				(tab) =>
+					({
+						id: crypto.randomUUID(),
+						...tab,
+					}) as DockTab,
+			);
+			newState.set(action.mainTabId, {
 				tabs,
-				activeTabId: tabs[0]?.id ?? "output",
+				activeTabId: tabs[0]?.id,
 			});
 			return newState;
 		}
 
 		case "set_active_tab": {
-			const connectionTab = newState.get(action.connectionId);
+			const connectionTab = newState.get(action.mainTabId);
 			if (!connectionTab) return state;
-			newState.set(action.connectionId, {
+			newState.set(action.mainTabId, {
 				...connectionTab,
 				activeTabId: action.tabId,
 			});
@@ -58,16 +67,25 @@ const reducer: React.Reducer<Map<string, ConnectionTab>, DockTabsAction> = (stat
 		}
 
 		case "close_tab": {
-			const connection = newState.get(action.connectionId);
-			if (!connection) return state;
+			const group = newState.get(action.mainTabId);
+			if (!group) return state;
 
-			const tabs = connection.tabs.filter((t) => t.id !== action.tabId);
-			const activeTabId =
-				connection.activeTabId === action.tabId
-					? (tabs.at(-1)?.id ?? "output")
-					: connection.activeTabId;
+			const tabs = group.tabs.filter((t) => t.id !== action.tabId);
+			const activeTabId = group.activeTabId === action.tabId ? tabs.at(-1)?.id : group.activeTabId;
 
-			newState.set(action.connectionId, { tabs, activeTabId });
+			if (activeTabId) {
+				newState.set(action.mainTabId, { tabs, activeTabId });
+			} else {
+				newState.delete(action.mainTabId);
+			}
+
+			return newState;
+		}
+		case "close_group": {
+			const group = newState.get(action.mainTabId);
+			if (!group) return state;
+
+			newState.delete(action.mainTabId);
 			return newState;
 		}
 	}
@@ -77,10 +95,7 @@ type Props = {
 	children: React.ReactNode;
 };
 export const DockTabsProvider: React.FC<Props> = ({ children }) => {
-	const [state, dispatch] = useReducer(
-		reducer,
-		new Map([["default", { tabs: [], activeTabId: "output" }]]),
-	);
+	const [state, dispatch] = useReducer(reducer, new Map());
 	return (
 		<DockTabsContext.Provider value={{ state, dispatch }}>{children}</DockTabsContext.Provider>
 	);

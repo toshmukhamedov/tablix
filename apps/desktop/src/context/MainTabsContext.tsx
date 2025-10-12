@@ -89,10 +89,7 @@ const reducer: React.Reducer<Omit<MainTabsContext, "dispatch">, MainTabsAction> 
 		case "add_editor_tab": {
 			const newTab = action.tab;
 			const existedTab = state.tabs.find(
-				(tab) =>
-					tab.type === "editor" &&
-					tab.connectionId === newTab.connectionId &&
-					tab.query.path === newTab.query.path,
+				(tab) => tab.type === "editor" && tab.query.path === newTab.query.path,
 			);
 			if (existedTab) return { ...state, activeTabId: existedTab.id };
 

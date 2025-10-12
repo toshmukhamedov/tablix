@@ -6,14 +6,6 @@ export type Query = {
 	path: string;
 };
 
-type QueryOutputType = "Info" | "Error";
-export type QueryOutput = {
-	outputType: QueryOutputType;
-	message: string;
-	time: string;
-	connectionId: string;
-};
-
 export type AddQuery = {
 	projectId: string;
 	name?: string;
@@ -45,16 +37,16 @@ export type ExecuteQuery = {
 	connectionId: string;
 	query: string;
 };
-export type QueryResult =
-	| {
-			type: "modify";
-			affectedRows: number;
-	  }
-	| {
-			type: "data";
-			columns: Column[];
-			rows: Row[];
-	  };
+export type ModifyResult = {
+	type: "modify";
+	affectedRows: number;
+};
+export type DataResult = {
+	type: "data";
+	columns: Column[];
+	rows: Row[];
+};
+export type QueryResult = ModifyResult | DataResult;
 export type CancelQuery = Omit<ExecuteQuery, "query">;
 
 class QueryCommands {

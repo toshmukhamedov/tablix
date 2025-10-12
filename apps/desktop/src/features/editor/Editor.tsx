@@ -7,7 +7,7 @@ import { BiLogoPostgresql } from "react-icons/bi";
 import { queryCommands } from "@/commands/query";
 import { ToolbarButton } from "@/components/ToolbarButton";
 import { useConnections } from "@/context/ConnectionsContext";
-import { type DataViewTab, useDockTabs } from "@/context/DockTabsContext";
+import { useDockTabs } from "@/context/DockTabsContext";
 import { type EditorTab, useMainTabs } from "@/context/MainTabsContext";
 import { useOpenSections } from "@/context/OpenSectionsContext";
 import { useProject } from "@/context/ProjectContext";
@@ -101,17 +101,10 @@ export const Editor: React.FC<Props> = ({ tab }) => {
 				query: view.state.doc.toString(),
 			});
 
-			const tableData = results
-				.filter((result) => result.type === "data")
-				.map<Omit<DataViewTab, "id">>((result) => ({
-					rows: result.rows,
-					columns: result.columns,
-				}));
-
 			dockTabsDispatch({
 				type: "set_tabs",
-				connectionId: connection.id,
-				tabs: tableData,
+				mainTabId: tab.id,
+				tabs: results,
 			});
 
 			// Open Dock

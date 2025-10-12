@@ -15,13 +15,13 @@ import {
 import { useMemo, useState } from "react";
 import type { Pagination, Row } from "@/commands/connection";
 import { ToolbarButton } from "@/components/ToolbarButton";
-import type { DataViewTab } from "@/context/DockTabsContext";
+import type { DataResultTab } from "@/context/DockTabsContext";
 import classes from "../styles/TableView.module.css";
 
 type Props = {
-	tab: DataViewTab;
+	tab: DataResultTab;
 };
-export const DockTableView: React.FC<Props> = ({ tab }) => {
+export const DataResult: React.FC<Props> = ({ tab }) => {
 	const [pagination, setPagination] = useState<Pagination>({
 		pageIndex: 0,
 		pageSize: 100,

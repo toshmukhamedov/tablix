@@ -1,11 +1,12 @@
+import { Button, Flex, Space, Table, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconDotsVertical } from "@tabler/icons-react";
+import { Menu } from "@tauri-apps/api/menu";
+import { useMemo } from "react";
 import { type Project, projectCommands } from "@/commands/project";
-import { Flex, Space, Table, Text } from "@mantine/core";
-
 import { useProjectContext } from "@/context/ProjectContext";
 import { useProjects } from "@/context/ProjectsContext";
 import { useView } from "@/context/ViewContext";
-import { useMemo, useState } from "react";
-import { ProjectMenu } from "../components/ProjectMenu";
 
 type Props = {
 	search: string;
@@ -13,16 +14,10 @@ type Props = {
 	openEditModal: () => void;
 };
 
-export const ProjectsTable: React.FC<Props> = ({
-	search,
-	setEditingProject: setRenamingProject,
-	openEditModal: openRenameModal,
-}) => {
-	const { state } = useProjects();
+export const ProjectsTable: React.FC<Props> = ({ search, setEditingProject, openEditModal }) => {
+	const { state, dispatch } = useProjects();
 	const { setProject } = useProjectContext();
 	const { setView } = useView();
-
-	const [activeProject, setActiveProject] = useState<Project | null>(null);
 
 	const projects: Project[] = useMemo(() => {
 		const searchString = search.toLowerCase();
@@ -36,13 +31,52 @@ export const ProjectsTable: React.FC<Props> = ({
 		setView("workspace");
 	};
 
+	const onDelete = (project: Project) => {
+		projectCommands
+			.deleteProject({
+				id: project.id,
+				cleanup: false,
+			})
+			.then(() => {
+				projectCommands.loadAll().then((projects) => dispatch({ type: "set", projects }));
+			})
+			.catch((message) => {
+				notifications.show({
+					message,
+					color: "red",
+				});
+			});
+	};
+
+	const onEdit = (project: Project) => {
+		setEditingProject(project);
+		openEditModal();
+	};
+
+	const onContextMenu = async (e: React.MouseEvent, project: Project) => {
+		e.preventDefault();
+		const menu = await Menu.new({
+			items: [
+				{
+					text: "Edit",
+					action: () => onEdit(project),
+				},
+				{
+					text: "Delete",
+					action: () => onDelete(project),
+				},
+			],
+		});
+		await menu.popup();
+	};
+
 	return (
 		<Table.ScrollContainer minWidth="max-content" scrollAreaProps={{ scrollbarSize: "0.5rem" }}>
 			<Table highlightOnHoverColor="dark.6" highlightOnHover>
 				<Table.Tbody>
 					{projects.map((project) => (
-						<Table.Tr key={project.id}>
-							<Table.Td onClick={() => openProject(project)} style={{ cursor: "pointer" }}>
+						<Table.Tr key={project.id} onContextMenu={(e) => onContextMenu(e, project)}>
+							<Table.Td onClick={() => openProject(project)}>
 								<Text size={"sm"} fw="500">
 									{project.name}
 								</Text>
@@ -53,13 +87,15 @@ export const ProjectsTable: React.FC<Props> = ({
 							</Table.Td>
 							<Table.Td>
 								<Flex justify="end" mr="sm">
-									<ProjectMenu
-										currentProject={project}
-										activeProject={activeProject}
-										setActiveProject={setActiveProject}
-										setEditingProject={setRenamingProject}
-										openEditModal={openRenameModal}
-									/>
+									<Button
+										variant="transparent"
+										c="dark.1"
+										size="compact-sm"
+										p="unset"
+										onClick={(e) => onContextMenu(e, project)}
+									>
+										<IconDotsVertical />
+									</Button>
 								</Flex>
 							</Table.Td>
 						</Table.Tr>

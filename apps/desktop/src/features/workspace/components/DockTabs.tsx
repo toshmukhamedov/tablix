@@ -1,9 +1,8 @@
 import { Tabs } from "@mantine/core";
-import { IconTable, IconTerminal, IconX } from "@tabler/icons-react";
-import type { QueryOutput } from "@/commands/query";
-import { useDockTabs } from "@/context/DockTabsContext";
-import { DockTableView } from "./DockTableView";
-import { Output } from "./Output";
+import { IconInfoSquare, IconTable, IconX } from "@tabler/icons-react";
+import { type DockTab, type DockTabGroup, useDockTabs } from "@/context/DockTabsContext";
+import { DataResult } from "./DataResult";
+import { ModifyResult } from "./ModifyResult";
 
 type Props = {
 	connectionId: string;
@@ -16,7 +15,7 @@ export const DockTabs: React.FC<Props> = ({ connectionId }) => {
 		e.stopPropagation();
 		dispatch({
 			type: "close_tab",
-			connectionId,
+			mainTabId: connectionId,
 			tabId,
 		});
 	};
@@ -31,27 +30,20 @@ export const DockTabs: React.FC<Props> = ({ connectionId }) => {
 	const onClick = (tabId: string) => {
 		dispatch({
 			type: "set_active_tab",
-			connectionId,
+			mainTabId: connectionId,
 			tabId,
 		});
 	};
 
 	return (
 		<>
-			<Tabs.Tab
-				value="output"
-				leftSection={<IconTerminal size="14" />}
-				onClick={() => onClick("output")}
-			>
-				Output
-			</Tabs.Tab>
 			{tabs.map((tab, index) => (
 				<Tabs.Tab
 					value={tab.id}
 					key={tab.id}
 					onClick={() => onClick(tab.id)}
 					onAuxClick={(e) => onAuxClick(e, tab.id)}
-					leftSection={<IconTable size="14" />}
+					leftSection={tab.type === "data" ? <IconTable size="14" /> : <IconInfoSquare size="14" />}
 					rightSection={<IconX size="14" stroke="1" onClick={(e) => closeTab(e, tab.id)} />}
 				>
 					Result {index + 1}
@@ -62,23 +54,27 @@ export const DockTabs: React.FC<Props> = ({ connectionId }) => {
 };
 
 type TabContentsProps = {
-	connectionId: string;
-	outputs: QueryOutput[];
+	group: DockTabGroup;
 };
-export const TabContents: React.FC<TabContentsProps> = ({ connectionId, outputs }) => {
-	const { state } = useDockTabs();
-	const tabs = state.get(connectionId)?.tabs ?? [];
-
+export const TabContents: React.FC<TabContentsProps> = ({ group }) => {
 	return (
 		<>
-			<Tabs.Panel value="output" flex="1" mih="0">
-				<Output outputs={outputs} />
-			</Tabs.Panel>
-			{tabs.map((tab) => (
+			{group.tabs.map((tab) => (
 				<Tabs.Panel value={tab.id} key={tab.id} flex="1" mih="0">
-					<DockTableView tab={tab} />
+					<TabContent tab={tab} />
 				</Tabs.Panel>
 			))}
 		</>
 	);
+};
+
+export const TabContent: React.FC<{ tab: DockTab }> = ({ tab }) => {
+	switch (tab.type) {
+		case "data": {
+			return <DataResult tab={tab} />;
+		}
+		case "modify": {
+			return <ModifyResult tab={tab} />;
+		}
+	}
 };

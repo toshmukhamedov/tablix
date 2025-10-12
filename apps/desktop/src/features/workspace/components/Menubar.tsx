@@ -1,7 +1,10 @@
 import { Badge, Code, Divider, Flex, Title } from "@mantine/core";
 import {
+	IconLayoutBottombar,
 	IconLayoutBottombarFilled,
+	IconLayoutSidebar,
 	IconLayoutSidebarFilled,
+	IconLayoutSidebarRight,
 	IconLayoutSidebarRightFilled,
 } from "@tabler/icons-react";
 import { projectCommands } from "@/commands/project";
@@ -49,27 +52,36 @@ export const Menubar: React.FC = () => {
 			<div className="justify-self-end flex gap-1 ml-auto mr-2">
 				<button
 					type="button"
-					className="text-[var(--mantine-color-dark-1) data-[active=true]:bg-[var(--mantine-color-dark-5)] p-0.5 rounded"
-					data-active={openSections.has("explorer")}
+					className="text-[var(--mantine-color-dark-1)"
 					onClick={() => toggleSection("explorer")}
 				>
-					<IconLayoutSidebarFilled size="20" className="pr-[1px]" />
+					{openSections.has("explorer") ? (
+						<IconLayoutSidebarFilled size="20" />
+					) : (
+						<IconLayoutSidebar size="20" />
+					)}
 				</button>
 				<button
 					type="button"
-					className="text-[var(--mantine-color-dark-1) data-[active=true]:bg-[var(--mantine-color-dark-5)] p-0.5 rounded"
-					data-active={openSections.has("dock")}
+					className="text-[var(--mantine-color-dark-1)"
 					onClick={() => toggleSection("dock")}
 				>
-					<IconLayoutBottombarFilled size="20" className="pr-[1px]" />
+					{openSections.has("dock") ? (
+						<IconLayoutBottombarFilled size="20" />
+					) : (
+						<IconLayoutBottombar size="20" />
+					)}
 				</button>
 				<button
 					type="button"
-					className="text-[var(--mantine-color-dark-1) data-[active=true]:bg-[var(--mantine-color-dark-5)] p-0.5 rounded"
-					data-active={openSections.has("queries")}
+					className="text-[var(--mantine-color-dark-1)"
 					onClick={() => toggleSection("queries")}
 				>
-					<IconLayoutSidebarRightFilled size="20" className="pr-[1px]" />
+					{openSections.has("queries") ? (
+						<IconLayoutSidebarRightFilled size="20" />
+					) : (
+						<IconLayoutSidebarRight size="20" />
+					)}
 				</button>
 			</div>
 		</Flex>

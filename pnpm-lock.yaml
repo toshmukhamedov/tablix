@@ -60,9 +60,6 @@ importers:
       '@mantine/hooks':
         specifier: ^8.3.2
         version: 8.3.2(react@19.1.1)
-      '@mantine/modals':
-        specifier: ^8.3.2
-        version: 8.3.2(@mantine/core@8.3.2(@mantine/hooks@8.3.2(react@19.1.1))(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@mantine/hooks@8.3.2(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@mantine/notifications':
         specifier: ^8.3.2
         version: 8.3.2(@mantine/core@8.3.2(@mantine/hooks@8.3.2(react@19.1.1))(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@mantine/hooks@8.3.2(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -557,14 +554,6 @@ packages:
     resolution: {integrity: sha512-urDgQJNAs2t2mAyGaA+7uNsBMRn9U/ccvi+ZUl5ef3/Wzfv5KYHe9LA9DBNhn24BTSewxrI27W0EFpFxv/Jsbg==}
     peerDependencies:
       react: ^18.x || ^19.x
-
-  '@mantine/modals@8.3.2':
-    resolution: {integrity: sha512-1Of0KP27bAo8HTfsO7p5wy26+aUrb8h1w3mftoVlw463f/NYABm6ax+aZDx5NZdcqime2mnHasHaOWbHDfIk1A==}
-    peerDependencies:
-      '@mantine/core': 8.3.2
-      '@mantine/hooks': 8.3.2
-      react: ^18.x || ^19.x
-      react-dom: ^18.x || ^19.x
 
   '@mantine/notifications@8.3.2':
     resolution: {integrity: sha512-DLo3T8epAVPKT8KJePHix6xyY8NzWYC4u9W/UyUBtZlhooJrY1Fm77B9vMP+T0dJg//QnE8WDLHVtOb0QNb1Ow==}
@@ -1929,13 +1918,6 @@ snapshots:
   '@mantine/hooks@8.3.2(react@19.1.1)':
     dependencies:
       react: 19.1.1
-
-  '@mantine/modals@8.3.2(@mantine/core@8.3.2(@mantine/hooks@8.3.2(react@19.1.1))(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@mantine/hooks@8.3.2(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
-    dependencies:
-      '@mantine/core': 8.3.2(@mantine/hooks@8.3.2(react@19.1.1))(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
-      '@mantine/hooks': 8.3.2(react@19.1.1)
-      react: 19.1.1
-      react-dom: 19.1.1(react@19.1.1)
 
   '@mantine/notifications@8.3.2(@mantine/core@8.3.2(@mantine/hooks@8.3.2(react@19.1.1))(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@mantine/hooks@8.3.2(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
