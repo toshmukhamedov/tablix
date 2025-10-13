@@ -1,4 +1,5 @@
 import {
+	Kbd,
 	type MantineThemeComponents,
 	NumberInput,
 	PasswordInput,
@@ -6,6 +7,7 @@ import {
 	TextInput,
 	Tooltip,
 } from "@mantine/core";
+import KdbClasses from "./Kdb.module.css";
 import SelectClasses from "./Select.module.css";
 import TextInputClasses from "./TextInput.module.css";
 
@@ -26,6 +28,10 @@ const components: MantineThemeComponents = {
 	}),
 	PasswordInput: PasswordInput.extend({
 		classNames: TextInputClasses,
+	}),
+	Kbd: Kbd.extend({
+		classNames: KdbClasses,
+		defaultProps: { size: "xs" },
 	}),
 };
 export default components;

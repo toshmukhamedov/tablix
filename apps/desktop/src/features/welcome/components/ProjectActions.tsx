@@ -1,9 +1,9 @@
-import { projectCommands } from "@/commands/project";
-import { useProjects } from "@/context/ProjectsContext";
 import { Button, Flex, Stack, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconFolder, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
+import { projectCommands } from "@/commands/project";
+import { useProjects } from "@/context/ProjectsContext";
 import { NewProjectModal } from "./NewProjectModal";
 
 export function ProjectActions() {

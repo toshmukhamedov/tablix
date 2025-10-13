@@ -1,8 +1,8 @@
-import type { Project } from "@/commands/project";
 import { Divider, Stack, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
+import type { Project } from "@/commands/project";
 import { EditProjectModal } from "./EditProjectModal";
 import { ProjectsTable } from "./ProjectsTable";
 

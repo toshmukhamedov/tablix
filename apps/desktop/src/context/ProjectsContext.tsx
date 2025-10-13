@@ -1,5 +1,5 @@
-import { type Project, projectCommands } from "@/commands/project";
 import { createContext, useContext, useEffect, useReducer } from "react";
+import { type Project, projectCommands } from "@/commands/project";
 
 type ProjectsContextState = {
 	projects: Project[];

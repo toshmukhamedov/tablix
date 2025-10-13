@@ -52,7 +52,7 @@ export const Menubar: React.FC = () => {
 			<div className="justify-self-end flex gap-1 ml-auto mr-2">
 				<button
 					type="button"
-					className="text-[var(--mantine-color-dark-1)"
+					className="text-[var(--mantine-color-dark-1)]"
 					onClick={() => toggleSection("explorer")}
 				>
 					{openSections.has("explorer") ? (
@@ -63,7 +63,7 @@ export const Menubar: React.FC = () => {
 				</button>
 				<button
 					type="button"
-					className="text-[var(--mantine-color-dark-1)"
+					className="text-[var(--mantine-color-dark-1)]"
 					onClick={() => toggleSection("dock")}
 				>
 					{openSections.has("dock") ? (
@@ -74,7 +74,7 @@ export const Menubar: React.FC = () => {
 				</button>
 				<button
 					type="button"
-					className="text-[var(--mantine-color-dark-1)"
+					className="text-[var(--mantine-color-dark-1)]"
 					onClick={() => toggleSection("queries")}
 				>
 					{openSections.has("queries") ? (

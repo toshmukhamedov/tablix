@@ -1,6 +1,5 @@
 import { Split, type SplitResizerProps } from "@gfazioli/mantine-split-pane";
 import { Stack } from "@mantine/core";
-import { ConnectionsProvider } from "@/context/ConnectionsContext";
 import { DockTabsProvider } from "@/context/DockTabsContext";
 import { MainTabsProvider } from "@/context/MainTabsContext";
 import { OpenSectionsProvider, type Section, useOpenSections } from "@/context/OpenSectionsContext";
@@ -66,13 +65,11 @@ export function WorkspaceInner() {
 export const Workspace: React.FC = () => {
 	return (
 		<OpenSectionsProvider>
-			<ConnectionsProvider>
-				<MainTabsProvider>
-					<DockTabsProvider>
-						<WorkspaceInner />
-					</DockTabsProvider>
-				</MainTabsProvider>
-			</ConnectionsProvider>
+			<MainTabsProvider>
+				<DockTabsProvider>
+					<WorkspaceInner />
+				</DockTabsProvider>
+			</MainTabsProvider>
 		</OpenSectionsProvider>
 	);
 };

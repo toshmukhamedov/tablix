@@ -1,8 +1,5 @@
-use crate::{
-	postgres::interval::PgInterval,
-	queries::{QueryOutput, QueryOutputType, emit_query_output},
-};
-use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use crate::{postgres::interval::PgInterval, queries::ConnectionStatus};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use rust_decimal::Decimal;
 use serde_json::{Value, json};
 use std::net::IpAddr;
@@ -21,7 +18,7 @@ use tablix_connection::{
 	storage::{self, AddConnection},
 };
 use tablix_project::controller::ProjectController;
-use tauri::{AppHandle, Error, State};
+use tauri::{AppHandle, Emitter, Error, State};
 use tracing::instrument;
 use validator::Validate;
 
@@ -155,13 +152,11 @@ pub async fn disconnect_connection(
 	match connection_client {
 		ConnectionClient::PostgreSQL { .. } => {
 			tracing::info!("Client dropped");
-			emit_query_output(
+			emit_connection_status(
 				&app_handle,
-				QueryOutput {
-					output_type: QueryOutputType::Info,
-					time: Local::now(),
-					message: "Disconnected".to_string(),
+				ConnectionStatus {
 					connection_id,
+					connected: false,
 				},
 			);
 		}
@@ -224,13 +219,11 @@ pub async fn connect_connection(
 						.insert(connection_id, ConnectionClient::PostgreSQL { client });
 
 					tracing::info!("Client connected");
-					emit_query_output(
+					emit_connection_status(
 						&app_handle,
-						QueryOutput {
-							output_type: QueryOutputType::Info,
-							time: Local::now(),
-							message: "Connected".to_string(),
+						ConnectionStatus {
 							connection_id,
+							connected: true,
 						},
 					);
 
@@ -401,7 +394,7 @@ pub async fn get_table_data(
 	let project = project_controller
 		.get(project_id)
 		.map_err(|e| e.to_string())?;
-	let connection = connection_controller
+	let _ = connection_controller
 		.get(project, connection_id)
 		.map_err(|e| e.to_string())?;
 
@@ -432,15 +425,6 @@ pub async fn get_table_data(
 			);
 
 			tracing::info!("Executing query: {}", query);
-			emit_query_output(
-				&app_handle,
-				QueryOutput {
-					output_type: QueryOutputType::Info,
-					time: Local::now(),
-					message: format!("{}> {}", connection.details.get_database(), query),
-					connection_id,
-				},
-			);
 
 			let statement = client.prepare(&query).await.map_err(|e| e.to_string())?;
 
@@ -453,18 +437,10 @@ pub async fn get_table_data(
 				})
 				.collect();
 
-			let mut table_rows = client.query(&statement, &[]).await.map_err(|e| {
-				emit_query_output(
-					&app_handle,
-					QueryOutput {
-						output_type: QueryOutputType::Error,
-						time: Local::now(),
-						message: e.to_string(),
-						connection_id,
-					},
-				);
-				e.to_string()
-			})?;
+			let mut table_rows = client
+				.query(&statement, &[])
+				.await
+				.map_err(|e| e.to_string())?;
 
 			let has_more = table_rows.len() as i64 > pagination.page_size;
 			table_rows.pop();
@@ -473,28 +449,11 @@ pub async fn get_table_data(
 			let count_query = format!("select count(*) from {}.{}", schema, table);
 
 			tracing::info!("Executing query: {}", count_query);
-			emit_query_output(
-				&app_handle,
-				QueryOutput {
-					output_type: QueryOutputType::Info,
-					time: Local::now(),
-					message: format!("{}> {}", connection.details.get_database(), count_query),
-					connection_id,
-				},
-			);
 
-			let count_rows = client.query(&count_query, &[]).await.map_err(|e| {
-				emit_query_output(
-					&app_handle,
-					QueryOutput {
-						output_type: QueryOutputType::Error,
-						time: Local::now(),
-						message: e.to_string(),
-						connection_id,
-					},
-				);
-				e.to_string()
-			})?;
+			let count_rows = client
+				.query(&count_query, &[])
+				.await
+				.map_err(|e| e.to_string())?;
 
 			let rows_count: i64 = match count_rows.first() {
 				Some(row) => row.get(0),
@@ -619,4 +578,10 @@ pub fn rows_to_json(table_rows: Vec<tokio_postgres::Row>) -> Result<Vec<Row>, St
 	}
 
 	Ok(rows)
+}
+
+pub fn emit_connection_status(app_handle: &AppHandle, payload: ConnectionStatus) {
+	if let Err(e) = app_handle.emit("connection-status-changed", payload) {
+		tracing::error!("Failed to emit connection-status-changed {}", e);
+	};
 }

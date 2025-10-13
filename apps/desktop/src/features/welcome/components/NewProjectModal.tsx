@@ -1,10 +1,10 @@
-import { projectCommands } from "@/commands/project";
-import { useProjects } from "@/context/ProjectsContext";
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconFolderOpen } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod/v4";
+import { projectCommands } from "@/commands/project";
+import { useProjects } from "@/context/ProjectsContext";
 
 type Props = {
 	open: boolean;

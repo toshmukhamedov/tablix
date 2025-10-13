@@ -1,34 +1,35 @@
+import { defaultKeymap as defaultKeymapBase } from "@codemirror/commands";
 import { PostgreSQL, sql } from "@codemirror/lang-sql";
 import { Text } from "@mantine/core";
 import { IconDatabase, IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
-import { keymap, useCodeMirror } from "@uiw/react-codemirror";
+import { type EditorView, keymap, useCodeMirror } from "@uiw/react-codemirror";
+import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BiLogoPostgresql } from "react-icons/bi";
 import { queryCommands } from "@/commands/query";
 import { ToolbarButton } from "@/components/ToolbarButton";
-import { useConnections } from "@/context/ConnectionsContext";
 import { useDockTabs } from "@/context/DockTabsContext";
 import { type EditorTab, useMainTabs } from "@/context/MainTabsContext";
 import { useOpenSections } from "@/context/OpenSectionsContext";
 import { useProject } from "@/context/ProjectContext";
+import { connectionStore } from "@/stores/connectionStore";
 import { tablix } from "./theme";
+import { getSelectedText } from "./utils";
 
 const extensions = [sql({ dialect: PostgreSQL, upperCaseKeywords: true })];
+const defaultKeymap = defaultKeymapBase.filter((keymap) => keymap.key !== "Mod+Enter");
 
 type Props = {
 	tab: EditorTab;
 };
-export const Editor: React.FC<Props> = ({ tab }) => {
+export const Editor: React.FC<Props> = observer(({ tab }) => {
 	const editor = useRef<HTMLDivElement | null>(null);
 	const [content, setContent] = useState<string>("");
 	const [isExecuting, setIsExecuting] = useState(false);
 	const [isCancelling, setIsCancelling] = useState(false);
-	const {
-		state: { connections },
-	} = useConnections();
 
 	const connection = useMemo(
-		() => connections.find((connection) => connection.id === tab.connectionId),
+		() => connectionStore.connections.find((connection) => connection.id === tab.connectionId),
 		[tab.connectionId],
 	);
 
@@ -51,8 +52,7 @@ export const Editor: React.FC<Props> = ({ tab }) => {
 
 	const saveKeymap = keymap.of([
 		{
-			key: "Ctrl-s",
-			mac: "Cmd-s",
+			key: "Mod-s",
 			run: (view) => {
 				queryCommands
 					.updateContent({
@@ -66,13 +66,31 @@ export const Editor: React.FC<Props> = ({ tab }) => {
 				return true;
 			},
 		},
+		{
+			key: "Mod-Enter",
+			run: (view) => {
+				executeQuery(view, true);
+				return true;
+			},
+		},
+		{
+			key: "Mod-Shift-Enter",
+			run: (view) => {
+				executeQuery(view, false);
+				return true;
+			},
+		},
+		...defaultKeymap,
 	]);
 
 	const { setContainer, view } = useCodeMirror({
 		container: editor.current,
-		extensions: [...extensions, saveKeymap],
+		extensions: [saveKeymap, ...extensions],
 		value: content,
 		theme: tablix,
+		basicSetup: {
+			defaultKeymap: false,
+		},
 		height: "100%",
 		onChange: (value) => {
 			mainTabsDispatch({
@@ -90,15 +108,31 @@ export const Editor: React.FC<Props> = ({ tab }) => {
 		}
 	}, [editor.current]);
 
-	const executeQuery = async () => {
-		if (!view || !connection) return;
+	const onExecute = async () => {
+		if (!view) return;
+		await executeQuery(view, null);
+	};
+
+	const executeQuery = async (view: EditorView, selected: boolean | null) => {
+		if (!connection) return;
 		try {
 			setIsExecuting(true);
+			let query: string | null = null;
+
+			if (selected) {
+				query = getSelectedText(view);
+			} else if (selected === null) {
+				const selectedText = getSelectedText(view);
+				query = selectedText ?? view.state.doc.toString();
+			} else {
+				query = view.state.doc.toString();
+			}
+			if (!query) return;
 
 			const results = await queryCommands.execute({
 				connectionId: connection.id,
 				projectId: project.id,
-				query: view.state.doc.toString(),
+				query,
 			});
 
 			dockTabsDispatch({
@@ -140,7 +174,7 @@ export const Editor: React.FC<Props> = ({ tab }) => {
 	return (
 		<div className="flex flex-col h-full">
 			<div className="h-10 px-2 py-1 border-y border-y-[var(--mantine-color-dark-6)] flex items-center">
-				<ToolbarButton disabled={isExecuting || !connection} onClick={executeQuery} title="Execute">
+				<ToolbarButton disabled={isExecuting || !connection} onClick={onExecute} title="Execute">
 					<IconPlayerPlay rotate="180" size="20" color="var(--mantine-color-green-4)" />
 				</ToolbarButton>
 				<div className="border-l h-4 border-l-[var(--mantine-color-dark-5)] mx-2" />
@@ -183,7 +217,7 @@ export const Editor: React.FC<Props> = ({ tab }) => {
 						<option value="connections" disabled>
 							Connections
 						</option>
-						{connections.map((connection) => (
+						{connectionStore.connections.map((connection) => (
 							<option value={connection.id} key={connection.id}>
 								{connection.name}
 							</option>
@@ -194,4 +228,4 @@ export const Editor: React.FC<Props> = ({ tab }) => {
 			<div className="flex-1 min-h-0" ref={editor} />
 		</div>
 	);
-};
+});

@@ -1,7 +1,3 @@
-import { ConnectionType, connectionCommands } from "@/commands/connection";
-import { useConnections } from "@/context/ConnectionsContext";
-import { useProject } from "@/context/ProjectContext";
-import { CONNECTION_TYPES } from "@/features/explorer/constants";
 import {
 	Button,
 	Flex,
@@ -20,6 +16,10 @@ import { notifications } from "@mantine/notifications";
 import { IconCheck, IconExclamationCircle } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useState } from "react";
+import { ConnectionType, connectionCommands } from "@/commands/connection";
+import { useProject } from "@/context/ProjectContext";
+import { CONNECTION_TYPES } from "@/features/explorer/constants";
+import { connectionStore } from "@/stores/connectionStore";
 import {
 	AddConnectionFormProvider,
 	AddConnectionFormSchema,
@@ -46,7 +46,6 @@ type ConnectionTestResult =
 export const AddConnectionModal: React.FC<Props> = (props) => {
 	const { project } = useProject();
 
-	const { dispatch } = useConnections();
 	const [testResult, setTestResult] = useState<ConnectionTestResult | null>(null);
 	const [popoverOpened, { close: popoverClose, open: popoverOpen }] = useDisclosure(false);
 
@@ -72,17 +71,12 @@ export const AddConnectionModal: React.FC<Props> = (props) => {
 	};
 
 	const onSubmit = (values: AddConnectionFormValues) => {
-		connectionCommands
+		connectionStore
 			.add({
 				projectId: project.id,
 				data: values,
 			})
-			.then(() => {
-				onClose();
-				connectionCommands
-					.list({ projectId: project.id })
-					.then((connections) => dispatch({ type: "set", connections }));
-			})
+			.then(onClose)
 			.catch((message) => {
 				notifications.show({
 					message,

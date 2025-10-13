@@ -2,9 +2,8 @@ import { Button, Group, Modal, Stack, TextInput, type UseTreeReturnType } from "
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useMemo } from "react";
-import { connectionCommands } from "@/commands/connection";
-import { useConnections } from "@/context/ConnectionsContext";
 import { useProject } from "@/context/ProjectContext";
+import { connectionStore } from "@/stores/connectionStore";
 import {
 	EditConnectionFormProvider,
 	EditConnectionFormSchema,
@@ -20,11 +19,10 @@ type Props = {
 
 export const EditConnectionModal: React.FC<Props> = ({ onClose, opened, tree }) => {
 	const { project } = useProject();
-	const { dispatch, state } = useConnections();
 	const connection = useMemo(() => {
 		const selectedNodeValue = tree.selectedState[0];
 		if (!selectedNodeValue) return;
-		return state.connections.find((conn) => conn.id === selectedNodeValue);
+		return connectionStore.connections.find((conn) => conn.id === selectedNodeValue);
 	}, [tree.selectedState]);
 
 	const form = useEditConnectionForm({
@@ -44,7 +42,7 @@ export const EditConnectionModal: React.FC<Props> = ({ onClose, opened, tree }) 
 	};
 
 	const onSubmit = (values: EditConnectionFormValues) => {
-		connectionCommands
+		connectionStore
 			.update({
 				projectId: project.id,
 				data: {
@@ -52,12 +50,7 @@ export const EditConnectionModal: React.FC<Props> = ({ onClose, opened, tree }) 
 					...values,
 				},
 			})
-			.then(() => {
-				closeModal();
-				connectionCommands
-					.list({ projectId: project.id })
-					.then((connections) => dispatch({ type: "set", connections }));
-			})
+			.then(closeModal)
 			.catch((message) => {
 				notifications.show({
 					message,

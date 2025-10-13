@@ -1,6 +1,7 @@
 import { Indicator, Tabs, Text } from "@mantine/core";
 import { IconFileTypeSql, IconTable, IconX } from "@tabler/icons-react";
 import { confirm } from "@tauri-apps/plugin-dialog";
+import { useDockTabs } from "@/context/DockTabsContext";
 import { type Tab, useMainTabs } from "@/context/MainTabsContext";
 import { Editor } from "@/features/editor/Editor";
 import { filename } from "@/lib/utils/filename";
@@ -10,7 +11,8 @@ type Props = {
 	tab: Tab;
 };
 export const TabListItem: React.FC<Props> = ({ tab }) => {
-	const { dispatch } = useMainTabs();
+	const { dispatch: dispatchMainTabs } = useMainTabs();
+	const { dispatch: dispatchDockTabs } = useDockTabs();
 
 	const closeTab = async (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -25,9 +27,13 @@ export const TabListItem: React.FC<Props> = ({ tab }) => {
 			if (!confirmation) return;
 		}
 
-		dispatch({
+		dispatchMainTabs({
 			type: "close",
 			tabId: tab.id,
+		});
+		dispatchDockTabs({
+			type: "close_group",
+			mainTabId: tab.id,
 		});
 	};
 	const onAuxClick = (e: React.MouseEvent) => {
@@ -38,7 +44,7 @@ export const TabListItem: React.FC<Props> = ({ tab }) => {
 		}
 	};
 	const onClick = () => {
-		dispatch({
+		dispatchMainTabs({
 			type: "set_active_tab",
 			tabId: tab.id,
 		});

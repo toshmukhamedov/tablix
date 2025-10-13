@@ -1,6 +1,6 @@
+import { createContext, useContext, useState } from "react";
 import type { Project } from "@/commands/project";
 import { useView } from "@/context/ViewContext";
-import { createContext, useContext, useState } from "react";
 
 type ProjectContext = {
 	project: Project | null;

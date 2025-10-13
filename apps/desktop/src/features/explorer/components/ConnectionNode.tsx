@@ -1,21 +1,21 @@
 import { Loader, type RenderTreeNodePayload, Text } from "@mantine/core";
 import { Menu } from "@tauri-apps/api/menu";
 import { confirm } from "@tauri-apps/plugin-dialog";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { BiLogoPostgresql } from "react-icons/bi";
-import { type Connection, connectionCommands } from "@/commands/connection";
-import { useConnections } from "@/context/ConnectionsContext";
+import type { Connection } from "@/commands/connection";
 import { useProject } from "@/context/ProjectContext";
+import { connectionStore } from "@/stores/connectionStore";
 import { useEditConnectionModal } from "../context/EditConnectionModalContext";
 import { TreeChevron } from "./TreeChevron";
 
 type Props = {
 	payload: RenderTreeNodePayload;
 };
-export const ConnectionNode: React.FC<Props> = ({ payload }) => {
+export const ConnectionNode: React.FC<Props> = observer(({ payload }) => {
 	const [isConnecting, setIsConnecting] = useState(false);
 	const { project } = useProject();
-	const { dispatch, state } = useConnections();
 
 	const { setOpened } = useEditConnectionModal();
 	const connection = payload.node.nodeProps as Connection;
@@ -28,18 +28,10 @@ export const ConnectionNode: React.FC<Props> = ({ payload }) => {
 			});
 			if (!confirmation) return;
 
-			await connectionCommands.delete({
+			await connectionStore.delete({
 				id: connection.id,
 				projectId: project.id,
 			});
-			const connections = await connectionCommands.list({
-				projectId: project.id,
-			});
-			dispatch({
-				connections,
-				type: "set",
-			});
-
 			payload.tree.clearSelected();
 		} catch (e) {
 			console.error("[onDeleteConnection]", e);
@@ -87,16 +79,10 @@ export const ConnectionNode: React.FC<Props> = ({ payload }) => {
 	};
 
 	const getSchema = async (refresh: boolean = false) => {
-		const schema = await connectionCommands.getSchema({
+		await connectionStore.getSchema({
 			projectId: project.id,
 			connectionId: connection.id,
 			refresh,
-		});
-
-		state.schemas.set(connection.id, schema);
-		dispatch({
-			type: "schemas",
-			schemas: state.schemas,
 		});
 	};
 
@@ -104,18 +90,10 @@ export const ConnectionNode: React.FC<Props> = ({ payload }) => {
 		if (connection.connected) return;
 		setIsConnecting(true);
 		try {
-			await connectionCommands.connect({
+			await connectionStore.connect({
 				projectId: project.id,
 				connectionId: connection.id,
 			});
-			const connections = await connectionCommands.list({
-				projectId: project.id,
-			});
-			dispatch({
-				connections,
-				type: "set",
-			});
-
 			await getSchema();
 		} catch (e) {
 			console.error("[connect]", e);
@@ -127,16 +105,9 @@ export const ConnectionNode: React.FC<Props> = ({ payload }) => {
 	const disconnectConnection = async (_: React.MouseEvent, connection: Connection) => {
 		if (!connection.connected) return;
 		try {
-			await connectionCommands.disconnect({
+			await connectionStore.disconnect({
 				projectId: project.id,
 				connectionId: connection.id,
-			});
-			const connections = await connectionCommands.list({
-				projectId: project.id,
-			});
-			dispatch({
-				connections,
-				type: "set",
 			});
 		} catch (e) {
 			console.error("[disconnect]", e);
@@ -177,4 +148,4 @@ export const ConnectionNode: React.FC<Props> = ({ payload }) => {
 			</Text>
 		</div>
 	);
-};
+});

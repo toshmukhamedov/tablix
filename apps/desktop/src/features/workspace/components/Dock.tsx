@@ -5,6 +5,7 @@ import { useMainTabs } from "@/context/MainTabsContext";
 import { useOpenSections } from "@/context/OpenSectionsContext";
 import classes from "../styles/Tabs.module.css";
 import { DockTabs, TabContents } from "./DockTabs";
+import { EmptyDock } from "./EmptyDock";
 
 export const Dock: React.FC = () => {
 	const { activeTabId } = useMainTabs();
@@ -12,7 +13,6 @@ export const Dock: React.FC = () => {
 	const { setOpenSections } = useOpenSections();
 
 	useEffect(() => {
-		console.info("Size", state.size);
 		if (state.size < 1) {
 			setOpenSections((prev) => {
 				const sections = new Set(prev);
@@ -21,6 +21,10 @@ export const Dock: React.FC = () => {
 			});
 		}
 	}, [state]);
+
+	if (!activeTabId || state.size < 1 || !state.has(activeTabId)) {
+		return <EmptyDock />;
+	}
 
 	return (
 		<Tabs classNames={classes} value={activeTabId}>

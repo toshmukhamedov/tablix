@@ -1,10 +1,15 @@
 import { Tabs } from "@mantine/core";
 import { useMainTabs } from "@/context/MainTabsContext";
 import classes from "../styles/Tabs.module.css";
+import { EmptyMain } from "./EmptyMain";
 import { TabContent, TabListItem } from "./MainTabs";
 
 export const Main: React.FC = () => {
 	const { tabs, activeTabId } = useMainTabs();
+
+	if (tabs.length < 1) {
+		return <EmptyMain />;
+	}
 
 	return (
 		<Tabs value={activeTabId} classNames={classes}>

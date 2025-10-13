@@ -1,50 +1,21 @@
-import { Tree, type TreeNodeData, useTree } from "@mantine/core";
-import { useMemo, useState } from "react";
-import { useConnections } from "@/context/ConnectionsContext";
+import { Tree, useTree } from "@mantine/core";
+import { observer } from "mobx-react-lite";
+import { useEffect, useState } from "react";
+import { useProject } from "@/context/ProjectContext";
+import { connectionStore } from "@/stores/connectionStore";
 import { EditConnectionModalContext } from "../context/EditConnectionModalContext";
 import classes from "../styles/ExplorerTree.module.css";
 import { EditConnectionModal } from "./EditConnectionModal";
 import { TreeNode } from "./TreeLabel";
 
-export const ExplorerTree: React.FC = () => {
-	const { state } = useConnections();
+export const ExplorerTree: React.FC = observer(() => {
 	const tree = useTree();
+	const { project } = useProject();
 
 	const [editConnectionModalOpened, setEditConnectionModalOpened] = useState(false);
-
-	// TODO
-	const data = useMemo(
-		() =>
-			state.connections.map<TreeNodeData>((connection) => {
-				const nodeChildren: TreeNodeData[] = [];
-				const node: TreeNodeData = {
-					label: connection.name,
-					value: connection.id,
-					nodeProps: connection,
-					children: nodeChildren,
-				};
-				const connectionSchema = state.schemas.get(connection.id);
-
-				if (connectionSchema) {
-					for (const schema of Object.values(connectionSchema.schemas)) {
-						nodeChildren.push({
-							label: schema.name,
-							value: `${connection.id}.${schema.name}`,
-							children: Object.values(schema.tables).map((table) => ({
-								label: table.name,
-								value: `${connection.id}.${schema.name}.${table.name}`,
-								children: table.columns.map((column) => ({
-									label: column.name,
-									value: `${connection.id}.${schema.name}.${table.name}.${column.name}`,
-								})),
-							})),
-						});
-					}
-				}
-				return node;
-			}),
-		[state.connections, state.schemas],
-	);
+	useEffect(() => {
+		connectionStore.reload({ projectId: project.id });
+	}, []);
 
 	return (
 		<EditConnectionModalContext.Provider
@@ -57,7 +28,7 @@ export const ExplorerTree: React.FC = () => {
 				allowRangeSelection={false}
 				classNames={classes}
 				tree={tree}
-				data={data}
+				data={connectionStore.treeData}
 				selectOnClick
 				expandOnClick={false}
 				renderNode={TreeNode}
@@ -69,4 +40,4 @@ export const ExplorerTree: React.FC = () => {
 			/>
 		</EditConnectionModalContext.Provider>
 	);
-};
+});

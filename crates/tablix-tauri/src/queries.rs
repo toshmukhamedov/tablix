@@ -1,11 +1,10 @@
 use std::path::PathBuf;
 
-use chrono::{DateTime, Local};
 use serde::Serialize;
 use sqlparser::{dialect::PostgreSqlDialect, parser::Parser};
 use tablix_connection::controller::{Column, ConnectionClient, ConnectionController};
 use tablix_project::controller::ProjectController;
-use tauri::{AppHandle, Emitter, State};
+use tauri::State;
 use tokio_postgres::NoTls;
 use tracing::instrument;
 use uuid::Uuid;
@@ -30,18 +29,10 @@ pub enum QueryResult {
 }
 
 #[derive(Serialize, Clone)]
-pub enum QueryOutputType {
-	Info,
-	Error,
-}
-
-#[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct QueryOutput {
-	pub time: DateTime<Local>,
-	pub message: String,
-	pub output_type: QueryOutputType,
+pub struct ConnectionStatus {
 	pub connection_id: Uuid,
+	pub connected: bool,
 }
 
 #[tauri::command]
@@ -279,7 +270,7 @@ pub async fn execute_query(
 		.get(project_id)
 		.map_err(|e| e.to_string())?;
 
-	let connection = connection_controller
+	let _ = connection_controller
 		.get(project, connection_id)
 		.map_err(|e| e.to_string())?;
 
@@ -322,29 +313,10 @@ pub async fn execute_query(
 					.collect();
 
 				tracing::info!("Executing query: {}", query);
-				emit_query_output(
-					&app_handle,
-					QueryOutput {
-						output_type: QueryOutputType::Info,
-						time: Local::now(),
-						message: format!("{}> {}", connection.details.get_database(), query),
-						connection_id,
-					},
-				);
-
 				if columns.is_empty() {
 					let affected_rows = match client.execute(&statement, &[]).await {
 						Ok(affected_rows) => affected_rows,
 						Err(e) => {
-							emit_query_output(
-								&app_handle,
-								QueryOutput {
-									output_type: QueryOutputType::Error,
-									time: Local::now(),
-									message: e.to_string(),
-									connection_id,
-								},
-							);
 							return Err(e.to_string());
 						}
 					};
@@ -354,15 +326,6 @@ pub async fn execute_query(
 					let table_rows = match client.query(&statement, &[]).await {
 						Ok(table_rows) => table_rows,
 						Err(e) => {
-							emit_query_output(
-								&app_handle,
-								QueryOutput {
-									output_type: QueryOutputType::Error,
-									time: Local::now(),
-									message: e.to_string(),
-									connection_id,
-								},
-							);
 							return Err(e.to_string());
 						}
 					};
@@ -410,10 +373,4 @@ pub async fn cancel_query(
 			return Ok(());
 		}
 	}
-}
-
-pub fn emit_query_output(app_handle: &AppHandle, output: QueryOutput) {
-	if let Err(e) = app_handle.emit("query_output", output) {
-		tracing::error!("Failed to emit query output {}", e);
-	};
 }

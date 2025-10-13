@@ -1,5 +1,5 @@
-import { ConnectionType } from "@/commands/connection";
 import { Group, NumberInput, PasswordInput, TextInput } from "@mantine/core";
+import { ConnectionType } from "@/commands/connection";
 import { useAddConnectionFormContext } from "../context/form";
 
 export const ConnectionSpecificFields: React.FC = () => {

@@ -91,6 +91,11 @@ export type TableData = {
 	hasMore: boolean;
 };
 
+export type UpdateConnectionStatus = {
+	connectionId: string;
+	connected: boolean;
+};
+
 class ConnectionCommands {
 	async list(data: GetConnections): Promise<Connection[]> {
 		return await invoke<Connection[]>("list_connections", data);

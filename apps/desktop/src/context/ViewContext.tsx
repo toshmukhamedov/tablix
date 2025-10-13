@@ -1,5 +1,5 @@
-import type { View } from "@/App";
 import { createContext, useContext, useState } from "react";
+import type { View } from "@/App";
 
 type ViewContext = { view: View; setView: React.Dispatch<View> };
 

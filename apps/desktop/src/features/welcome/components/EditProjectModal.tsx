@@ -1,10 +1,10 @@
-import { type Project, projectCommands } from "@/commands/project";
-import { useProjects } from "@/context/ProjectsContext";
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useEffect } from "react";
 import type { z } from "zod/v4";
+import { type Project, projectCommands } from "@/commands/project";
+import { useProjects } from "@/context/ProjectsContext";
 import { formSchema as createFormSchema } from "./NewProjectModal";
 
 type Props = {
