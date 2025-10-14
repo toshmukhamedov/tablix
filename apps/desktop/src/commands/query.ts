@@ -40,6 +40,14 @@ export type ExecuteQuery = {
 export type ModifyResult = {
 	type: "modify";
 	affectedRows: number;
+	executedAt: string;
+	executeTime: string;
+	query: string;
+};
+export type ErrorResult = {
+	type: "error";
+	query: string;
+	message: string;
 };
 export type DataResult = {
 	type: "data";

@@ -1,7 +1,8 @@
 import { Button, Group, Modal, Stack, TextInput, type UseTreeReturnType } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { useMemo } from "react";
+import { observer } from "mobx-react-lite";
+import { useEffect, useMemo } from "react";
 import { useProject } from "@/context/ProjectContext";
 import { connectionStore } from "@/stores/connectionStore";
 import {
@@ -17,7 +18,7 @@ type Props = {
 	tree: UseTreeReturnType;
 };
 
-export const EditConnectionModal: React.FC<Props> = ({ onClose, opened, tree }) => {
+export const EditConnectionModal: React.FC<Props> = observer(({ onClose, opened, tree }) => {
 	const { project } = useProject();
 	const connection = useMemo(() => {
 		const selectedNodeValue = tree.selectedState[0];
@@ -26,15 +27,19 @@ export const EditConnectionModal: React.FC<Props> = ({ onClose, opened, tree }) 
 	}, [tree.selectedState]);
 
 	const form = useEditConnectionForm({
+		mode: "uncontrolled",
 		validateInputOnBlur: true,
 		transformValues: EditConnectionFormSchema.parse,
 		validate: zod4Resolver(EditConnectionFormSchema),
 	});
-	if (!connection) return;
 
-	form.setInitialValues({
-		name: connection.name,
-	});
+	useEffect(() => {
+		if (connection) {
+			form.setValues({
+				name: connection.name,
+			});
+		}
+	}, [connection]);
 
 	const closeModal = () => {
 		form.reset();
@@ -42,6 +47,7 @@ export const EditConnectionModal: React.FC<Props> = ({ onClose, opened, tree }) 
 	};
 
 	const onSubmit = (values: EditConnectionFormValues) => {
+		if (!connection) return;
 		connectionStore
 			.update({
 				projectId: project.id,
@@ -85,4 +91,4 @@ export const EditConnectionModal: React.FC<Props> = ({ onClose, opened, tree }) 
 			</EditConnectionFormProvider>
 		</Modal>
 	);
-};
+});

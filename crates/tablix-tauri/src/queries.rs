@@ -1,15 +1,20 @@
 use std::path::PathBuf;
 
+use chrono::Local;
 use serde::Serialize;
 use sqlparser::{dialect::PostgreSqlDialect, parser::Parser};
 use tablix_connection::controller::{Column, ConnectionClient, ConnectionController};
 use tablix_project::controller::ProjectController;
 use tauri::State;
+use tokio::time::Instant;
 use tokio_postgres::NoTls;
 use tracing::instrument;
 use uuid::Uuid;
 
-use crate::connections::{Row, rows_to_json};
+use crate::{
+	connections::{Row, rows_to_json},
+	utils::format_duration,
+};
 
 #[derive(Serialize)]
 pub struct Query {
@@ -21,10 +26,19 @@ pub struct Query {
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum QueryResult {
 	#[serde(rename_all = "camelCase")]
-	Modify { affected_rows: u64 },
+	Modify {
+		affected_rows: u64,
+		executed_at: String,
+		execute_time: String,
+		query: String,
+	},
 	Data {
 		columns: Vec<Column>,
 		rows: Vec<Row>,
+	},
+	Error {
+		message: String,
+		query: String,
 	},
 }
 
@@ -314,19 +328,35 @@ pub async fn execute_query(
 
 				tracing::info!("Executing query: {}", query);
 				if columns.is_empty() {
+					let executed_at = format!("{}", Local::now().format("%d/%m/%Y %H:%M:%S"));
+					let start = Instant::now();
 					let affected_rows = match client.execute(&statement, &[]).await {
 						Ok(affected_rows) => affected_rows,
 						Err(e) => {
-							return Err(e.to_string());
+							results.push(QueryResult::Error {
+								message: e.to_string(),
+								query,
+							});
+							continue;
 						}
 					};
 
-					results.push(QueryResult::Modify { affected_rows });
+					let execute_time = format_duration(start.elapsed()).map_err(|e| e.to_string())?;
+					results.push(QueryResult::Modify {
+						affected_rows,
+						executed_at,
+						execute_time,
+						query,
+					});
 				} else {
 					let table_rows = match client.query(&statement, &[]).await {
 						Ok(table_rows) => table_rows,
 						Err(e) => {
-							return Err(e.to_string());
+							results.push(QueryResult::Error {
+								message: e.to_string(),
+								query,
+							});
+							continue;
 						}
 					};
 					let rows = rows_to_json(table_rows)?;

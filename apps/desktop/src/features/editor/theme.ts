@@ -133,6 +133,7 @@ export const tablixTheme = EditorView.theme(
 		".cm-scroller": {
 			overscrollBehavior: "none",
 			scrollbarWidth: "thin",
+			scrollbarColor: "#000077 #bada55",
 		},
 	},
 	{ dark: true },

@@ -9,6 +9,7 @@ mod logs;
 mod postgres;
 mod projects;
 mod queries;
+mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

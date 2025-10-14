@@ -1,7 +1,8 @@
 import { Tabs } from "@mantine/core";
-import { IconInfoSquare, IconTable, IconX } from "@tabler/icons-react";
+import { IconAlertSquare, IconInfoSquare, IconTable, IconX } from "@tabler/icons-react";
 import { type DockTab, type DockTabGroup, useDockTabs } from "@/context/DockTabsContext";
 import { DataResult } from "./DataResult";
+import { ErrorResult } from "./ErrorResult";
 import { ModifyResult } from "./ModifyResult";
 
 type Props = {
@@ -43,7 +44,7 @@ export const DockTabs: React.FC<Props> = ({ connectionId }) => {
 					key={tab.id}
 					onClick={() => onClick(tab.id)}
 					onAuxClick={(e) => onAuxClick(e, tab.id)}
-					leftSection={tab.type === "data" ? <IconTable size="14" /> : <IconInfoSquare size="14" />}
+					leftSection={<TabIcon tab={tab} />}
 					rightSection={<IconX size="14" stroke="1" onClick={(e) => closeTab(e, tab.id)} />}
 				>
 					Result {index + 1}
@@ -75,6 +76,24 @@ export const TabContent: React.FC<{ tab: DockTab }> = ({ tab }) => {
 		}
 		case "modify": {
 			return <ModifyResult tab={tab} />;
+		}
+		case "error": {
+			return <ErrorResult tab={tab} />;
+		}
+	}
+};
+
+type TabIconProps = { tab: DockTab };
+const TabIcon: React.FC<TabIconProps> = ({ tab }) => {
+	switch (tab.type) {
+		case "data": {
+			return <IconTable size="14" />;
+		}
+		case "modify": {
+			return <IconInfoSquare size="14" />;
+		}
+		case "error": {
+			return <IconAlertSquare size="14" color="var(--mantine-color-red-4)" />;
 		}
 	}
 };

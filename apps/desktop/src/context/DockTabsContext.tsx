@@ -1,10 +1,11 @@
 import { createContext, useContext, useReducer } from "react";
-import type { DataResult, ModifyResult } from "@/commands/query";
+import type { DataResult, ErrorResult, ModifyResult } from "@/commands/query";
 import type { BaseTab } from "./MainTabsContext";
 
 export type DataResultTab = BaseTab & DataResult;
 export type ModifyResultTab = BaseTab & ModifyResult;
-export type DockTab = DataResultTab | ModifyResultTab;
+export type ErrorResultTab = BaseTab & ErrorResult;
+export type DockTab = DataResultTab | ModifyResultTab | ErrorResultTab;
 export type DockTabsAction =
 	| {
 			type: "set_tabs";

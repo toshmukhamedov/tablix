@@ -1,7 +1,7 @@
-import { defaultKeymap as defaultKeymapBase } from "@codemirror/commands";
+import { defaultKeymap } from "@codemirror/commands";
 import { PostgreSQL, sql } from "@codemirror/lang-sql";
-import { Text } from "@mantine/core";
-import { IconDatabase, IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
+import { Alert, Text } from "@mantine/core";
+import { IconAlertSquare, IconDatabase, IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
 import { type EditorView, keymap, useCodeMirror } from "@uiw/react-codemirror";
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -16,8 +16,10 @@ import { connectionStore } from "@/stores/connectionStore";
 import { tablix } from "./theme";
 import { getSelectedText } from "./utils";
 
-const extensions = [sql({ dialect: PostgreSQL, upperCaseKeywords: true })];
-const defaultKeymap = defaultKeymapBase.filter((keymap) => keymap.key !== "Mod+Enter");
+const extensions = [
+	sql({ dialect: PostgreSQL, upperCaseKeywords: true }),
+	keymap.of(defaultKeymap),
+];
 
 type Props = {
 	tab: EditorTab;
@@ -27,6 +29,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 	const [content, setContent] = useState<string>("");
 	const [isExecuting, setIsExecuting] = useState(false);
 	const [isCancelling, setIsCancelling] = useState(false);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const connection = useMemo(
 		() => connectionStore.connections.find((connection) => connection.id === tab.connectionId),
@@ -50,7 +53,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 		loadContent().catch(console.error);
 	}, []);
 
-	const saveKeymap = keymap.of([
+	const editorKeymap = keymap.of([
 		{
 			key: "Mod-s",
 			run: (view) => {
@@ -80,12 +83,11 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 				return true;
 			},
 		},
-		...defaultKeymap,
 	]);
 
 	const { setContainer, view } = useCodeMirror({
 		container: editor.current,
-		extensions: [saveKeymap, ...extensions],
+		extensions: [editorKeymap, ...extensions],
 		value: content,
 		theme: tablix,
 		basicSetup: {
@@ -147,8 +149,9 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 				sections.add("dock");
 				return sections;
 			});
+			setErrorMessage(null);
 		} catch (e) {
-			console.error("[executeQuery]", e);
+			setErrorMessage(e as string);
 		} finally {
 			setIsExecuting(false);
 		}
@@ -226,6 +229,11 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 				</ToolbarButton>
 			</div>
 			<div className="flex-1 min-h-0" ref={editor} />
+			{errorMessage && (
+				<Alert color="red.4" icon={<IconAlertSquare />}>
+					{errorMessage}
+				</Alert>
+			)}
 		</div>
 	);
 });
