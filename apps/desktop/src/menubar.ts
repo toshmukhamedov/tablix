@@ -48,6 +48,7 @@ export async function setAppMenu(state: State): Promise<void> {
 					},
 					{
 						item: "CloseWindow",
+						accelerator: "CmdOrControl+Shift+W",
 					},
 				],
 			},

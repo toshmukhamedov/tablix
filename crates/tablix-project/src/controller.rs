@@ -79,6 +79,10 @@ impl ProjectController {
 			return Ok(());
 		};
 
+		#[cfg(not(target_os = "macos"))]
+		let trash_ctx = trash::TrashContext::new();
+
+		#[cfg(target_os = "macos")]
 		let mut trash_ctx = trash::TrashContext::new();
 
 		#[cfg(target_os = "macos")]

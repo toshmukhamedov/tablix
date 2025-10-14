@@ -1,5 +1,6 @@
 import { notifications as toasts } from "@mantine/notifications";
 import { invoke } from "@tauri-apps/api/core";
+import { homeDir } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 
 export type Project = {
@@ -101,5 +102,5 @@ class ProjectCommands {
 	}
 }
 
-// FIXME
-export const projectCommands = new ProjectCommands("/Users/abdugani");
+const homeDirPath = await homeDir();
+export const projectCommands = new ProjectCommands(homeDirPath);
