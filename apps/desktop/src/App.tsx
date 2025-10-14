@@ -11,9 +11,6 @@ import { appStore } from "./stores/appStore";
 export type View = "welcome" | "workspace" | "settings";
 
 export const App: React.FC = observer(() => {
-	// TODO: Implement stage
-	const dev = true;
-
 	useEffect(() => {
 		const handleDragOver = (e: DragEvent) => {
 			e.preventDefault();
@@ -35,7 +32,7 @@ export const App: React.FC = observer(() => {
 	}, []);
 
 	const handleContextMenu: React.MouseEventHandler<HTMLDivElement> = (e) => {
-		if (!dev) e.preventDefault();
+		if (import.meta.env.PROD) e.preventDefault();
 	};
 
 	return (
