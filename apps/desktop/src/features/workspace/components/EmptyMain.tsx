@@ -1,4 +1,5 @@
 import { Kbd } from "@mantine/core";
+import { ModKbd } from "@/features/explorer/components/ModKbd";
 
 export const EmptyMain: React.FC = () => {
 	return (
@@ -6,12 +7,27 @@ export const EmptyMain: React.FC = () => {
 			<div className="grid grid-cols-2 gap-2">
 				<span>Add Connection</span>
 				<span>
-					<Kbd>⌘</Kbd> + <Kbd>N</Kbd>
+					<ModKbd /> + <Kbd>N</Kbd>
+				</span>
+
+				<span>Toggle Explorer</span>
+				<span>
+					<ModKbd /> + <Kbd>B</Kbd>
+				</span>
+
+				<span>Toggle Queries</span>
+				<span>
+					<ModKbd /> + <Kbd>⇧</Kbd> + <Kbd>B</Kbd>
+				</span>
+
+				<span>Toggle Dock</span>
+				<span>
+					<ModKbd /> + <Kbd>J</Kbd>
 				</span>
 
 				<span>Close Tab</span>
 				<span>
-					<Kbd>⌘</Kbd> + <Kbd>W</Kbd>
+					<ModKbd /> + <Kbd>W</Kbd>
 				</span>
 			</div>
 		</div>

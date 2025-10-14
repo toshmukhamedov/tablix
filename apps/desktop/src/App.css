@@ -37,7 +37,6 @@ html {
 
 .scrollable {
 	overflow: auto;
-	scrollbar-gutter: stable;
 	overscroll-behavior: none;
 }
 

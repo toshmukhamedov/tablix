@@ -17,6 +17,7 @@ export async function setAppMenu(state: State): Promise<void> {
 	const separator = await PredefinedMenuItem.new({
 		item: "Separator",
 	});
+	const inWorkspace = state.view === "workspace";
 	const menu = await Menu.new({
 		items: [
 			{
@@ -26,7 +27,7 @@ export async function setAppMenu(state: State): Promise<void> {
 						text: "Add connection",
 						accelerator: "CmdOrControl+N",
 						action: connectionStore.openAddModal,
-						enabled: state.view === "workspace",
+						enabled: inWorkspace,
 					},
 					{
 						text: "Close Tab",
@@ -41,8 +42,9 @@ export async function setAppMenu(state: State): Promise<void> {
 							connectionStore.dispose();
 							tabStore.dispose();
 							appStore.setView("welcome");
+							appStore.dispose();
 						},
-						enabled: state.view === "workspace",
+						enabled: inWorkspace,
 					},
 					{
 						item: "CloseWindow",
@@ -84,6 +86,32 @@ export async function setAppMenu(state: State): Promise<void> {
 					},
 				],
 			},
+			{
+				text: "View",
+				items: [
+					{
+						item: "Fullscreen",
+					},
+					{
+						text: "Toggle Explorer",
+						action: () => appStore.toggleSection("explorer"),
+						accelerator: "CmdOrControl+B",
+						enabled: inWorkspace,
+					},
+					{
+						text: "Toggle Queries",
+						action: () => appStore.toggleSection("queries"),
+						accelerator: "CmdOrControl+Shift+B",
+						enabled: inWorkspace,
+					},
+					{
+						text: "Toggle Dock",
+						action: () => appStore.toggleSection("dock"),
+						accelerator: "CmdOrControl+J",
+						enabled: inWorkspace,
+					},
+				],
+			},
 		],
 	});
 	if (platform === "macos") {
@@ -118,17 +146,7 @@ export async function setAppMenu(state: State): Promise<void> {
 			],
 		});
 
-		const viewMenu = await Submenu.new({
-			text: "View",
-			items: [
-				{
-					item: "Fullscreen",
-				},
-			],
-		});
-
 		await menu.insert(appMenu, 0);
-		await menu.append(viewMenu);
 	}
 
 	await menu.setAsAppMenu();

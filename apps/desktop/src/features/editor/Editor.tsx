@@ -9,8 +9,8 @@ import { BiLogoPostgresql } from "react-icons/bi";
 import { queryCommands } from "@/commands/query";
 import { ToolbarButton } from "@/components/ToolbarButton";
 import { useDockTabs } from "@/context/DockTabsContext";
-import { useOpenSections } from "@/context/OpenSectionsContext";
 import { useProject } from "@/context/ProjectContext";
+import { appStore } from "@/stores/appStore";
 import { connectionStore } from "@/stores/connectionStore";
 import { type EditorTab, tabStore } from "@/stores/tabStore";
 import { tablix } from "./theme";
@@ -38,7 +38,6 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 
 	const { project } = useProject();
 	const { dispatch: dockTabsDispatch } = useDockTabs();
-	const { setOpenSections } = useOpenSections();
 
 	const loadContent = async () => {
 		const content = await queryCommands.getContent({
@@ -143,11 +142,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 			});
 
 			// Open Dock
-			setOpenSections((prev) => {
-				const sections = new Set(prev);
-				sections.add("dock");
-				return sections;
-			});
+			appStore.openSection("dock");
 			setErrorMessage(null);
 		} catch (e) {
 			setErrorMessage(e as string);

@@ -1,3 +1,3 @@
-import { platform } from "@tauri-apps/plugin-os";
+import { platform as getPlatform } from "@tauri-apps/plugin-os";
 
-export const platformName = platform();
+export const platform = getPlatform();

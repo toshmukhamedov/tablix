@@ -6,7 +6,10 @@
   </p>
 </div>
 
+### Showcase
 <img align="center" src="./assets/welcome.png" alt="Welcome Page Screenshot" />
+<img align="center" src="./assets/tableview.png" alt="Table View Screenshot" />
+<img align="center" src="./assets/editor.png" alt="Editor Screenshot" />
 
 ## Development
 ### Prerequisites

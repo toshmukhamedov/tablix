@@ -1,4 +1,5 @@
 import { Kbd } from "@mantine/core";
+import { ModKbd } from "@/features/explorer/components/ModKbd";
 
 export const EmptyDock: React.FC = () => {
 	return (
@@ -9,10 +10,10 @@ export const EmptyDock: React.FC = () => {
 			</div>
 			<div className="flex flex-col gap-2">
 				<span>
-					<Kbd>⌘</Kbd> + <Kbd>Enter</Kbd>
+					<ModKbd /> + <Kbd>↵</Kbd>
 				</span>
 				<span>
-					<Kbd>⌘</Kbd> + <Kbd>Shift</Kbd> + <Kbd>Enter</Kbd>
+					<ModKbd /> + <Kbd>⇧</Kbd> + <Kbd>↵</Kbd>
 				</span>
 			</div>
 		</div>

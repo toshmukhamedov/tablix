@@ -7,25 +7,13 @@ import {
 	IconLayoutSidebarRight,
 	IconLayoutSidebarRightFilled,
 } from "@tabler/icons-react";
+import { observer } from "mobx-react-lite";
 import { projectCommands } from "@/commands/project";
-import { type Section, useOpenSections } from "@/context/OpenSectionsContext";
 import { useProject } from "@/context/ProjectContext";
+import { appStore } from "@/stores/appStore";
 
-export const Menubar: React.FC = () => {
+export const Menubar: React.FC = observer(() => {
 	const { project } = useProject();
-	const { setOpenSections, openSections } = useOpenSections();
-
-	const toggleSection = (section: Section) => {
-		setOpenSections((prev) => {
-			const sections = new Set(prev);
-			if (sections.has(section)) {
-				sections.delete(section);
-			} else {
-				sections.add(section);
-			}
-			return sections;
-		});
-	};
 
 	return (
 		<Flex
@@ -53,9 +41,9 @@ export const Menubar: React.FC = () => {
 				<button
 					type="button"
 					className="text-[var(--mantine-color-dark-1)]"
-					onClick={() => toggleSection("explorer")}
+					onClick={() => appStore.toggleSection("explorer")}
 				>
-					{openSections.has("explorer") ? (
+					{appStore.openSections.has("explorer") ? (
 						<IconLayoutSidebarFilled size="20" />
 					) : (
 						<IconLayoutSidebar size="20" />
@@ -64,9 +52,9 @@ export const Menubar: React.FC = () => {
 				<button
 					type="button"
 					className="text-[var(--mantine-color-dark-1)]"
-					onClick={() => toggleSection("dock")}
+					onClick={() => appStore.toggleSection("dock")}
 				>
-					{openSections.has("dock") ? (
+					{appStore.openSections.has("dock") ? (
 						<IconLayoutBottombarFilled size="20" />
 					) : (
 						<IconLayoutBottombar size="20" />
@@ -75,9 +63,9 @@ export const Menubar: React.FC = () => {
 				<button
 					type="button"
 					className="text-[var(--mantine-color-dark-1)]"
-					onClick={() => toggleSection("queries")}
+					onClick={() => appStore.toggleSection("queries")}
 				>
-					{openSections.has("queries") ? (
+					{appStore.openSections.has("queries") ? (
 						<IconLayoutSidebarRightFilled size="20" />
 					) : (
 						<IconLayoutSidebarRight size="20" />
@@ -86,4 +74,4 @@ export const Menubar: React.FC = () => {
 			</div>
 		</Flex>
 	);
-};
+});

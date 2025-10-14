@@ -2,7 +2,7 @@ import { Tabs } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { useDockTabs } from "@/context/DockTabsContext";
-import { useOpenSections } from "@/context/OpenSectionsContext";
+import { appStore } from "@/stores/appStore";
 import { tabStore } from "@/stores/tabStore";
 import classes from "../styles/Tabs.module.css";
 import { DockTabs, TabContents } from "./DockTabs";
@@ -10,15 +10,10 @@ import { EmptyDock } from "./EmptyDock";
 
 export const Dock: React.FC = observer(() => {
 	const { state } = useDockTabs();
-	const { setOpenSections } = useOpenSections();
 
 	useEffect(() => {
 		if (state.size < 1) {
-			setOpenSections((prev) => {
-				const sections = new Set(prev);
-				sections.delete("dock");
-				return sections;
-			});
+			appStore.hideSection("dock");
 		}
 	}, [state]);
 

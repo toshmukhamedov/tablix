@@ -2,9 +2,9 @@ import { Split, type SplitResizerProps } from "@gfazioli/mantine-split-pane";
 import { Stack } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { DockTabsProvider } from "@/context/DockTabsContext";
-import { OpenSectionsProvider, type Section, useOpenSections } from "@/context/OpenSectionsContext";
 import { useProject } from "@/context/ProjectContext";
-import { appStore } from "@/stores/appStore";
+import { platform } from "@/lib/platform";
+import { appStore, type Section } from "@/stores/appStore";
 import { Explorer } from "../explorer";
 import { Queries } from "../queries";
 import { Dock } from "./components/Dock";
@@ -18,7 +18,6 @@ const getResizerProps = (): SplitResizerProps => ({
 
 export const WorkspaceInner: React.FC = observer(() => {
 	const { project } = useProject();
-	const { openSections } = useOpenSections();
 
 	if (!project) {
 		appStore.setView("welcome");
@@ -26,12 +25,12 @@ export const WorkspaceInner: React.FC = observer(() => {
 	}
 
 	const getPaneStyles = (section: Section) => ({
-		root: { display: openSections.has(section) ? "initial" : "none" },
+		root: { display: appStore.openSections.has(section) ? "initial" : "none" },
 	});
 
 	return (
 		<Stack gap="0" h="100%">
-			<Menubar />
+			{platform === "macos" && <Menubar />}
 			<Split size="1px" w="100%" spacing="0" style={{ minHeight: 0, flex: 1 }}>
 				<Split.Pane minWidth="200px" styles={getPaneStyles("explorer")}>
 					<Explorer />
@@ -63,10 +62,8 @@ export const WorkspaceInner: React.FC = observer(() => {
 
 export const Workspace: React.FC = () => {
 	return (
-		<OpenSectionsProvider>
-			<DockTabsProvider>
-				<WorkspaceInner />
-			</DockTabsProvider>
-		</OpenSectionsProvider>
+		<DockTabsProvider>
+			<WorkspaceInner />
+		</DockTabsProvider>
 	);
 };
