@@ -15,6 +15,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconExclamationCircle } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { ConnectionType, connectionCommands } from "@/commands/connection";
 import { useProject } from "@/context/ProjectContext";
@@ -27,10 +28,6 @@ import {
 } from "../context/form";
 import { ConnectionSpecificFields } from "./ConnectionSpecificFields";
 
-type Props = {
-	opened: boolean;
-	onClose: () => void;
-};
 type ConnectionTestResult =
 	| {
 			type: "pending";
@@ -43,7 +40,7 @@ type ConnectionTestResult =
 			type: "success";
 	  };
 
-export const AddConnectionModal: React.FC<Props> = (props) => {
+export const AddConnectionModal: React.FC = observer(() => {
 	const { project } = useProject();
 
 	const [testResult, setTestResult] = useState<ConnectionTestResult | null>(null);
@@ -67,7 +64,7 @@ export const AddConnectionModal: React.FC<Props> = (props) => {
 	});
 	const onClose = () => {
 		form.reset();
-		props.onClose();
+		connectionStore.closeAddModal();
 	};
 
 	const onSubmit = (values: AddConnectionFormValues) => {
@@ -106,7 +103,12 @@ export const AddConnectionModal: React.FC<Props> = (props) => {
 	};
 
 	return (
-		<Modal opened={props.opened} onClose={onClose} title="Add connection" centered>
+		<Modal
+			opened={connectionStore.isAddModalOpen}
+			onClose={onClose}
+			title="Add connection"
+			centered
+		>
 			<AddConnectionFormProvider form={form}>
 				<form onSubmit={form.onSubmit(onSubmit)}>
 					<Stack gap="xs">
@@ -184,4 +186,4 @@ export const AddConnectionModal: React.FC<Props> = (props) => {
 			</AddConnectionFormProvider>
 		</Modal>
 	);
-};
+});

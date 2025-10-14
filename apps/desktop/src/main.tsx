@@ -7,16 +7,15 @@ import { Notifications } from "@mantine/notifications";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
-import { ViewProvider } from "./context/ViewContext";
 import theme from "./theme";
+
+import "./menubar";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	<React.StrictMode>
 		<MantineProvider defaultColorScheme="dark" theme={theme}>
 			<Notifications />
-			<ViewProvider>
-				<App />
-			</ViewProvider>
+			<App />
 		</MantineProvider>
 	</React.StrictMode>,
 );

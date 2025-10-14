@@ -2,9 +2,9 @@ import { IconFileTypeSql } from "@tabler/icons-react";
 import { Menu } from "@tauri-apps/api/menu";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { type Query, queryCommands } from "@/commands/query";
-import { useMainTabs } from "@/context/MainTabsContext";
 import { useProject } from "@/context/ProjectContext";
 import { useQueries } from "@/context/QueriesContext";
+import { tabStore } from "@/stores/tabStore";
 import { EditQueryInput } from "./EditQueryInput";
 
 type Props = {
@@ -25,7 +25,6 @@ export const QueryNode: React.FC<Props> = ({
 }) => {
 	const { project } = useProject();
 	const { setQueries } = useQueries();
-	const { dispatch } = useMainTabs();
 
 	const onDeleteQuery = async () => {
 		try {
@@ -46,10 +45,7 @@ export const QueryNode: React.FC<Props> = ({
 
 			setSelectedQuery(null);
 
-			dispatch({
-				type: "close_by_query",
-				queryName: query.name,
-			});
+			tabStore.closeEditor(query.name);
 		} catch (e) {
 			console.error("[onDeleteQuery]", e);
 		}
@@ -90,13 +86,10 @@ export const QueryNode: React.FC<Props> = ({
 			onContextMenu={onContextMenu}
 			onClick={() => setSelectedQuery(query.name)}
 			onDoubleClick={() => {
-				dispatch({
-					type: "add_editor_tab",
-					tab: {
-						type: "editor",
-						connectionId: null,
-						query,
-					},
+				tabStore.addEditor({
+					type: "editor",
+					connectionId: null,
+					query,
 				});
 			}}
 			data-selected={selectedQuery === query.name}

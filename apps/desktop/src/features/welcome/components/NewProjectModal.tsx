@@ -73,7 +73,14 @@ export function NewProjectModal({ close, open }: Props) {
 							key={form.key("path")}
 							{...form.getInputProps("path")}
 						/>
-						<Button variant="default" px="sm" c="blue" radius="0 4px 4px 0" onClick={onOpen}>
+						<Button
+							variant="default"
+							px="sm"
+							c="dark.2"
+							bd="1px solid var(--mantine-color-dark-5)"
+							radius="0 4px 4px 0"
+							onClick={onOpen}
+						>
 							<IconFolderOpen size="20" />
 						</Button>
 					</Group>

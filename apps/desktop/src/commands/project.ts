@@ -96,13 +96,9 @@ class ProjectCommands {
 		return newPath;
 	}
 
-	// getLastOpenedProject() {
-	// 	return get(this.persistedId);
-	// }
-
-	// setLastOpenedProject(projectId: string) {
-	// 	this.persistedId.set(projectId);
-	// }
+	async close(): Promise<void> {
+		await invoke("close_project");
+	}
 }
 
 // FIXME

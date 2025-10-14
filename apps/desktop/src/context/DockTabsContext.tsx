@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer } from "react";
 import type { DataResult, ErrorResult, ModifyResult } from "@/commands/query";
-import type { BaseTab } from "./MainTabsContext";
+import type { BaseTab } from "@/stores/tabStore";
 
 export type DataResultTab = BaseTab & DataResult;
 export type ModifyResultTab = BaseTab & ModifyResult;

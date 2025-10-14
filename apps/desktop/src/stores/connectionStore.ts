@@ -17,6 +17,7 @@ import {
 
 class ConnectionStore {
 	connections: Connection[] = [];
+	isAddModalOpen: boolean = false;
 	private schemas: Map<string, ConnectionSchema> = new Map();
 
 	constructor() {
@@ -114,6 +115,19 @@ class ConnectionStore {
 	async disconnect(data: DisconnectConnection): Promise<void> {
 		await connectionCommands.disconnect(data);
 	}
+
+	dispose(): void {
+		this.connections = [];
+		this.schemas.clear();
+		this.isAddModalOpen = false;
+	}
+
+	openAddModal = (): void => {
+		this.isAddModalOpen = true;
+	};
+	closeAddModal = (): void => {
+		this.isAddModalOpen = false;
+	};
 }
 
 export const connectionStore = new ConnectionStore();

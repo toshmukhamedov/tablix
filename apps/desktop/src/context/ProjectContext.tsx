@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { Project } from "@/commands/project";
-import { useView } from "@/context/ViewContext";
+import { appStore } from "@/stores/appStore";
 
 type ProjectContext = {
 	project: Project | null;
@@ -34,9 +34,8 @@ export const useProject = () => {
 		throw new Error("You should use this hook inside ProjectProvider");
 	}
 	const { project, setProject } = context;
-	const { setView } = useView();
 	if (!project) {
-		setView("welcome");
+		appStore.setView("welcome");
 		return {
 			project: {} as Project,
 			setProject,

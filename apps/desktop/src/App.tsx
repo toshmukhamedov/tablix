@@ -1,19 +1,18 @@
 import { useEffect } from "react";
 
 import "./App.css";
+import { observer } from "mobx-react-lite";
 import { appCommands } from "./commands/app";
 import { ProjectProvider } from "./context/ProjectContext";
-import { useView } from "./context/ViewContext";
 import { Welcome } from "./features/welcome";
 import { Workspace } from "./features/workspace";
+import { appStore } from "./stores/appStore";
 
 export type View = "welcome" | "workspace" | "settings";
 
-export const App: React.FC = () => {
+export const App: React.FC = observer(() => {
 	// TODO: Implement stage
 	const dev = true;
-
-	const { view } = useView();
 
 	useEffect(() => {
 		const handleDragOver = (e: DragEvent) => {
@@ -42,9 +41,9 @@ export const App: React.FC = () => {
 	return (
 		<div id="app" role="application" onContextMenu={handleContextMenu}>
 			<ProjectProvider>
-				{view === "welcome" ? (
+				{appStore.view === "welcome" ? (
 					<Welcome />
-				) : view === "workspace" ? (
+				) : appStore.view === "workspace" ? (
 					<Workspace />
 				) : (
 					<div>Settings</div>
@@ -52,4 +51,4 @@ export const App: React.FC = () => {
 			</ProjectProvider>
 		</div>
 	);
-};
+});

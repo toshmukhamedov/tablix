@@ -1,10 +1,10 @@
 import { Split, type SplitResizerProps } from "@gfazioli/mantine-split-pane";
 import { Stack } from "@mantine/core";
+import { observer } from "mobx-react-lite";
 import { DockTabsProvider } from "@/context/DockTabsContext";
-import { MainTabsProvider } from "@/context/MainTabsContext";
 import { OpenSectionsProvider, type Section, useOpenSections } from "@/context/OpenSectionsContext";
 import { useProject } from "@/context/ProjectContext";
-import { useView } from "@/context/ViewContext";
+import { appStore } from "@/stores/appStore";
 import { Explorer } from "../explorer";
 import { Queries } from "../queries";
 import { Dock } from "./components/Dock";
@@ -16,13 +16,12 @@ const getResizerProps = (): SplitResizerProps => ({
 	hoverColor: "var(--mantine-color-dark-9)",
 });
 
-export function WorkspaceInner() {
+export const WorkspaceInner: React.FC = observer(() => {
 	const { project } = useProject();
-	const { setView } = useView();
 	const { openSections } = useOpenSections();
 
 	if (!project) {
-		setView("welcome");
+		appStore.setView("welcome");
 		return;
 	}
 
@@ -60,16 +59,14 @@ export function WorkspaceInner() {
 			</Split>
 		</Stack>
 	);
-}
+});
 
 export const Workspace: React.FC = () => {
 	return (
 		<OpenSectionsProvider>
-			<MainTabsProvider>
-				<DockTabsProvider>
-					<WorkspaceInner />
-				</DockTabsProvider>
-			</MainTabsProvider>
+			<DockTabsProvider>
+				<WorkspaceInner />
+			</DockTabsProvider>
 		</OpenSectionsProvider>
 	);
 };

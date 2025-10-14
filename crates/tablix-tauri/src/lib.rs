@@ -24,6 +24,7 @@ pub fn run() {
 			projects::commands::update_project,
 			projects::commands::delete_project,
 			projects::commands::list_projects,
+			projects::commands::close_project,
 			connections::add_connection,
 			connections::get_connection,
 			connections::update_connection,

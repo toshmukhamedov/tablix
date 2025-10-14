@@ -15,8 +15,8 @@ import {
 	type TableData,
 } from "@/commands/connection";
 import { ToolbarButton } from "@/components/ToolbarButton";
-import type { TableViewTab } from "@/context/MainTabsContext";
 import { useProject } from "@/context/ProjectContext";
+import type { TableViewTab } from "@/stores/tabStore";
 import classes from "../styles/TableView.module.css";
 
 type Props = {

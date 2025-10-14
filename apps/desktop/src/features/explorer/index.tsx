@@ -1,17 +1,18 @@
 import { Button, Flex, Title, Tooltip } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import { IconPlug } from "@tabler/icons-react";
+import { observer } from "mobx-react-lite";
+import { connectionStore } from "@/stores/connectionStore";
 import { AddConnectionModal } from "./components/AddConnectionModal";
 import { ExplorerTree } from "./components/ExplorerTree";
 
-export const Explorer: React.FC = () => {
-	const [addConnectionModalOpened, addConnectionModalHandlers] = useDisclosure();
-
+export const Explorer: React.FC = observer(() => {
 	return (
 		<Flex direction="column" h="100%">
 			<Flex
 				align="center"
-				styles={{ root: { borderBottom: "1px solid var(--mantine-color-dark-9)", height: "40px" } }}
+				styles={{
+					root: { borderBottom: "1px solid var(--mantine-color-dark-9)", height: "40px" },
+				}}
 				justify="space-between"
 				px="sm"
 			>
@@ -23,7 +24,7 @@ export const Explorer: React.FC = () => {
 							p="4px"
 							size="compact-xs"
 							variant="subtle"
-							onClick={addConnectionModalHandlers.open}
+							onClick={connectionStore.openAddModal}
 						>
 							<IconPlug size="16" />
 						</Button>
@@ -32,10 +33,7 @@ export const Explorer: React.FC = () => {
 			</Flex>
 			<ExplorerTree />
 
-			<AddConnectionModal
-				opened={addConnectionModalOpened}
-				onClose={addConnectionModalHandlers.close}
-			/>
+			<AddConnectionModal />
 		</Flex>
 	);
-};
+});

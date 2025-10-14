@@ -443,7 +443,9 @@ pub async fn get_table_data(
 				.map_err(|e| e.to_string())?;
 
 			let has_more = table_rows.len() as i64 > pagination.page_size;
-			table_rows.pop();
+			if has_more {
+				table_rows.pop();
+			}
 			let rows = rows_to_json(table_rows)?;
 
 			let count_query = format!("select count(*) from {}.{}", schema, table);

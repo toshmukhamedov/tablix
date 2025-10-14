@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { type Project, projectCommands } from "@/commands/project";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useProjects } from "@/context/ProjectsContext";
-import { useView } from "@/context/ViewContext";
+import { appStore } from "@/stores/appStore";
 
 type Props = {
 	search: string;
@@ -17,7 +17,6 @@ type Props = {
 export const ProjectsTable: React.FC<Props> = ({ search, setEditingProject, openEditModal }) => {
 	const { state, dispatch } = useProjects();
 	const { setProject } = useProjectContext();
-	const { setView } = useView();
 
 	const projects: Project[] = useMemo(() => {
 		const searchString = search.toLowerCase();
@@ -28,7 +27,7 @@ export const ProjectsTable: React.FC<Props> = ({ search, setEditingProject, open
 
 	const openProject = (project: Project) => {
 		setProject(project);
-		setView("workspace");
+		appStore.setView("workspace");
 	};
 
 	const onDelete = (project: Project) => {

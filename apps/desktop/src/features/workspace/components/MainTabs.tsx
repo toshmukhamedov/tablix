@@ -1,17 +1,17 @@
 import { Indicator, Tabs, Text } from "@mantine/core";
 import { IconFileTypeSql, IconTable, IconX } from "@tabler/icons-react";
 import { confirm } from "@tauri-apps/plugin-dialog";
+import { observer } from "mobx-react-lite";
 import { useDockTabs } from "@/context/DockTabsContext";
-import { type Tab, useMainTabs } from "@/context/MainTabsContext";
 import { Editor } from "@/features/editor/Editor";
 import { filename } from "@/lib/utils/filename";
+import { type MainTab, tabStore } from "@/stores/tabStore";
 import { TableView } from "./TableView";
 
 type Props = {
-	tab: Tab;
+	tab: MainTab;
 };
-export const TabListItem: React.FC<Props> = ({ tab }) => {
-	const { dispatch: dispatchMainTabs } = useMainTabs();
+export const TabListItem: React.FC<Props> = observer(({ tab }) => {
 	const { dispatch: dispatchDockTabs } = useDockTabs();
 
 	const closeTab = async (e: React.MouseEvent) => {
@@ -27,10 +27,7 @@ export const TabListItem: React.FC<Props> = ({ tab }) => {
 			if (!confirmation) return;
 		}
 
-		dispatchMainTabs({
-			type: "close",
-			tabId: tab.id,
-		});
+		tabStore.close(tab.id);
 		dispatchDockTabs({
 			type: "close_group",
 			mainTabId: tab.id,
@@ -44,10 +41,7 @@ export const TabListItem: React.FC<Props> = ({ tab }) => {
 		}
 	};
 	const onClick = () => {
-		dispatchMainTabs({
-			type: "set_active_tab",
-			tabId: tab.id,
-		});
+		tabStore.setActive(tab.id);
 	};
 
 	switch (tab.type) {
@@ -86,7 +80,7 @@ export const TabListItem: React.FC<Props> = ({ tab }) => {
 			);
 		}
 	}
-};
+});
 
 export const TabContent: React.FC<Props> = ({ tab }) => {
 	switch (tab.type) {

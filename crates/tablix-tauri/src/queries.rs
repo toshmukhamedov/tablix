@@ -315,7 +315,16 @@ pub async fn execute_query(
 
 			for statement in statements {
 				let query = statement.to_string();
-				let statement = client.prepare(&query).await.map_err(|e| e.to_string())?;
+				let statement = match client.prepare(&query).await {
+					Ok(statement) => statement,
+					Err(e) => {
+						results.push(QueryResult::Error {
+							message: e.to_string(),
+							query,
+						});
+						continue;
+					}
+				};
 
 				let columns: Vec<Column> = statement
 					.columns()

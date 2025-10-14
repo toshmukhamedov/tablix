@@ -1,28 +1,27 @@
 import { Tabs } from "@mantine/core";
-import { useMainTabs } from "@/context/MainTabsContext";
+import { observer } from "mobx-react-lite";
+import { tabStore } from "@/stores/tabStore";
 import classes from "../styles/Tabs.module.css";
 import { EmptyMain } from "./EmptyMain";
 import { TabContent, TabListItem } from "./MainTabs";
 
-export const Main: React.FC = () => {
-	const { tabs, activeTabId } = useMainTabs();
-
-	if (tabs.length < 1) {
+export const Main: React.FC = observer(() => {
+	if (tabStore.tabs.length < 1) {
 		return <EmptyMain />;
 	}
 
 	return (
-		<Tabs value={activeTabId} classNames={classes}>
+		<Tabs value={tabStore.activeTabId} classNames={classes}>
 			<Tabs.List
 				onWheel={(e) => {
 					e.currentTarget.scrollLeft += e.deltaY;
 				}}
 			>
-				{tabs.map((tab) => (
+				{tabStore.tabs.map((tab) => (
 					<TabListItem key={tab.id} tab={tab} />
 				))}
 			</Tabs.List>
-			{tabs.map((tab) => {
+			{tabStore.tabs.map((tab) => {
 				return (
 					<Tabs.Panel value={tab.id} key={tab.id} mih="0" flex="1">
 						<TabContent tab={tab} />
@@ -31,4 +30,4 @@ export const Main: React.FC = () => {
 			})}
 		</Tabs>
 	);
-};
+});

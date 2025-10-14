@@ -9,10 +9,10 @@ import { BiLogoPostgresql } from "react-icons/bi";
 import { queryCommands } from "@/commands/query";
 import { ToolbarButton } from "@/components/ToolbarButton";
 import { useDockTabs } from "@/context/DockTabsContext";
-import { type EditorTab, useMainTabs } from "@/context/MainTabsContext";
 import { useOpenSections } from "@/context/OpenSectionsContext";
 import { useProject } from "@/context/ProjectContext";
 import { connectionStore } from "@/stores/connectionStore";
+import { type EditorTab, tabStore } from "@/stores/tabStore";
 import { tablix } from "./theme";
 import { getSelectedText } from "./utils";
 
@@ -37,7 +37,6 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 	);
 
 	const { project } = useProject();
-	const { dispatch: mainTabsDispatch } = useMainTabs();
 	const { dispatch: dockTabsDispatch } = useDockTabs();
 	const { setOpenSections } = useOpenSections();
 
@@ -64,7 +63,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 						content: view.state.doc.toString(),
 					})
 					.then(() => {
-						mainTabsDispatch({ type: "mark_as_dirty", tabId: tab.id, isDirty: false });
+						tabStore.setDirty(tab.id, false);
 					});
 				return true;
 			},
@@ -95,11 +94,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 		},
 		height: "100%",
 		onChange: (value) => {
-			mainTabsDispatch({
-				type: "mark_as_dirty",
-				tabId: tab.id,
-				isDirty: value !== content,
-			});
+			tabStore.setDirty(tab.id, value !== content);
 		},
 		autoFocus: true,
 	});
@@ -211,13 +206,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 					</div>
 					<select
 						defaultValue="connections"
-						onChange={(e) =>
-							mainTabsDispatch({
-								type: "set_connection",
-								tabId: tab.id,
-								connectionId: e.target.value,
-							})
-						}
+						onChange={(e) => tabStore.setConnection(tab.id, e.target.value)}
 						className="absolute w-full h-full top-0 left-0 opacity-0"
 						style={{ fontSize: "12px" }}
 					>
@@ -235,7 +224,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 			<div className="flex-1 min-h-0" ref={editor} />
 			{errorMessage && (
 				<Alert color="red.4" icon={<IconAlertSquare />}>
-					{errorMessage}
+					<span className="text-[var(--mantine-color-dark-1)] text-sm">{errorMessage}</span>
 				</Alert>
 			)}
 		</div>

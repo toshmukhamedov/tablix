@@ -1,6 +1,7 @@
 pub mod commands {
 	use std::path;
 
+	use tablix_connection::controller::ConnectionController;
 	// use but_settings::AppSettingsWithDiskSync;
 	use tablix_project::{
 		self as projects,
@@ -54,5 +55,16 @@ pub mod commands {
 		cleanup: bool,
 	) -> Result<(), Error> {
 		projects.delete(id, cleanup).map_err(Into::into)
+	}
+
+	#[tauri::command(async)]
+	#[instrument(skip(connection_controller), err(Debug))]
+	pub fn close_project(
+		connection_controller: State<'_, ConnectionController>,
+	) -> Result<(), Error> {
+		connection_controller.connected.clear();
+		connection_controller.schemas.clear();
+
+		Ok(())
 	}
 }

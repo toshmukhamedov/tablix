@@ -1,29 +1,26 @@
 import { type RenderTreeNodePayload, Text } from "@mantine/core";
 import { IconTable } from "@tabler/icons-react";
-import { useMainTabs } from "@/context/MainTabsContext";
+import { observer } from "mobx-react-lite";
+import { tabStore } from "@/stores/tabStore";
 import { TreeChevron } from "./TreeChevron";
 
 type Props = {
 	payload: RenderTreeNodePayload;
 };
-export const TableNode: React.FC<Props> = ({ payload }) => {
+export const TableNode: React.FC<Props> = observer(({ payload }) => {
 	const toggleExpanded = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		payload.tree.toggleExpanded(payload.node.value);
 	};
-	const { dispatch } = useMainTabs();
 
 	const onDoubleClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		const [connectionId, schema, table] = payload.node.value.split(".");
-		dispatch({
-			type: "add_view_tab",
-			tab: {
-				type: "view",
-				connectionId,
-				schema,
-				table,
-			},
+		tabStore.addView({
+			type: "view",
+			connectionId,
+			schema,
+			table,
 		});
 	};
 
@@ -46,4 +43,4 @@ export const TableNode: React.FC<Props> = ({ payload }) => {
 			</Text>
 		</div>
 	);
-};
+});

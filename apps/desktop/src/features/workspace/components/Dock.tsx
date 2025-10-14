@@ -1,14 +1,14 @@
 import { Tabs } from "@mantine/core";
+import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { useDockTabs } from "@/context/DockTabsContext";
-import { useMainTabs } from "@/context/MainTabsContext";
 import { useOpenSections } from "@/context/OpenSectionsContext";
+import { tabStore } from "@/stores/tabStore";
 import classes from "../styles/Tabs.module.css";
 import { DockTabs, TabContents } from "./DockTabs";
 import { EmptyDock } from "./EmptyDock";
 
-export const Dock: React.FC = () => {
-	const { activeTabId } = useMainTabs();
+export const Dock: React.FC = observer(() => {
 	const { state } = useDockTabs();
 	const { setOpenSections } = useOpenSections();
 
@@ -22,12 +22,12 @@ export const Dock: React.FC = () => {
 		}
 	}, [state]);
 
-	if (!activeTabId || state.size < 1 || !state.has(activeTabId)) {
+	if (!tabStore.activeTabId || state.size < 1 || !state.has(tabStore.activeTabId)) {
 		return <EmptyDock />;
 	}
 
 	return (
-		<Tabs classNames={classes} value={activeTabId}>
+		<Tabs classNames={classes} value={tabStore.activeTabId}>
 			{Array.from(state.entries()).map(([mainTabId, group]) => (
 				<Tabs.Panel key={mainTabId} value={mainTabId} h="100%">
 					<Tabs classNames={classes} value={state.get(mainTabId)?.activeTabId}>
@@ -47,4 +47,4 @@ export const Dock: React.FC = () => {
 			))}
 		</Tabs>
 	);
-};
+});
