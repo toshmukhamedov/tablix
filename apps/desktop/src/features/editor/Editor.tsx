@@ -107,6 +107,10 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 	useEffect(() => {
 		if (editor.current) {
 			setContainer(editor.current);
+			const scroller = editor.current.querySelector(".cm-scroller");
+			if (scroller && !scroller.className.includes("scrollable")) {
+				scroller.className += " scrollable";
+			}
 		}
 	}, [editor.current]);
 

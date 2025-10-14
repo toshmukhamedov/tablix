@@ -26,6 +26,7 @@ export const ExplorerTree: React.FC = observer(() => {
 		>
 			<Tree
 				allowRangeSelection={false}
+				className="scrollable"
 				classNames={classes}
 				tree={tree}
 				data={connectionStore.treeData}

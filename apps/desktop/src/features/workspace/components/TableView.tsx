@@ -162,7 +162,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 					<IconRefresh stroke="1" size="20" />
 				</ToolbarButton>
 			</div>
-			<div className={classes.tableWrapper}>
+			<div className={`${classes.tableWrapper} scrollable`}>
 				<table className={classes.table}>
 					<thead>
 						{table.getHeaderGroups().map((headerGroup) => (

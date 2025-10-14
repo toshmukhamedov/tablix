@@ -127,7 +127,7 @@ export const DataResult: React.FC<Props> = ({ tab }) => {
 				</ToolbarButton>
 			</div>
 			<div className="flex-1 min-h-0 overflow-hidden">
-				<div className={classes.tableWrapper} style={{ height: "100%" }}>
+				<div className={`${classes.tableWrapper} scrollable`} style={{ height: "100%" }}>
 					<table className={classes.table}>
 						<thead>
 							{table.getHeaderGroups().map((headerGroup) => (
