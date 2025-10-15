@@ -1,15 +1,17 @@
 <div align="center">
   <img align="center" width="128px" src="./crates/tablix-tauri/icons/icon.png" />
 	<h1 align="center"><b>Tablix</b></h1>
-	<p align="center">
-		Database management tool
-  </p>
 </div>
 
 ### Showcase
 <img align="center" src="./assets/welcome.png" alt="Welcome Page Screenshot" />
 <img align="center" src="./assets/tableview.png" alt="Table View Screenshot" />
 <img align="center" src="./assets/editor.png" alt="Editor Screenshot" />
+
+### Database support
+- [x] PostgeSQL
+- [ ] SQLite
+- [ ] MySQL
 
 ## Development
 ### Prerequisites
