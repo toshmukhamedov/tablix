@@ -50,7 +50,7 @@ export const WorkspaceInner: React.FC = observer(() => {
 							</Split>
 						</Split.Pane>
 						<Split.Resizer {...getResizerProps()} />
-						<Split.Pane minHeight="250px" styles={getPaneStyles("dock")}>
+						<Split.Pane minHeight="200px" styles={getPaneStyles("dock")}>
 							<Dock />
 						</Split.Pane>
 					</Split>
