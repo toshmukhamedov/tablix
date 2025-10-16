@@ -19,11 +19,9 @@ use tablix_connection::{
 };
 use tablix_project::controller::ProjectController;
 use tauri::{AppHandle, Emitter, Error, State};
-use tracing::instrument;
 use validator::Validate;
 
 #[tauri::command(async)]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
 pub fn update_connection(
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
@@ -35,7 +33,6 @@ pub fn update_connection(
 }
 
 #[tauri::command(async)]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
 pub fn add_connection(
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
@@ -47,7 +44,6 @@ pub fn add_connection(
 }
 
 #[tauri::command(async)]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
 pub fn get_connection(
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
@@ -59,7 +55,6 @@ pub fn get_connection(
 }
 
 #[tauri::command(async)]
-#[instrument(skip(connection_controller, project_controller), err(Debug))]
 pub fn list_connections(
 	connection_controller: State<'_, ConnectionController>,
 	project_controller: State<'_, ProjectController>,
@@ -70,10 +65,6 @@ pub fn list_connections(
 }
 
 #[tauri::command(async)]
-#[instrument(
-	skip(app_handle, connection_controller, project_controller),
-	err(Debug)
-)]
 pub async fn delete_connection(
 	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
@@ -97,7 +88,6 @@ pub async fn delete_connection(
 }
 
 #[tauri::command]
-#[instrument(err(Debug))]
 pub async fn test_connection(connection_details: ConnectionDetails) -> Result<(), String> {
 	match connection_details {
 		ConnectionDetails::PostgreSQL {
@@ -126,10 +116,6 @@ pub async fn test_connection(connection_details: ConnectionDetails) -> Result<()
 }
 
 #[tauri::command]
-#[instrument(
-	skip(app_handle, connection_controller, project_controller),
-	err(Debug)
-)]
 pub async fn disconnect_connection(
 	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
@@ -151,7 +137,7 @@ pub async fn disconnect_connection(
 
 	match connection_client {
 		ConnectionClient::PostgreSQL { .. } => {
-			tracing::info!("Client dropped");
+			log::info!("Client dropped");
 			emit_connection_status(
 				&app_handle,
 				ConnectionStatus {
@@ -166,10 +152,6 @@ pub async fn disconnect_connection(
 }
 
 #[tauri::command]
-#[instrument(
-	skip(app_handle, connection_controller, project_controller),
-	err(Debug)
-)]
 pub async fn connect_connection(
 	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
@@ -210,15 +192,15 @@ pub async fn connect_connection(
 				Ok((client, connection)) => {
 					tauri::async_runtime::spawn(async move {
 						if let Err(e) = connection.await {
-							tracing::error!("Connection closed with error: {}", e);
+							log::error!("Connection closed with error: {}", e);
 						}
-						tracing::info!("Connection closed");
+						log::info!("Connection closed");
 					});
 					connection_controller
 						.connected
 						.insert(connection_id, ConnectionClient::PostgreSQL { client });
 
-					tracing::info!("Client connected");
+					log::info!("Client connected");
 					emit_connection_status(
 						&app_handle,
 						ConnectionStatus {
@@ -236,10 +218,6 @@ pub async fn connect_connection(
 }
 
 #[tauri::command]
-#[instrument(
-	skip(app_handle, connection_controller, project_controller),
-	err(Debug)
-)]
 pub async fn get_connection_schema(
 	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
@@ -347,7 +325,7 @@ pub async fn get_connection_schema(
 				.schemas
 				.insert(connection_id, connection_schema.clone());
 
-			return Ok(connection_schema);
+			Ok(connection_schema)
 		}
 	}
 }
@@ -372,30 +350,32 @@ pub struct Pagination {
 	pub page_size: i64,
 }
 
-#[tauri::command]
-#[instrument(
-	skip(app_handle, connection_controller, project_controller),
-	err(Debug)
-)]
-pub async fn get_table_data(
-	app_handle: AppHandle,
-	connection_controller: State<'_, ConnectionController>,
-	project_controller: State<'_, ProjectController>,
+#[derive(Deserialize, Debug, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct GetTableData {
 	project_id: Uuid,
 	connection_id: Uuid,
 	schema: String,
 	table: String,
 	pagination: Pagination,
+}
+
+#[tauri::command]
+pub async fn get_table_data(
+	app_handle: AppHandle,
+	connection_controller: State<'_, ConnectionController>,
+	project_controller: State<'_, ProjectController>,
+	payload: GetTableData,
 ) -> Result<TableData, String> {
-	if let Err(e) = pagination.validate() {
+	if let Err(e) = payload.pagination.validate() {
 		return Err(e.to_string());
 	}
 
 	let project = project_controller
-		.get(project_id)
+		.get(payload.project_id)
 		.map_err(|e| e.to_string())?;
 	let _ = connection_controller
-		.get(project, connection_id)
+		.get(project, payload.connection_id)
 		.map_err(|e| e.to_string())?;
 
 	// Make sure to have client
@@ -403,28 +383,26 @@ pub async fn get_table_data(
 		app_handle.clone(),
 		connection_controller.clone(),
 		project_controller,
-		project_id,
-		connection_id,
+		payload.project_id,
+		payload.connection_id,
 	)
 	.await?;
 
-	let client_ref = match connection_controller.connected.get(&connection_id) {
+	let client_ref = match connection_controller.connected.get(&payload.connection_id) {
 		Some(client_ref) => client_ref,
 		None => return Err("Couldn't establish connection".to_string()),
 	};
 	let client = client_ref.value();
 
-	let offset = pagination.page_index * pagination.page_size;
-	let limit = pagination.page_size + 1;
+	let offset = payload.pagination.page_index * payload.pagination.page_size;
+	let limit = payload.pagination.page_size + 1;
 
 	match client {
 		ConnectionClient::PostgreSQL { client } => {
 			let query = format!(
 				"select * from {}.{} offset {} limit {}",
-				schema, table, offset, limit
+				payload.schema, payload.table, offset, limit
 			);
-
-			tracing::info!("Executing query: {}", query);
 
 			let statement = client.prepare(&query).await.map_err(|e| e.to_string())?;
 
@@ -442,15 +420,13 @@ pub async fn get_table_data(
 				.await
 				.map_err(|e| e.to_string())?;
 
-			let has_more = table_rows.len() as i64 > pagination.page_size;
+			let has_more = table_rows.len() as i64 > payload.pagination.page_size;
 			if has_more {
 				table_rows.pop();
 			}
 			let rows = rows_to_json(table_rows)?;
 
-			let count_query = format!("select count(*) from {}.{}", schema, table);
-
-			tracing::info!("Executing query: {}", count_query);
+			let count_query = format!("select count(*) from {}.{}", payload.schema, payload.table);
 
 			let count_rows = client
 				.query(&count_query, &[])
@@ -468,19 +444,15 @@ pub async fn get_table_data(
 				rows_count,
 				has_more,
 				range_start: offset + 1,
-				range_end: offset + pagination.page_size,
+				range_end: offset + payload.pagination.page_size,
 			};
 
-			return Ok(data);
+			Ok(data)
 		}
 	}
 }
 
 #[tauri::command]
-#[instrument(
-	skip(app_handle, connection_controller, project_controller),
-	err(Debug)
-)]
 pub async fn get_table_data_count(
 	app_handle: AppHandle,
 	connection_controller: State<'_, ConnectionController>,
@@ -517,8 +489,6 @@ pub async fn get_table_data_count(
 		ConnectionClient::PostgreSQL { client } => {
 			let query = format!("select count(*) from {}.{}", schema, table);
 
-			tracing::info!("Executing query: {}", query);
-
 			let rows = client.query(&query, &[]).await.map_err(|e| e.to_string())?;
 
 			if let Some(row) = rows.first() {
@@ -526,7 +496,7 @@ pub async fn get_table_data_count(
 				return Ok(count);
 			}
 
-			return Ok(0);
+			Ok(0)
 		}
 	}
 }
@@ -566,7 +536,7 @@ pub fn rows_to_json(table_rows: Vec<tokio_postgres::Row>) -> Result<Vec<Row>, St
 				Type::UUID => to_json(row.try_get::<_, Uuid>(i)),
 				Type::UUID_ARRAY => to_json(row.try_get::<_, Vec<Uuid>>(i)),
 				_ => {
-					tracing::error!(
+					log::error!(
 						"Unknown data type `{:?}`, kind: {:?}",
 						data_type,
 						data_type.kind()
@@ -584,6 +554,6 @@ pub fn rows_to_json(table_rows: Vec<tokio_postgres::Row>) -> Result<Vec<Row>, St
 
 pub fn emit_connection_status(app_handle: &AppHandle, payload: ConnectionStatus) {
 	if let Err(e) = app_handle.emit("connection-status-changed", payload) {
-		tracing::error!("Failed to emit connection-status-changed {}", e);
+		log::error!("Failed to emit connection-status-changed {}", e);
 	};
 }

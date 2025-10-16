@@ -6,6 +6,7 @@ import { useProject } from "@/context/ProjectContext";
 import { useQueries } from "@/context/QueriesContext";
 import { tabStore } from "@/stores/tabStore";
 import { EditQueryInput } from "./EditQueryInput";
+import { error } from "@tauri-apps/plugin-log";
 
 type Props = {
 	query: Query;
@@ -47,7 +48,7 @@ export const QueryNode: React.FC<Props> = ({
 
 			tabStore.closeEditor(query.name);
 		} catch (e) {
-			console.error("[onDeleteQuery]", e);
+			error(`[onDeleteQuery] ${e}`);
 		}
 	};
 
@@ -74,7 +75,7 @@ export const QueryNode: React.FC<Props> = ({
 
 			await menu.popup();
 		} catch (e) {
-			console.error("[onQueryContextMenu]", e);
+			error(`[onQueryContextMenu] ${e}`);
 		}
 	};
 

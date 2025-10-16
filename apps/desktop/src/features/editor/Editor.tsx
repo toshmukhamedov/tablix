@@ -15,6 +15,7 @@ import { connectionStore } from "@/stores/connectionStore";
 import { type EditorTab, tabStore } from "@/stores/tabStore";
 import { tablix } from "./theme";
 import { getSelectedText } from "./utils";
+import { error } from "@tauri-apps/plugin-log";
 
 const extensions = [
 	sql({ dialect: PostgreSQL, upperCaseKeywords: true }),
@@ -48,7 +49,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 	};
 
 	useEffect(() => {
-		loadContent().catch(console.error);
+		loadContent().catch(error);
 	}, []);
 
 	const editorKeymap = keymap.of([
@@ -162,7 +163,7 @@ export const Editor: React.FC<Props> = observer(({ tab }) => {
 			});
 			setIsExecuting(false);
 		} catch (e) {
-			console.error("[executeQuery]", e);
+			error(`[executeQuery] ${e}`);
 		} finally {
 			setIsCancelling(false);
 		}

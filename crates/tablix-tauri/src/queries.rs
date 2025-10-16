@@ -8,7 +8,6 @@ use tablix_project::controller::ProjectController;
 use tauri::State;
 use tokio::time::Instant;
 use tokio_postgres::NoTls;
-use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -50,7 +49,6 @@ pub struct ConnectionStatus {
 }
 
 #[tauri::command]
-#[instrument(skip(project_controller), err(Debug))]
 pub async fn add_query(
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -99,7 +97,6 @@ pub async fn add_query(
 }
 
 #[tauri::command]
-#[instrument(skip(project_controller), err(Debug))]
 pub async fn get_queries(
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -137,7 +134,7 @@ pub async fn get_queries(
 		let filename = match entry.file_name().into_string() {
 			Ok(filename) => filename,
 			Err(e) => {
-				tracing::warn!("Couldn't convert filename into String, Skipping... {:?}", e);
+				log::warn!("Couldn't convert filename into String, Skipping... {:?}", e);
 				continue;
 			}
 		};
@@ -156,7 +153,6 @@ pub async fn get_queries(
 }
 
 #[tauri::command]
-#[instrument(skip(project_controller), err(Debug))]
 pub async fn get_query_content(
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -176,13 +172,12 @@ pub async fn get_query_content(
 		Err(e) => return Err(e.to_string()),
 	};
 
-	return tokio::fs::read_to_string(query_path)
+	tokio::fs::read_to_string(query_path)
 		.await
-		.map_err(|e| e.to_string());
+		.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-#[instrument(skip(project_controller), err(Debug))]
 pub async fn rename_query(
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -219,7 +214,6 @@ pub async fn rename_query(
 }
 
 #[tauri::command]
-#[instrument(skip(project_controller), err(Debug))]
 pub async fn delete_query(
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -239,7 +233,6 @@ pub async fn delete_query(
 }
 
 #[tauri::command]
-#[instrument(skip(project_controller), err(Debug))]
 pub async fn update_query_content(
 	project_controller: State<'_, ProjectController>,
 	project_id: Uuid,
@@ -268,10 +261,6 @@ pub async fn update_query_content(
 }
 
 #[tauri::command]
-#[instrument(
-	skip(app_handle, project_controller, connection_controller),
-	err(Debug)
-)]
 pub async fn execute_query(
 	app_handle: tauri::AppHandle,
 	project_controller: State<'_, ProjectController>,
@@ -335,7 +324,6 @@ pub async fn execute_query(
 					})
 					.collect();
 
-				tracing::info!("Executing query: {}", query);
 				if columns.is_empty() {
 					let executed_at = format!("{}", Local::now().format("%d/%m/%Y %H:%M:%S"));
 					let start = Instant::now();
@@ -374,13 +362,12 @@ pub async fn execute_query(
 				}
 			}
 
-			return Ok(results);
+			Ok(results)
 		}
 	}
 }
 
 #[tauri::command]
-#[instrument(skip(project_controller, connection_controller), err(Debug))]
 pub async fn cancel_query(
 	project_controller: State<'_, ProjectController>,
 	connection_controller: State<'_, ConnectionController>,
@@ -409,7 +396,7 @@ pub async fn cancel_query(
 				return Err(e.to_string());
 			};
 
-			return Ok(());
+			Ok(())
 		}
 	}
 }

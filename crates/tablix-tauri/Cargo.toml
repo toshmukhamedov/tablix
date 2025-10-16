@@ -22,8 +22,7 @@ tauri = { version = "2", features = [] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 anyhow = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
+log = { workspace = true }
 tauri-plugin-os = "2"
 tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
@@ -40,3 +39,4 @@ rust_decimal = { version = "1.38.0", features = ["db-tokio-postgres"] }
 bytes = "1.10.1"
 tokio = { version = "1.47.1", features = ["fs"] }
 sqlparser = "0.59.0"
+tauri-plugin-log = "2"

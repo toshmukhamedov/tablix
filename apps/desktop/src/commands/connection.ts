@@ -132,8 +132,8 @@ class ConnectionCommands {
 		return await invoke("get_connection_schema", data);
 	}
 
-	async getTableData(data: GetTableData): Promise<TableData> {
-		return await invoke("get_table_data", data);
+	async getTableData(payload: GetTableData): Promise<TableData> {
+		return await invoke("get_table_data", { payload });
 	}
 	async getTableDataCount(data: GetTableDataCount): Promise<number> {
 		return await invoke("get_table_data_count", data);

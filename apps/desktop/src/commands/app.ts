@@ -3,11 +3,12 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 class AppCommands {
 	async showWindow(): Promise<void> {
 		const window = getCurrentWindow();
-		const isVisible = await window.isVisible();
 
-		if (!isVisible) {
+		// FIXME: Workaroud to avoid flashing
+		const id = setTimeout(async () => {
 			await window.show();
-		}
+			clearTimeout(id);
+		}, 200);
 	}
 }
 

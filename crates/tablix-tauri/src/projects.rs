@@ -9,11 +9,9 @@ pub mod commands {
 		project::{self, Project},
 	};
 	use tauri::{Error, State};
-	use tracing::instrument;
 	use uuid::Uuid;
 
 	#[tauri::command(async)]
-	#[instrument(skip(projects), err(Debug))]
 	pub fn update_project(
 		projects: State<'_, Controller>,
 		project: projects::storage::UpdateRequest,
@@ -22,7 +20,6 @@ pub mod commands {
 	}
 
 	#[tauri::command(async)]
-	#[instrument(skip(projects), err(Debug))]
 	pub fn add_project(
 		projects: State<'_, Controller>,
 		name: String,
@@ -32,33 +29,21 @@ pub mod commands {
 	}
 
 	#[tauri::command(async)]
-	#[instrument(skip(projects), err(Debug))]
-	pub fn get_project(
-		projects: State<'_, Controller>,
-		id: Uuid,
-		no_validation: Option<bool>,
-	) -> Result<project::Project, Error> {
+	pub fn get_project(projects: State<'_, Controller>, id: Uuid) -> Result<project::Project, Error> {
 		Ok(projects.get_raw(id)?)
 	}
 
 	#[tauri::command(async)]
-	#[instrument(skip(projects), err(Debug))]
 	pub fn list_projects(projects: State<'_, Controller>) -> Result<Vec<Project>, Error> {
 		projects.list().map_err(Into::into)
 	}
 
 	#[tauri::command(async)]
-	#[instrument(skip(projects), err(Debug))]
-	pub fn delete_project(
-		projects: State<'_, Controller>,
-		id: Uuid,
-		cleanup: bool,
-	) -> Result<(), Error> {
-		projects.delete(id, cleanup).map_err(Into::into)
+	pub fn delete_project(projects: State<'_, Controller>, id: Uuid) -> Result<(), Error> {
+		projects.delete(id).map_err(Into::into)
 	}
 
 	#[tauri::command(async)]
-	#[instrument(skip(connection_controller), err(Debug))]
 	pub fn close_project(
 		connection_controller: State<'_, ConnectionController>,
 	) -> Result<(), Error> {

@@ -34,7 +34,6 @@ export const ProjectsTable: React.FC<Props> = ({ search, setEditingProject, open
 		projectCommands
 			.deleteProject({
 				id: project.id,
-				cleanup: false,
 			})
 			.then(() => {
 				projectCommands.loadAll().then((projects) => dispatch({ type: "set", projects }));

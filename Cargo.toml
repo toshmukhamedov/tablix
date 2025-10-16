@@ -7,8 +7,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 anyhow = "1.0.97"
 uuid = { version = "1.16.0", features = ["v4"] }
-tracing = "0.1"
-tracing-subscriber = "0.3"
+log = { version = "0.4.28", features = ["kv", "kv_std"] }
 
 tablix-storage = { path = "crates/tablix-storage" }
 tablix-project = { path = "crates/tablix-project" }

@@ -30,6 +30,7 @@
 		"@tauri-apps/api": "^2",
 		"@tauri-apps/cli": "^2",
 		"@tauri-apps/plugin-dialog": "^2.4.0",
+		"@tauri-apps/plugin-log": "~2.7.0",
 		"@tauri-apps/plugin-os": "^2.3.1",
 		"@types/react": "^19.1.16",
 		"@types/react-dom": "^19.1.9",

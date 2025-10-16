@@ -2,6 +2,7 @@ import { notifications as toasts } from "@mantine/notifications";
 import { invoke } from "@tauri-apps/api/core";
 import { homeDir } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
+import { error } from "@tauri-apps/plugin-log";
 
 export type Project = {
 	id: string;
@@ -15,9 +16,7 @@ export type AddProject = {
 };
 
 export type EditProject = Omit<Project, "path">;
-export type DeleteProject = Pick<Project, "id"> & {
-	cleanup: boolean;
-};
+export type DeleteProject = Pick<Project, "id">;
 
 class ProjectCommands {
 	constructor(private readonly homeDir: string | undefined) {}
@@ -30,8 +29,8 @@ class ProjectCommands {
 		await invoke("set_project_active", { id: projectId });
 	}
 
-	async getProject(projectId: string, noValidation?: boolean): Promise<Project> {
-		return await invoke("get_project", { id: projectId, noValidation });
+	async getProject(projectId: string): Promise<Project> {
+		return await invoke("get_project", { id: projectId });
 	}
 
 	async updateProject(project: EditProject): Promise<void> {
@@ -57,7 +56,7 @@ class ProjectCommands {
 
 			return selectedPath;
 		} catch (e) {
-			console.error("[promptForDirectory]", e);
+			error(`[promptForDirectory] ${e}`);
 			return null;
 		}
 	}

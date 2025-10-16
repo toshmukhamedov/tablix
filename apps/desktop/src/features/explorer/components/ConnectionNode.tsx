@@ -9,6 +9,7 @@ import { useProject } from "@/context/ProjectContext";
 import { connectionStore } from "@/stores/connectionStore";
 import { useEditConnectionModal } from "../context/EditConnectionModalContext";
 import { TreeChevron } from "./TreeChevron";
+import { error } from "@tauri-apps/plugin-log";
 
 type Props = {
 	payload: RenderTreeNodePayload;
@@ -34,7 +35,7 @@ export const ConnectionNode: React.FC<Props> = observer(({ payload }) => {
 			});
 			payload.tree.clearSelected();
 		} catch (e) {
-			console.error("[onDeleteConnection]", e);
+			error(`[onDeleteConnection] ${e}`);
 		}
 	};
 
@@ -74,7 +75,7 @@ export const ConnectionNode: React.FC<Props> = observer(({ payload }) => {
 
 			await menu.popup();
 		} catch (e) {
-			console.error("[onConnectionContextMenu]", e);
+			error(`[onConnectionContextMenu] ${e}`);
 		}
 	};
 
@@ -96,7 +97,7 @@ export const ConnectionNode: React.FC<Props> = observer(({ payload }) => {
 			});
 			await getSchema();
 		} catch (e) {
-			console.error("[connect]", e);
+			error(`[connect] ${e}`);
 		} finally {
 			setIsConnecting(false);
 		}
@@ -110,7 +111,7 @@ export const ConnectionNode: React.FC<Props> = observer(({ payload }) => {
 				connectionId: connection.id,
 			});
 		} catch (e) {
-			console.error("[disconnect]", e);
+			error(`[disconnect] ${e}`);
 		}
 	};
 

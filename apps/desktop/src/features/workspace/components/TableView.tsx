@@ -18,6 +18,7 @@ import { ToolbarButton } from "@/components/ToolbarButton";
 import { useProject } from "@/context/ProjectContext";
 import type { TableViewTab } from "@/stores/tabStore";
 import classes from "../styles/TableView.module.css";
+import { error } from "@tauri-apps/plugin-log";
 
 type Props = {
 	tab: TableViewTab;
@@ -49,7 +50,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 	};
 
 	useEffect(() => {
-		loadData().catch(console.error);
+		loadData().catch(error);
 	}, [pagination]);
 
 	const columns = useMemo(() => {

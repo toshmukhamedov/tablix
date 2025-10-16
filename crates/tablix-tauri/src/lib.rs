@@ -5,7 +5,7 @@ use tauri::Manager;
 mod app;
 mod commands;
 mod connections;
-mod logs;
+mod log;
 mod postgres;
 mod projects;
 mod queries;
@@ -14,6 +14,7 @@ mod utils;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
 	tauri::Builder::default()
+		.plugin(log::build())
 		.plugin(tauri_plugin_store::Builder::new().build())
 		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_dialog::init())
@@ -50,8 +51,6 @@ pub fn run() {
 				let paths = tauri_app.path();
 				paths.app_data_dir().expect("missing app data dir")
 			};
-
-			logs::init();
 
 			let app = app::App::new(app_data_dir);
 			let projects_controller = ProjectController::new(app.storage.clone());
