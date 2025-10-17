@@ -40,3 +40,5 @@ bytes = "1.10.1"
 tokio = { version = "1.47.1", features = ["fs"] }
 sqlparser = "0.59.0"
 tauri-plugin-log = "2"
+postgres-native-tls = "0.5.2"
+native-tls = "0.2.14"

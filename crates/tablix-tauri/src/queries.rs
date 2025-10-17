@@ -10,10 +10,8 @@ use tokio::time::Instant;
 use tokio_postgres::NoTls;
 use uuid::Uuid;
 
-use crate::{
-	connections::{Row, rows_to_json},
-	utils::format_duration,
-};
+use crate::dialects::postgres;
+use crate::{connections::Row, utils::format_duration};
 
 #[derive(Serialize)]
 pub struct Query {
@@ -356,7 +354,7 @@ pub async fn execute_query(
 							continue;
 						}
 					};
-					let rows = rows_to_json(table_rows)?;
+					let rows = postgres::rows_to_json(table_rows)?;
 
 					results.push(QueryResult::Data { columns, rows });
 				}

@@ -1,14 +1,10 @@
-use crate::{postgres::interval::PgInterval, queries::ConnectionStatus};
-use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
-use rust_decimal::Decimal;
-use serde_json::{Value, json};
-use std::net::IpAddr;
-use tokio_postgres::types::Type;
+use crate::{dialects::postgres, queries::ConnectionStatus};
+use serde_json::Value;
 use uuid::Uuid;
 
 pub type Row = Vec<Value>;
 
-use std::{collections::HashMap, time::Duration};
+use std::collections::HashMap;
 
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
@@ -90,28 +86,10 @@ pub async fn delete_connection(
 #[tauri::command]
 pub async fn test_connection(connection_details: ConnectionDetails) -> Result<(), String> {
 	match connection_details {
-		ConnectionDetails::PostgreSQL {
-			database,
-			host,
-			password,
-			port,
-			user,
-		} => {
-			let mut config = tokio_postgres::Config::new();
-
-			config
-				.host(host)
-				.port(port)
-				.user(user)
-				.password(password)
-				.dbname(database)
-				.connect_timeout(Duration::from_secs(10));
-
-			match config.connect(tokio_postgres::NoTls).await {
-				Ok(_) => Ok(()),
-				Err(e) => Err(e.to_string()),
-			}
-		}
+		ConnectionDetails::PostgreSQL(details) => match postgres::connect(details).await {
+			Ok(_) => Ok(()),
+			Err(e) => Err(e.to_string()),
+		},
 	}
 }
 
@@ -171,49 +149,25 @@ pub async fn connect_connection(
 		.map_err(|e| e.to_string())?;
 
 	match connection.details {
-		ConnectionDetails::PostgreSQL {
-			database,
-			host,
-			password,
-			port,
-			user,
-		} => {
-			let mut config = tokio_postgres::Config::new();
+		ConnectionDetails::PostgreSQL(details) => match postgres::connect(details).await {
+			Ok(client) => {
+				connection_controller
+					.connected
+					.insert(connection_id, ConnectionClient::PostgreSQL { client });
 
-			config
-				.host(host)
-				.port(port)
-				.user(user)
-				.password(password)
-				.dbname(database)
-				.connect_timeout(Duration::from_secs(10));
+				log::debug!(connection_id:%; "Client connected");
+				emit_connection_status(
+					&app_handle,
+					ConnectionStatus {
+						connection_id,
+						connected: true,
+					},
+				);
 
-			match config.connect(tokio_postgres::NoTls).await {
-				Ok((client, connection)) => {
-					tauri::async_runtime::spawn(async move {
-						if let Err(e) = connection.await {
-							log::error!("Connection closed with error: {}", e);
-						}
-						log::info!("Connection closed");
-					});
-					connection_controller
-						.connected
-						.insert(connection_id, ConnectionClient::PostgreSQL { client });
-
-					log::info!("Client connected");
-					emit_connection_status(
-						&app_handle,
-						ConnectionStatus {
-							connection_id,
-							connected: true,
-						},
-					);
-
-					Ok(())
-				}
-				Err(e) => Err(e.to_string()),
+				Ok(())
 			}
-		}
+			Err(e) => Err(e.to_string()),
+		},
 	}
 }
 
@@ -424,7 +378,7 @@ pub async fn get_table_data(
 			if has_more {
 				table_rows.pop();
 			}
-			let rows = rows_to_json(table_rows)?;
+			let rows = postgres::rows_to_json(table_rows)?;
 
 			let count_query = format!("select count(*) from {}.{}", payload.schema, payload.table);
 
@@ -499,57 +453,6 @@ pub async fn get_table_data_count(
 			Ok(0)
 		}
 	}
-}
-
-pub fn to_json(v: Result<impl serde::Serialize, tokio_postgres::Error>) -> Value {
-	match v {
-		Ok(x) => json!(x),
-		Err(_) => Value::Null,
-	}
-}
-
-pub fn rows_to_json(table_rows: Vec<tokio_postgres::Row>) -> Result<Vec<Row>, String> {
-	let mut rows: Vec<Row> = Vec::default();
-	for row in table_rows {
-		let mut values: Vec<Value> = Vec::default();
-		for (i, column) in row.columns().iter().enumerate() {
-			let data_type = column.type_();
-			let value: Value = match *data_type {
-				Type::BOOL => to_json(row.try_get::<_, bool>(i)),
-				Type::INT2 => to_json(row.try_get::<_, i16>(i)),
-				Type::INT4 => to_json(row.try_get::<_, i32>(i)),
-				Type::INT8 => to_json(row.try_get::<_, i64>(i)),
-				Type::FLOAT4 => to_json(row.try_get::<_, f32>(i)),
-				Type::FLOAT8 => to_json(row.try_get::<_, f64>(i)),
-				Type::NUMERIC => to_json(row.try_get::<_, Decimal>(i)),
-				Type::JSON | Type::JSONB => to_json(row.try_get::<_, Value>(i)),
-				Type::TEXT_ARRAY => to_json(row.try_get::<_, Vec<String>>(i)),
-				Type::INT4_ARRAY => to_json(row.try_get::<_, Vec<i32>>(i)),
-				Type::INT8_ARRAY => to_json(row.try_get::<_, Vec<i64>>(i)),
-				Type::TIMESTAMP => to_json(row.try_get::<_, NaiveDateTime>(i)),
-				Type::TIMESTAMPTZ => to_json(row.try_get::<_, DateTime<Utc>>(i)),
-				Type::DATE => to_json(row.try_get::<_, NaiveDate>(i)),
-				Type::TIME => to_json(row.try_get::<_, NaiveTime>(i)),
-				Type::INTERVAL => to_json(row.try_get::<_, PgInterval>(i)),
-				Type::INET => to_json(row.try_get::<_, IpAddr>(i)),
-				Type::TEXT | Type::VARCHAR => to_json(row.try_get::<_, &str>(i)),
-				Type::UUID => to_json(row.try_get::<_, Uuid>(i)),
-				Type::UUID_ARRAY => to_json(row.try_get::<_, Vec<Uuid>>(i)),
-				_ => {
-					log::error!(
-						"Unknown data type `{:?}`, kind: {:?}",
-						data_type,
-						data_type.kind()
-					);
-					json!("unknown")
-				}
-			};
-			values.push(value);
-		}
-		rows.push(values);
-	}
-
-	Ok(rows)
 }
 
 pub fn emit_connection_status(app_handle: &AppHandle, payload: ConnectionStatus) {
