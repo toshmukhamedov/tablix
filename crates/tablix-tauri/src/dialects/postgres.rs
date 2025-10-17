@@ -8,7 +8,7 @@ use postgres_native_tls::MakeTlsConnector;
 use rust_decimal::Decimal;
 use serde_json::{Value, json};
 use tablix_connection::connection::PostgreSQLConnectionDetails;
-use tokio::{fs, io::AsyncReadExt};
+use tokio::fs;
 use tokio_postgres::{
 	Client, Config, Connection, NoTls, Socket, config::SslMode, tls::MakeTlsConnect, types::Type,
 };
@@ -40,32 +40,20 @@ pub async fn connect(details: PostgreSQLConnectionDetails) -> anyhow::Result<Cli
 			let mut builder = TlsConnector::builder();
 
 			if let Some(ca_certificate_path) = details.ca_certificate_path {
-				let mut file = fs::File::open(ca_certificate_path).await?;
-				let mut buffer: Vec<u8> = Vec::new();
-				file.read_buf(&mut buffer).await?;
+				let buffer = fs::read(ca_certificate_path).await?;
 
 				let certificate = Certificate::from_pem(&buffer)?;
 				builder.add_root_certificate(certificate);
 			}
 
-			if let Some(client_certificate_path) = details.client_certificate_path {
-				if let Some(client_private_key_path) = details.client_private_key_path {
-					log::info!(
-						"{:?} {:?}",
-						client_certificate_path,
-						client_private_key_path
-					);
-					let mut certificate_file = fs::File::open(client_certificate_path).await?;
-					let mut key_file = fs::File::open(client_private_key_path).await?;
-					let mut cert_buffer: Vec<u8> = Vec::new();
-					let mut key_buffer: Vec<u8> = Vec::new();
-
-					certificate_file.read_buf(&mut cert_buffer).await?;
-					key_file.read_buf(&mut key_buffer).await?;
-
-					let identity = Identity::from_pkcs8(&cert_buffer, &key_buffer)?;
-					builder.identity(identity);
-				}
+			if let (Some(cert_path), Some(key_path)) = (
+				details.client_certificate_path,
+				details.client_private_key_path,
+			) {
+				let cert_buffer = fs::read(cert_path).await?;
+				let key_buffer = fs::read(key_path).await?;
+				let identity = Identity::from_pkcs8(&cert_buffer, &key_buffer)?;
+				builder.identity(identity);
 			}
 
 			let connector = builder.build()?;

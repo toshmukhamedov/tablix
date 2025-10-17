@@ -26,14 +26,7 @@ export const Dock: React.FC = observer(() => {
 			{Array.from(state.entries()).map(([mainTabId, group]) => (
 				<Tabs.Panel key={mainTabId} value={mainTabId} h="100%">
 					<Tabs classNames={classes} value={state.get(mainTabId)?.activeTabId}>
-						<Tabs.List
-							styles={{
-								list: {
-									backgroundColor: "var(--mantine-color-dark-8)",
-									borderBottom: "1px solid var(--mantine-color-dark-9)",
-								},
-							}}
-						>
+						<Tabs.List>
 							<DockTabs connectionId={mainTabId} />
 						</Tabs.List>
 						<TabContents group={group} />

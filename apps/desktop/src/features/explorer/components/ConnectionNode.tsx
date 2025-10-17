@@ -1,15 +1,17 @@
 import { Loader, type RenderTreeNodePayload, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { Menu } from "@tauri-apps/api/menu";
 import { confirm } from "@tauri-apps/plugin-dialog";
+import { error } from "@tauri-apps/plugin-log";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { BiLogoPostgresql } from "react-icons/bi";
 import type { Connection } from "@/commands/connection";
 import { useProject } from "@/context/ProjectContext";
+import { formatError } from "@/lib/utils";
 import { connectionStore } from "@/stores/connectionStore";
 import { useEditConnectionModal } from "../context/EditConnectionModalContext";
 import { TreeChevron } from "./TreeChevron";
-import { error } from "@tauri-apps/plugin-log";
 
 type Props = {
 	payload: RenderTreeNodePayload;
@@ -97,7 +99,10 @@ export const ConnectionNode: React.FC<Props> = observer(({ payload }) => {
 			});
 			await getSchema();
 		} catch (e) {
-			error(`[connect] ${e}`);
+			notifications.show({
+				message: formatError(e),
+				color: "red.5",
+			});
 		} finally {
 			setIsConnecting(false);
 		}

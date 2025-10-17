@@ -5,14 +5,13 @@
 }
 
 .list {
-	background-color: var(--mantine-color-dark-9);
 	border: none;
 	flex-wrap: nowrap;
 	overflow: auto;
 	scrollbar-width: none;
 
 	&::before {
-		content: none;
+		border-color: var(--mantine-color-dark-9);
 	}
 }
 

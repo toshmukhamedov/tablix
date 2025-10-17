@@ -4,7 +4,7 @@ import { confirm } from "@tauri-apps/plugin-dialog";
 import { observer } from "mobx-react-lite";
 import { useDockTabs } from "@/context/DockTabsContext";
 import { Editor } from "@/features/editor/Editor";
-import { filename } from "@/lib/utils/filename";
+import { filename } from "@/lib/utils";
 import { type MainTab, tabStore } from "@/stores/tabStore";
 import { TableView } from "./TableView";
 

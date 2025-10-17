@@ -7,6 +7,7 @@ import {
 	IconRefresh,
 } from "@tabler/icons-react";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { error } from "@tauri-apps/plugin-log";
 import { useEffect, useMemo, useState } from "react";
 import {
 	connectionCommands,
@@ -18,7 +19,6 @@ import { ToolbarButton } from "@/components/ToolbarButton";
 import { useProject } from "@/context/ProjectContext";
 import type { TableViewTab } from "@/stores/tabStore";
 import classes from "../styles/TableView.module.css";
-import { error } from "@tauri-apps/plugin-log";
 
 type Props = {
 	tab: TableViewTab;
@@ -119,7 +119,7 @@ export const TableView: React.FC<Props> = ({ tab }) => {
 
 	return (
 		<div className="h-full flex flex-col">
-			<div className="h-10 px-2 py-1 flex items-center shrink-0">
+			<div className="h-10 px-2 py-1 flex items-center shrink-0 border-t border-t-[var(--mantine-color-dark-6)]">
 				<ToolbarButton disabled={!canPreviousPage} onClick={table.firstPage} title="First Page">
 					<IconChevronsLeft stroke="1" size="20" />
 				</ToolbarButton>

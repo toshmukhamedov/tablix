@@ -1,8 +1,0 @@
-.input {
-	&[data-variant="default"] {
-		@mixin dark {
-			background-color: var(--mantine-color-dark-8);
-			border-color: var(--mantine-color-dark-5);
-		}
-	}
-}

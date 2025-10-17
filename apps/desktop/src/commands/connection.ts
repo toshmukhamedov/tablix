@@ -1,19 +1,42 @@
 import { invoke } from "@tauri-apps/api/core";
 import z from "zod/v4";
-import { isHost } from "@/lib/validator";
 
 export enum ConnectionType {
 	PostgreSQL = "PostgreSQL",
 }
+export enum SslMode {
+	Disable = "disable",
+	Prefer = "prefer",
+	Require = "require",
+}
 
 export const ConnectionDetailsSchema = z.union([
 	z.object({
-		type: z.literal(ConnectionType.PostgreSQL),
-		host: isHost,
-		port: z.number().min(0).max(65535),
+		type: z.enum(ConnectionType),
+		host: z.hostname(),
+		port: z
+			.union([z.string(), z.number()])
+			.transform((value) => {
+				if (typeof value === "number") {
+					return value;
+				}
+				if (value === "") {
+					return null;
+				}
+				const parsed = Number(value);
+				if (Number.isNaN(parsed)) {
+					throw new Error("Invalid number");
+				}
+				return parsed;
+			})
+			.nullable(),
 		user: z.string().trim().nonempty(),
-		password: z.string().nonempty(),
-		database: z.string().nonempty(),
+		password: z.string().trim().optional(),
+		database: z.string().trim().optional(),
+		sslMode: z.enum(SslMode),
+		caCertificatePath: z.string().optional().nullable(),
+		clientCertificatePath: z.string().optional().nullable(),
+		clientPrivateKeyPath: z.string().optional().nullable(),
 	}),
 ]);
 export type ConnectionDetails = z.infer<typeof ConnectionDetailsSchema>;
@@ -28,7 +51,10 @@ export type Connection = {
 
 export type AddConnection = {
 	projectId: string;
-	data: Pick<Connection, "name" | "details">;
+	data: {
+		name?: string;
+		details: ConnectionDetails;
+	};
 };
 
 export type UpdateConnection = {

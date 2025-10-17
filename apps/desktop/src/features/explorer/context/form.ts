@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 import { ConnectionDetailsSchema } from "@/commands/connection";
 
 export const AddConnectionFormSchema = z.object({
-	name: z.string().trim().max(128).nonempty(),
+	name: z.string().trim().max(128).optional(),
 	details: ConnectionDetailsSchema,
 });
 export const EditConnectionFormSchema = AddConnectionFormSchema.pick({

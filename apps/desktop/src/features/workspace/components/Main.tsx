@@ -16,6 +16,7 @@ export const Main: React.FC = observer(() => {
 				onWheel={(e) => {
 					e.currentTarget.scrollLeft += e.deltaY;
 				}}
+				classNames={{ list: "bg-[var(--mantine-color-dark-9)]" }}
 			>
 				{tabStore.tabs.map((tab) => (
 					<TabListItem key={tab.id} tab={tab} />
