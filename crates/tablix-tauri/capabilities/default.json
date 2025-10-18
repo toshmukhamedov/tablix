@@ -7,6 +7,10 @@
 		"core:default",
 		"os:default",
 		"core:window:allow-show",
+		"core:window:allow-create",
+		"core:webview:allow-create-webview-window",
+		"core:webview:allow-create-webview",
+
 		"core:window:allow-start-dragging",
 		"dialog:default",
 		"dialog:allow-open",

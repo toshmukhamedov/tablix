@@ -2,11 +2,12 @@
 	&[data-variant="default"] {
 		background-color: var(--mantine-color-dark-8);
 		border-color: var(--mantine-color-dark-5);
-	}
-	&:focus-within {
-		border-color: var(--mantine-primary-color-5);
-	}
-	&[data-error="true"] {
-		border-color: var(--mantine-color-red-5);
+
+		&:focus-within {
+			border-color: var(--mantine-primary-color-5);
+		}
+		&[data-error="true"] {
+			border-color: var(--mantine-color-red-5);
+		}
 	}
 }

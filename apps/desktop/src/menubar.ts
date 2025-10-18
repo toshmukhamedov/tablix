@@ -26,7 +26,7 @@ export async function setAppMenu(state: State): Promise<void> {
 					{
 						text: "Add connection",
 						accelerator: "CmdOrControl+N",
-						action: connectionStore.openAddModal,
+						action: () => connectionStore.openAddModal(),
 						enabled: inWorkspace,
 					},
 					{

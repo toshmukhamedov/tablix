@@ -10,7 +10,6 @@ import type { Connection } from "@/commands/connection";
 import { useProject } from "@/context/ProjectContext";
 import { formatError } from "@/lib/utils";
 import { connectionStore } from "@/stores/connectionStore";
-import { useEditConnectionModal } from "../context/EditConnectionModalContext";
 import { TreeChevron } from "./TreeChevron";
 
 type Props = {
@@ -20,7 +19,6 @@ export const ConnectionNode: React.FC<Props> = observer(({ payload }) => {
 	const [isConnecting, setIsConnecting] = useState(false);
 	const { project } = useProject();
 
-	const { setOpened } = useEditConnectionModal();
 	const connection = payload.node.nodeProps as Connection;
 
 	const onDeleteConnection = async (connection: Connection) => {
@@ -66,7 +64,7 @@ export const ConnectionNode: React.FC<Props> = observer(({ payload }) => {
 							]),
 					{
 						text: "Edit",
-						action: () => setOpened(true),
+						action: () => connectionStore.openAddModal(connection),
 					},
 					{
 						text: "Delete",
