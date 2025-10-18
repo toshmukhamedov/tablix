@@ -2,7 +2,7 @@ import { Button, Flex, Title, Tooltip } from "@mantine/core";
 import { IconPlug } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { connectionStore } from "@/stores/connectionStore";
-import { AddConnectionModal } from "./components/AddConnectionModal";
+import { AddConnectionModal } from "./components/ConnectionModal";
 import { ExplorerTree } from "./components/ExplorerTree";
 
 export const Explorer: React.FC = observer(() => {
@@ -24,7 +24,7 @@ export const Explorer: React.FC = observer(() => {
 							p="4px"
 							size="compact-xs"
 							variant="subtle"
-							onClick={connectionStore.openAddModal}
+							onClick={() => connectionStore.openAddModal()}
 						>
 							<IconPlug size="16" />
 						</Button>

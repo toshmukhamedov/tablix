@@ -24,7 +24,6 @@ serde_json = { workspace = true }
 anyhow = { workspace = true }
 log = { workspace = true }
 tauri-plugin-os = "2"
-tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
 uuid.workspace = true
 

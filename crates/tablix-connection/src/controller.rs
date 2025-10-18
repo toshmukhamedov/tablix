@@ -63,7 +63,7 @@ impl ConnectionController {
 	}
 
 	pub fn update(&self, project: Project, update_data: UpdateConnection) -> Result<()> {
-		self.connections_storage.update(project, &update_data)
+		self.connections_storage.update(project, update_data)
 	}
 
 	pub fn get(&self, project: Project, id: Uuid) -> Result<Connection> {

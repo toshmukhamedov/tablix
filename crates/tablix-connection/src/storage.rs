@@ -17,6 +17,7 @@ pub struct ConnectionStorage {}
 pub struct UpdateConnection {
 	pub id: Uuid,
 	pub name: String,
+	pub details: ConnectionDetails,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -51,14 +52,15 @@ impl ConnectionStorage {
 		Ok(connections.into_iter().find(|p| p.id == id))
 	}
 
-	pub fn update(&self, project: Project, update_data: &UpdateConnection) -> Result<()> {
+	pub fn update(&self, project: Project, update_data: UpdateConnection) -> Result<()> {
 		let mut connections = self.list(&project)?;
 		let connection = connections
 			.iter_mut()
 			.find(|c| c.id == update_data.id)
 			.with_context(|| format!("Connection {} not found for update", update_data.id))?;
 
-		connection.name = update_data.name.clone();
+		connection.name = update_data.name;
+		connection.details = update_data.details;
 
 		Storage::write_with_base(
 			CONNECTIONS_FILE,

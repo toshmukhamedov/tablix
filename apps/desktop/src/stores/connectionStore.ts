@@ -15,9 +15,22 @@ import {
 	type UpdateConnectionStatus,
 } from "@/commands/connection";
 
+export type ConnectionTestResult =
+	| {
+			type: "pending";
+	  }
+	| {
+			type: "error";
+			message: string;
+	  }
+	| {
+			type: "success";
+	  };
+
 class ConnectionStore {
 	connections: Connection[] = [];
 	isAddModalOpen: boolean = false;
+	editingConnection: Connection | null = null;
 	private schemas: Map<string, ConnectionSchema> = new Map();
 
 	constructor() {
@@ -103,7 +116,10 @@ class ConnectionStore {
 		runInAction(() => {
 			const connection = this.connections.find((connection) => connection.id === payload.data.id);
 			if (connection) {
-				connection.name = payload.data.name;
+				if (payload.data.name) {
+					connection.name = payload.data.name;
+				}
+				connection.details = payload.data.details;
 			}
 		});
 	}
@@ -122,11 +138,14 @@ class ConnectionStore {
 		this.isAddModalOpen = false;
 	}
 
-	openAddModal = (): void => {
+	openAddModal = (connection?: Connection): void => {
 		this.isAddModalOpen = true;
+		this.editingConnection = connection ?? null;
 	};
+
 	closeAddModal = (): void => {
 		this.isAddModalOpen = false;
+		this.editingConnection = null;
 	};
 }
 

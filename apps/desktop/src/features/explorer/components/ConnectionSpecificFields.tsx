@@ -1,10 +1,10 @@
 import { NumberInput, PasswordInput, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { ConnectionType } from "@/commands/connection";
-import { useAddConnectionFormContext } from "../context/form";
+import { useConnectionFormContext } from "../context/form";
 
 export const ConnectionSpecificFields: React.FC = () => {
-	const form = useAddConnectionFormContext();
+	const form = useConnectionFormContext();
 	const [previousHost, setPreviousHost] = useState(form.values.details.host);
 	const [previousDatabase, setPreviousDatabase] = useState(form.values.details.database);
 

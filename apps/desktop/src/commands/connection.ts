@@ -59,7 +59,11 @@ export type AddConnection = {
 
 export type UpdateConnection = {
 	projectId: string;
-	data: Pick<Connection, "name" | "id">;
+	data: {
+		id: string;
+		name?: string;
+		details: ConnectionDetails;
+	};
 };
 export type DeleteConnection = {
 	projectId: string;
